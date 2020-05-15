@@ -1,9 +1,9 @@
 package com.programmersbox.mangaworld
 
-import com.programmersbox.mangaworld.mangasources.MangaEden
-import com.programmersbox.mangaworld.mangasources.MangaModel
-import com.programmersbox.mangaworld.mangasources.MangaSource
-import com.programmersbox.mangaworld.mangasources.Manganelo
+import com.programmersbox.manga_sources.mangasources.MangaEden
+import com.programmersbox.manga_sources.mangasources.MangaModel
+import com.programmersbox.manga_sources.mangasources.MangaSource
+import com.programmersbox.manga_sources.mangasources.Manganelo
 import org.junit.Test
 
 /**

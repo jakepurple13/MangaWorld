@@ -1,4 +1,4 @@
-package com.programmersbox.mangaworld.mangasources
+package com.programmersbox.manga_sources.mangasources
 
 import com.programmersbox.gsonutils.getJsonApi
 import java.text.SimpleDateFormat

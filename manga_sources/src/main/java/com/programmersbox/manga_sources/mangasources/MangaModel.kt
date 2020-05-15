@@ -1,4 +1,4 @@
-package com.programmersbox.mangaworld.mangasources
+package com.programmersbox.manga_sources.mangasources
 
 abstract class MangaSource {
     abstract fun getManga(pageNumber: Int = 1): List<MangaModel>
