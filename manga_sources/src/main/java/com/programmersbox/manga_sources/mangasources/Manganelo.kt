@@ -2,7 +2,7 @@ package com.programmersbox.manga_sources.mangasources
 
 import org.jsoup.Jsoup
 
-object Manganelo : MangaSource() {
+object Manganelo : MangaSource {
 
     override fun getManga(pageNumber: Int): List<MangaModel> = Jsoup.connect("https://m.manganelo.com/advanced_search?s=all&orby=az&page=$pageNumber").get()
         .select("div.content-genres-item").map {

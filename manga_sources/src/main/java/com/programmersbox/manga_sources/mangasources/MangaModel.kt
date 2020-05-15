@@ -1,9 +1,9 @@
 package com.programmersbox.manga_sources.mangasources
 
-abstract class MangaSource {
-    abstract fun getManga(pageNumber: Int = 1): List<MangaModel>
-    abstract fun toInfoModel(model: MangaModel): MangaInfoModel
-    abstract fun getPageInfo(chapterModel: ChapterModel): PageModel
+interface MangaSource {
+    fun getManga(pageNumber: Int = 1): List<MangaModel>
+    fun toInfoModel(model: MangaModel): MangaInfoModel
+    fun getPageInfo(chapterModel: ChapterModel): PageModel
 }
 
 data class MangaModel(

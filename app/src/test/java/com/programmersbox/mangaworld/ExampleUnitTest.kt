@@ -1,5 +1,7 @@
 package com.programmersbox.mangaworld
 
+import com.programmersbox.gsonutils.fromJson
+import com.programmersbox.gsonutils.toJson
 import com.programmersbox.manga_sources.mangasources.MangaEden
 import com.programmersbox.manga_sources.mangasources.MangaModel
 import com.programmersbox.manga_sources.mangasources.MangaSource
@@ -65,5 +67,16 @@ class ExampleUnitTest {
         val f = (nelo + eden).groupBy { it.title }.filter { it.value.size > 1 }
 
         println(f.entries.joinToString("\n") { "${it.key}=${it.value.map(MangaModel::source)}" })
+    }
+
+    @Test
+    fun other() {
+        println(MangaEden)
+        val f = Manganelo.toJson()
+        println(f)
+        val g = f.fromJson<Manganelo>()
+        println(g)
+        val d = g?.getManga()
+        println(d)
     }
 }

@@ -4,7 +4,7 @@ import com.programmersbox.gsonutils.getJsonApi
 import java.text.SimpleDateFormat
 import java.util.*
 
-object MangaEden : MangaSource() {
+object MangaEden : MangaSource {
 
     private data class Eden(val end: Number?, val manga: List<Manga>?, val page: Number?, val start: Number?, val total: Number?)
 
