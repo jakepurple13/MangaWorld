@@ -2,10 +2,7 @@ package com.programmersbox.mangaworld
 
 import com.programmersbox.gsonutils.fromJson
 import com.programmersbox.gsonutils.toJson
-import com.programmersbox.manga_sources.mangasources.MangaEden
-import com.programmersbox.manga_sources.mangasources.MangaModel
-import com.programmersbox.manga_sources.mangasources.MangaSource
-import com.programmersbox.manga_sources.mangasources.Manganelo
+import com.programmersbox.manga_sources.mangasources.*
 import org.junit.Test
 
 /**
@@ -71,6 +68,12 @@ class ExampleUnitTest {
 
     @Test
     fun other() {
+        objectTest()
+        println("-".repeat(50))
+        enumTest()
+    }
+
+    private fun objectTest() {
         println(MangaEden)
         val f = Manganelo.toJson()
         println(f)
@@ -79,4 +82,15 @@ class ExampleUnitTest {
         val d = g?.getManga()
         println(d)
     }
+
+    private fun enumTest() {
+        println(Sources.MANGANELO)
+        val f = Sources.MANGANELO.toJson()
+        println(f)
+        val g = f.fromJson<Sources>()
+        println(g)
+        val d = g?.source()?.getManga()
+        println(d)
+    }
+
 }
