@@ -12,9 +12,9 @@ data class MangaModel(
     val description: String,
     val mangaUrl: String,
     val imageUrl: String,
-    private val mangaSource: MangaSource
+    val source: Sources
 ) {
-    fun toInfoModel() = mangaSource.toInfoModel(this)
+    fun toInfoModel() = source.getSource().toInfoModel(this)
 }
 
 data class MangaInfoModel(
@@ -23,14 +23,12 @@ data class MangaInfoModel(
     val mangaUrl: String,
     val imageUrl: String,
     val chapters: List<ChapterModel>,
-    val genres: GenreModel,
+    val genres: List<String>,
     val alternativeNames: List<String>
 )
 
-data class GenreModel(val genres: List<String>)
-
-data class ChapterModel(val name: String, val url: String, val uploaded: String, private val mangaSource: MangaSource) {
-    fun getPageInfo() = mangaSource.getPageInfo(this)
+data class ChapterModel(val name: String, val url: String, val uploaded: String, private val sources: Sources) {
+    fun getPageInfo() = sources.getSource().getPageInfo(this)
 }
 
 data class PageModel(val pages: List<String>)

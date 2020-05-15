@@ -59,7 +59,7 @@ class MangaEden : MangaSource() {
             description = "",
             mangaUrl = "$baseUrl/api/manga/${it.i}/",
             imageUrl = "$imageUrl${it.im}",
-            mangaSource = this
+            source = Sources.MANGA_EDEN
         )
     } ?: emptyList()
 
@@ -67,7 +67,7 @@ class MangaEden : MangaSource() {
         val details = getJsonApi<MangaDetails>(model.mangaUrl)
         return MangaInfoModel(
             title = model.title,
-            description = details?.description ?: "",
+            description = details?.description ?: model.description,
             mangaUrl = model.mangaUrl,
             imageUrl = model.imageUrl,
             chapters = details?.chapters?.mapIndexed { index, list ->
@@ -79,10 +79,10 @@ class MangaEden : MangaSource() {
                     },
                     url = "$baseUrl/api/chapter/${list[3]}/",
                     uploaded = SimpleDateFormat("MM/dd/yyyy hh:mm a", Locale.getDefault()).format(1000 * list[1] as Double),
-                    mangaSource = this
+                    sources = model.source
                 )
             } ?: emptyList(),
-            genres = GenreModel(details?.categories ?: emptyList()),
+            genres = details?.categories ?: emptyList(),
             alternativeNames = details?.aka ?: emptyList()
         )
     }

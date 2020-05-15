@@ -11,7 +11,7 @@ class Manganelo : MangaSource() {
                 description = it.select("div.genres-item-description").text(),
                 mangaUrl = it.select("a[href^=http]").attr("abs:href"),
                 imageUrl = it.select("img").select("img[src^=http]").attr("abs:src"),
-                mangaSource = this
+                source = Sources.MANGANELO
             )
         }.filter { it.title.isNotEmpty() }
 
@@ -19,13 +19,13 @@ class Manganelo : MangaSource() {
         val doc = Jsoup.connect(model.mangaUrl).get()
         val info = doc.select("tbody").select("tr").select("td.table-value")
         val name = info[0].select("td.table-value").map { it.text() }
-        val genre = GenreModel(info[3].select("td.table-value").select("a").map { it.text() })
+        val genre = info[3].select("td.table-value").select("a").map { it.text() }
         val chapters = doc.select("ul.row-content-chapter").select("li.a-h").map {
             ChapterModel(
                 name = it.select("a.chapter-name").text(),
                 url = it.select("a.chapter-name").attr("abs:href"),
                 uploaded = it.select("span.chapter-time").attr("title"),
-                mangaSource = this
+                sources = model.source
             )
         }
 
