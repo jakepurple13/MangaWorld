@@ -4,7 +4,7 @@ import org.jsoup.Jsoup
 
 class Manganelo : MangaSource() {
 
-    override fun getManga(): List<MangaModel> = Jsoup.connect("https://m.manganelo.com/advanced_search?s=all&orby=az&page=$pageNumber").get()
+    override fun getManga(pageNumber: Int): List<MangaModel> = Jsoup.connect("https://m.manganelo.com/advanced_search?s=all&orby=az&page=$pageNumber").get()
         .select("div.content-genres-item").map {
             MangaModel(
                 title = it.select("a[href^=http]").attr("title"),

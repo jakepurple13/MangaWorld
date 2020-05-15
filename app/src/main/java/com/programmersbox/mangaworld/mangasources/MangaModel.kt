@@ -1,8 +1,7 @@
 package com.programmersbox.mangaworld.mangasources
 
 abstract class MangaSource {
-    var pageNumber: Int = 1
-    abstract fun getManga(): List<MangaModel>
+    abstract fun getManga(pageNumber: Int = 1): List<MangaModel>
     abstract fun toInfoModel(model: MangaModel): MangaInfoModel
     abstract fun getPageInfo(chapterModel: ChapterModel): PageModel
 }
@@ -14,7 +13,7 @@ data class MangaModel(
     val imageUrl: String,
     val source: Sources
 ) {
-    fun toInfoModel() = source.getSource().toInfoModel(this)
+    fun toInfoModel() = source.source().toInfoModel(this)
 }
 
 data class MangaInfoModel(
@@ -28,7 +27,7 @@ data class MangaInfoModel(
 )
 
 data class ChapterModel(val name: String, val url: String, val uploaded: String, private val sources: Sources) {
-    fun getPageInfo() = sources.getSource().getPageInfo(this)
+    fun getPageInfo() = sources.source().getPageInfo(this)
 }
 
 data class PageModel(val pages: List<String>)

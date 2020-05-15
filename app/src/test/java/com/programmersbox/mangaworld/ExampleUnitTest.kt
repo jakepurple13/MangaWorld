@@ -1,7 +1,7 @@
 package com.programmersbox.mangaworld
 
-import com.programmersbox.helpfulutils.intersect
 import com.programmersbox.mangaworld.mangasources.MangaEden
+import com.programmersbox.mangaworld.mangasources.MangaModel
 import com.programmersbox.mangaworld.mangasources.MangaSource
 import com.programmersbox.mangaworld.mangasources.Manganelo
 import org.junit.Test
@@ -16,7 +16,6 @@ class ExampleUnitTest {
     fun addition_isCorrect() {
         val manganelo = Manganelo()
         val list = manganelo.getManga()
-        manganelo.pageNumber++
         val list2 = manganelo.getManga()
         println(list.joinToString("\n"))
         println("-".repeat(100))
@@ -27,7 +26,6 @@ class ExampleUnitTest {
     fun tryTwo() {
         val manganelo = Manganelo()
         //val list = manganelo.getManga()
-        manganelo.pageNumber++
         val list2 = manganelo.getManga()
         //println(list.joinToString("\n"))
         //println("-".repeat(100))
@@ -61,11 +59,11 @@ class ExampleUnitTest {
 
     @Test
     fun similarTest() {
-        val nelo = Manganelo()
-        val eden = MangaEden()
+        val nelo = Manganelo().let { s -> (1..3).flatMap { s.getManga(it) } }
+        val eden = MangaEden().getManga()
 
-        val f = eden.getManga().intersect(nelo.getManga()) { u, o -> u.title == o.title }
+        val f = (nelo + eden).groupBy { it.title }.filter { it.value.size > 1 }
 
-        println(f.joinToString("\n"))
+        println(f.entries.joinToString("\n") { "${it.key}=${it.value.map(MangaModel::source)}" })
     }
 }
