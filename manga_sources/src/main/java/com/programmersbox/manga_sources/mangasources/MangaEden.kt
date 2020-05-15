@@ -4,7 +4,7 @@ import com.programmersbox.gsonutils.getJsonApi
 import java.text.SimpleDateFormat
 import java.util.*
 
-class MangaEden : MangaSource() {
+object MangaEden : MangaSource() {
 
     private data class Eden(val end: Number?, val manga: List<Manga>?, val page: Number?, val start: Number?, val total: Number?)
 
@@ -50,8 +50,8 @@ class MangaEden : MangaSource() {
 
     private data class Pages(val images: List<List<Any>>?)
 
-    private val baseUrl = "http://www.mangaeden.com"
-    private val imageUrl = "http://cdn.mangaeden.com/mangasimg/"
+    private const val baseUrl = "http://www.mangaeden.com"
+    private const val imageUrl = "http://cdn.mangaeden.com/mangasimg/"
 
     override fun getManga(pageNumber: Int): List<MangaModel> = getJsonApi<Eden>("$baseUrl/api/list/0/")?.manga?.map {
         MangaModel(

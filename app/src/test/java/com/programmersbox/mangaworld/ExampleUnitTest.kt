@@ -14,7 +14,7 @@ import org.junit.Test
 class ExampleUnitTest {
     @Test
     fun addition_isCorrect() {
-        val manganelo = Manganelo()
+        val manganelo = Manganelo
         val list = manganelo.getManga()
         val list2 = manganelo.getManga()
         println(list.joinToString("\n"))
@@ -24,7 +24,7 @@ class ExampleUnitTest {
 
     @Test
     fun tryTwo() {
-        val manganelo = Manganelo()
+        val manganelo = Manganelo
         //val list = manganelo.getManga()
         val list2 = manganelo.getManga()
         //println(list.joinToString("\n"))
@@ -34,7 +34,7 @@ class ExampleUnitTest {
 
     @Test
     fun tryThree() {
-        val manganelo: MangaSource = Manganelo()
+        val manganelo: MangaSource = Manganelo
         val list = manganelo.getManga()
         val f = list.first().toInfoModel()
         val f1 = f.chapters.first().getPageInfo()
@@ -43,7 +43,7 @@ class ExampleUnitTest {
 
     @Test
     fun mangaEdenTest() {
-        val eden = MangaEden().getManga()
+        val eden = MangaEden.getManga()
         val f = eden.random()
         println(f)
         val g = f.toInfoModel()
@@ -59,8 +59,8 @@ class ExampleUnitTest {
 
     @Test
     fun similarTest() {
-        val nelo = Manganelo().let { s -> (1..3).flatMap { s.getManga(it) } }
-        val eden = MangaEden().getManga()
+        val nelo = Manganelo.let { s -> (1..3).flatMap { s.getManga(it) } }
+        val eden = MangaEden.getManga()
 
         val f = (nelo + eden).groupBy { it.title }.filter { it.value.size > 1 }
 
