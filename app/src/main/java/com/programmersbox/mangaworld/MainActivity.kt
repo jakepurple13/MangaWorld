@@ -41,9 +41,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun loadNewManga() {
         GlobalScope.launch {
-            val items = Sources.MANGA_EDEN.source().getManga(pageNumber)//Sources.values().random().source().getManga()
+            val items = source.source().getManga(pageNumber++)
             runOnUiThread { adapter.addItems(items) }
-            pageNumber++
         }
     }
 
