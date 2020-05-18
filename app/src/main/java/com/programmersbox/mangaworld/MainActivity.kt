@@ -1,12 +1,11 @@
 package com.programmersbox.mangaworld
 
 import android.Manifest
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.programmersbox.helpfulutils.requestPermissions
-import com.programmersbox.manga_sources.mangasources.MangaSource
 import com.programmersbox.manga_sources.mangasources.Sources
 import com.programmersbox.mangaworld.adapters.MangaListAdapter
 import com.programmersbox.mangaworld.views.EndlessScrollingListener
