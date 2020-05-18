@@ -2,6 +2,7 @@ package com.programmersbox.mangaworld
 
 import com.programmersbox.gsonutils.fromJson
 import com.programmersbox.gsonutils.toJson
+import com.programmersbox.helpfulutils.toHexString
 import com.programmersbox.manga_sources.mangasources.*
 import org.junit.Test
 
@@ -91,6 +92,23 @@ class ExampleUnitTest {
         println(g)
         val d = g?.source()?.getManga()
         println(d)
+    }
+
+    @Test
+    fun colors() {
+        /*listOf(
+            0xfff44336,0xffe91e63,0xff9c27b0,0xff673ab7,
+            0xff3f51b5,0xff2196f3,0xff03a9f4,0xff00bcd4,
+            0xff009688,0xff4caf50,0xff8bc34a,0xffcddc39,
+            0xffffeb3b,0xffffc107,0xffff9800,0xffff5722,
+            0xff795548,0xff9e9e9e,0xff607d8b,0xff333333
+        ).forEach {
+            println(it.toHexString())
+        }*/
+        fun randomColor() = (Math.random() * 16777215).toInt() or (0xFF shl 24)
+        for (i in 0..100) {
+            println(randomColor().toHexString())
+        }
     }
 
 }

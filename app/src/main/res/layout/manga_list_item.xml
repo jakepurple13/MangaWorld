@@ -6,13 +6,13 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="5dp"
+    tools:cardBackgroundColor="@sample/sample_colors"
     tools:showIn="@layout/activity_main">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="5dp"
-        tools:background="@tools:sample/backgrounds/scenic">
+        android:layout_margin="5dp">
 
         <ImageView
             android:id="@+id/mangaListCover"
@@ -35,7 +35,8 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/mangaListCover"
             app:layout_constraintTop_toTopOf="@id/mangaListCover"
-            tools:text="@tools:sample/full_names" />
+            tools:text="@tools:sample/full_names"
+            tools:textColor="@sample/sample_colors" />
 
         <TextView
             android:id="@+id/mangaListDescription"
@@ -48,7 +49,8 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/mangaListCover"
             app:layout_constraintTop_toBottomOf="@id/mangaListTitle"
-            tools:text="@tools:sample/lorem/random" />
+            tools:text="@tools:sample/lorem/random"
+            tools:textColor="@sample/sample_colors" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
