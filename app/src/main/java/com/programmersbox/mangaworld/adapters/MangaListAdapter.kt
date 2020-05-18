@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.view.View
 import android.view.ViewGroup
+import androidx.constraintlayout.widget.ConstraintSet
 import androidx.palette.graphics.Palette
 import androidx.recyclerview.widget.RecyclerView
 import coil.api.load
@@ -11,6 +12,7 @@ import coil.bitmappool.BitmapPool
 import coil.size.Size
 import coil.transform.Transformation
 import com.programmersbox.dragswipe.DragSwipeAdapter
+import com.programmersbox.helpfulutils.ConstraintRange
 import com.programmersbox.helpfulutils.layoutInflater
 import com.programmersbox.manga_sources.mangasources.MangaModel
 import com.programmersbox.mangaworld.R
@@ -22,9 +24,20 @@ class MangaListAdapter(dataList: MutableList<MangaModel>, private val context: C
         MangaHolder(context.layoutInflater.inflate(R.layout.manga_list_item, parent, false))
 
     override fun MangaHolder.onBind(item: MangaModel, position: Int) {
+
+        var range = ConstraintRange(
+            constraintLayout,
+            ConstraintSet().apply { clone(constraintLayout) },
+            ConstraintSet().apply { clone(context, R.layout.manga_list_item_alt) }
+        )
+
         itemView.setOnClickListener {
             //TODO: Make this send to Manga Info like activity
             println(item)
+        }
+        itemView.setOnLongClickListener {
+            range++
+            true
         }
         title.text = item.title
         description.text = item.description
@@ -56,4 +69,5 @@ class MangaHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     val title = itemView.mangaListTitle!!
     val description = itemView.mangaListDescription!!
     val layout = itemView.mangaListLayout!!
+    val constraintLayout = itemView.mangaListConstraintLayout!!
 }

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mangaListConstraintLayout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="5dp">
+
+    <ImageView
+        android:id="@+id/mangaListCover"
+        android:layout_width="300px"
+        android:layout_height="480px"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="ContentDescription,PxUsage"
+        tools:src="@tools:sample/avatars" />
+
+    <TextView
+        android:id="@+id/mangaListTitle"
+        style="@style/MaterialAlertDialog.MaterialComponents.Title.Text.CenterStacked"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="5dp"
+        android:gravity="center"
+        android:maxLines="3"
+        app:layout_constraintBottom_toTopOf="@id/mangaListDescription"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/mangaListCover"
+        app:layout_constraintTop_toTopOf="@id/mangaListCover"
+        tools:text="@tools:sample/full_names"
+        tools:textColor="@sample/sample_colors" />
+
+    <TextView
+        android:id="@+id/mangaListDescription"
+        style="@style/TextAppearance.MaterialComponents.Body2"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="5dp"
+        android:gravity="center"
+        app:layout_constraintBottom_toBottomOf="@id/mangaListCover"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/mangaListCover"
+        app:layout_constraintTop_toBottomOf="@id/mangaListTitle"
+        tools:text="@tools:sample/lorem/random"
+        tools:textColor="@sample/sample_colors" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
