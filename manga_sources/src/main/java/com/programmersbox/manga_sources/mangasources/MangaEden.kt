@@ -53,10 +53,13 @@ object MangaEden : MangaSource {
     private const val baseUrl = "http://www.mangaeden.com"
     private const val imageUrl = "http://cdn.mangaeden.com/mangasimg/"
 
-    override fun getManga(pageNumber: Int): List<MangaModel> = getJsonApi<Eden>("$baseUrl/api/list/0/")?.manga?.map {
-        MangaModel(
-            title = it.t ?: "",
-            description = "",
+    override val hasMorePages: Boolean = false
+
+    override fun getManga(pageNumber: Int): List<MangaModel> = getJsonApi<Eden?>("$baseUrl/api/list/0/")?.manga?.mapNotNull {
+        if (it.ld == null || it.t.isNullOrEmpty()) null
+        else MangaModel(
+            title = it.t,
+            description = "Last updated: ${SimpleDateFormat("MM/dd/yyyy hh:mm a", Locale.getDefault()).format(1000 * it.ld.toDouble())}",
             mangaUrl = "$baseUrl/api/manga/${it.i}/",
             imageUrl = "$imageUrl${it.im}",
             source = Sources.MANGA_EDEN

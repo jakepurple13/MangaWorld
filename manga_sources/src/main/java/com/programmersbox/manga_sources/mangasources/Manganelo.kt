@@ -4,16 +4,19 @@ import org.jsoup.Jsoup
 
 object Manganelo : MangaSource {
 
-    override fun getManga(pageNumber: Int): List<MangaModel> = Jsoup.connect("https://m.manganelo.com/advanced_search?s=all&orby=az&page=$pageNumber").get()
-        .select("div.content-genres-item").map {
-            MangaModel(
-                title = it.select("a[href^=http]").attr("title"),
-                description = it.select("div.genres-item-description").text(),
-                mangaUrl = it.select("a[href^=http]").attr("abs:href"),
-                imageUrl = it.select("img").select("img[src^=http]").attr("abs:src"),
-                source = Sources.MANGANELO
-            )
-        }.filter { it.title.isNotEmpty() }
+    override val hasMorePages: Boolean = true
+
+    override fun getManga(pageNumber: Int): List<MangaModel> =
+        Jsoup.connect("https://m.manganelo.com/advanced_search?s=all&orby=az&page=$pageNumber").get()
+            .select("div.content-genres-item").map {
+                MangaModel(
+                    title = it.select("a[href^=http]").attr("title"),
+                    description = it.select("div.genres-item-description").text(),
+                    mangaUrl = it.select("a[href^=http]").attr("abs:href"),
+                    imageUrl = it.select("img").select("img[src^=http]").attr("abs:src"),
+                    source = Sources.MANGANELO
+                )
+            }.filter { it.title.isNotEmpty() }
 
     override fun toInfoModel(model: MangaModel): MangaInfoModel {
         val doc = Jsoup.connect(model.mangaUrl).get()

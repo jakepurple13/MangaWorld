@@ -4,6 +4,7 @@ interface MangaSource {
     fun getManga(pageNumber: Int = 1): List<MangaModel>
     fun toInfoModel(model: MangaModel): MangaInfoModel
     fun getPageInfo(chapterModel: ChapterModel): PageModel
+    val hasMorePages: Boolean
 }
 
 data class MangaModel(
