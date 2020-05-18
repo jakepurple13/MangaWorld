@@ -19,7 +19,7 @@ class MainActivity : AppCompatActivity() {
 
     private val mangaList = mutableListOf<MangaModel>()
 
-    private val adapter = MangaListAdapter(mutableListOf(), this)
+    private val adapter = MangaListAdapter(this)
 
     private var pageNumber = 1
     private var source = Sources.values().random()

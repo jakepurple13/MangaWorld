@@ -18,7 +18,7 @@ import com.programmersbox.manga_sources.mangasources.MangaModel
 import com.programmersbox.mangaworld.R
 import kotlinx.android.synthetic.main.manga_list_item.view.*
 
-class MangaListAdapter(dataList: MutableList<MangaModel>, private val context: Context) : DragSwipeAdapter<MangaModel, MangaHolder>(dataList) {
+class MangaListAdapter(private val context: Context) : DragSwipeAdapter<MangaModel, MangaHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MangaHolder =
         MangaHolder(context.layoutInflater.inflate(R.layout.manga_list_item, parent, false))
