@@ -2,6 +2,7 @@ package com.programmersbox.mangaworld
 
 import android.app.Application
 import android.os.Build
+import com.programmersbox.helpfulutils.NotificationChannelImportance
 import com.programmersbox.helpfulutils.createNotificationChannel
 import com.programmersbox.helpfulutils.createNotificationGroup
 import com.programmersbox.helpfulutils.defaultSharedPrefName
@@ -14,7 +15,7 @@ class MangaWorldApp : Application() {
         Loged.TAG = "MangaWorld"
         defaultSharedPrefName = "mangaworld"
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            createNotificationChannel("mangaChannel")
+            createNotificationChannel("mangaChannel", importance = NotificationChannelImportance.HIGH)
             createNotificationGroup("mangaGroup")
         }
     }
