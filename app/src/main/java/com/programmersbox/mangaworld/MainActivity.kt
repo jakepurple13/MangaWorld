@@ -6,7 +6,9 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.doOnTextChanged
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.programmersbox.helpfulutils.requestPermissions
+import com.programmersbox.helpfulutils.setEnumItems
 import com.programmersbox.manga_sources.mangasources.MangaModel
 import com.programmersbox.manga_sources.mangasources.Sources
 import com.programmersbox.mangaworld.adapters.MangaListAdapter
@@ -28,16 +30,23 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        search_info.hint = "Search ${source.name}"
-
         requestPermissions(Manifest.permission.INTERNET) {
             if (!it.isGranted) Toast.makeText(this, "Need ${it.deniedPermissions} to work", Toast.LENGTH_SHORT).show()
         }
 
-        search_info.doOnTextChanged { text, _, _, _ ->
-            adapter.setListNotify(mangaList.filter { it.title.contains(text.toString(), true) })
-        }
+        searchSetup()
+        sourceChangeSetup()
+        rvSetup()
+    }
 
+    private fun loadNewManga() {
+        GlobalScope.launch {
+            mangaList.addAll(source.source().getManga(pageNumber++))
+            runOnUiThread { adapter.addItems(mangaList) }
+        }
+    }
+
+    private fun rvSetup() {
         mangaRV.adapter = adapter
         loadNewManga()
 
@@ -46,14 +55,28 @@ class MainActivity : AppCompatActivity() {
                 if (source.source().hasMorePages && search_info.text.isNullOrEmpty()) loadNewManga()
             }
         })
-
     }
 
-    private fun loadNewManga() {
-        GlobalScope.launch {
-            mangaList.addAll(source.source().getManga(pageNumber++))
-            runOnUiThread { adapter.addItems(mangaList) }
+    private fun sourceChangeSetup() {
+        changeSources.setOnClickListener {
+            MaterialAlertDialogBuilder(this)
+                .setTitle("Choose a Source")
+                .setEnumItems<Sources>(Sources.values().map(Sources::name).toTypedArray()) { source, dialog ->
+                    mangaList.clear()
+                    adapter.setListNotify(mangaList)
+                    this.source = source
+                    search_layout.hint = "Search ${this.source.name}"
+                    pageNumber = 1
+                    loadNewManga()
+                    dialog.dismiss()
+                }
+                .show()
         }
+    }
+
+    private fun searchSetup() {
+        search_layout.hint = "Search ${this.source.name}"
+        search_info.doOnTextChanged { text, _, _, _ -> adapter.setListNotify(mangaList.filter { it.title.contains(text.toString(), true) }) }
     }
 
 }

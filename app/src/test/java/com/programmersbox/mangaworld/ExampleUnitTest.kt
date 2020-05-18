@@ -2,6 +2,7 @@ package com.programmersbox.mangaworld
 
 import com.programmersbox.gsonutils.fromJson
 import com.programmersbox.gsonutils.toJson
+import com.programmersbox.gsonutils.toPrettyJson
 import com.programmersbox.helpfulutils.toHexString
 import com.programmersbox.manga_sources.mangasources.*
 import org.junit.Test
@@ -29,7 +30,8 @@ class ExampleUnitTest {
         val list2 = manganelo.getManga()
         //println(list.joinToString("\n"))
         //println("-".repeat(100))
-        println(list2.joinToString("\n"))
+        //println(list2.joinToString("\n"))
+        println(list2.random().toPrettyJson())
     }
 
     @Test
