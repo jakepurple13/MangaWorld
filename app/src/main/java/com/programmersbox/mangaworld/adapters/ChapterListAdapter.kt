@@ -1,14 +1,17 @@
 package com.programmersbox.mangaworld.adapters
 
 import android.content.Context
+import android.content.Intent
 import android.view.View
 import android.view.ViewGroup
 import androidx.palette.graphics.Palette
 import androidx.recyclerview.widget.RecyclerView
 import com.programmersbox.dragswipe.DragSwipeAdapter
+import com.programmersbox.gsonutils.putExtra
 import com.programmersbox.helpfulutils.layoutInflater
 import com.programmersbox.manga_sources.mangasources.ChapterModel
 import com.programmersbox.mangaworld.R
+import com.programmersbox.mangaworld.ReadActivity
 import kotlinx.android.synthetic.main.chapter_list_item.view.*
 
 class ChapterListAdapter(private val context: Context, dataList: MutableList<ChapterModel>, private val swatch: Palette.Swatch?) :
@@ -24,7 +27,7 @@ class ChapterListAdapter(private val context: Context, dataList: MutableList<Cha
         swatch?.titleTextColor?.let { name.setTextColor(it) }
         swatch?.bodyTextColor?.let { uploaded.setTextColor(it) }
         itemView.setOnClickListener {
-
+            context.startActivity(Intent(context, ReadActivity::class.java).apply { putExtra("chapter", item) })
         }
     }
 }
