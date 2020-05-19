@@ -19,6 +19,7 @@ import com.programmersbox.helpfulutils.layoutInflater
 import com.programmersbox.manga_sources.mangasources.MangaModel
 import com.programmersbox.mangaworld.MangaActivity
 import com.programmersbox.mangaworld.R
+import com.programmersbox.mangaworld.utils.usePalette
 import kotlinx.android.synthetic.main.manga_list_item.view.*
 
 class MangaListAdapter(private val context: Context) : DragSwipeAdapter<MangaModel, MangaHolder>() {
@@ -53,21 +54,23 @@ class MangaListAdapter(private val context: Context) : DragSwipeAdapter<MangaMod
             placeholder(R.mipmap.ic_launcher)
             error(R.mipmap.ic_launcher)
             crossfade(true)
-            transformations(object : Transformation {
-                override fun key() = "paletteTransformer"
-                override suspend fun transform(pool: BitmapPool, input: Bitmap, size: Size): Bitmap {
-                    val p = Palette.from(input).generate()
+            if (context.usePalette) {
+                transformations(object : Transformation {
+                    override fun key() = "paletteTransformer"
+                    override suspend fun transform(pool: BitmapPool, input: Bitmap, size: Size): Bitmap {
+                        val p = Palette.from(input).generate()
 
-                    val dom = p.vibrantSwatch
-                    dom?.rgb?.let { layout.setCardBackgroundColor(it) }
-                    dom?.titleTextColor?.let { title.setTextColor(it) }
-                    dom?.bodyTextColor?.let { description.setTextColor(it) }
+                        val dom = p.vibrantSwatch
+                        dom?.rgb?.let { layout.setCardBackgroundColor(it) }
+                        dom?.titleTextColor?.let { title.setTextColor(it) }
+                        dom?.bodyTextColor?.let { description.setTextColor(it) }
 
-                    swatch = dom
+                        swatch = dom
 
-                    return input
-                }
-            })
+                        return input
+                    }
+                })
+            }
         }
     }
 
