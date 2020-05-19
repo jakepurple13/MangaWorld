@@ -1,22 +1,30 @@
 package com.programmersbox.manga_sources.mangasources
 
 import org.jsoup.Jsoup
+import org.jsoup.nodes.Document
 
 object Manganelo : MangaSource {
 
     override val hasMorePages: Boolean = true
 
+    override fun searchManga(searchText: CharSequence, pageNumber: Int, mangaList: List<MangaModel>): List<MangaModel> =
+        mangaList.filter { it.title.contains(searchText, true) }
+    //TODO: Work on this
+    //Jsoup.connect("https://m.manganelo.com/advanced_search?s=all&orby=az&page=$pageNumber&keyw=${searchText.replace(" ".toRegex(), "_")}").get()
+    //.toMangaModel()
+
     override fun getManga(pageNumber: Int): List<MangaModel> =
-        Jsoup.connect("https://m.manganelo.com/advanced_search?s=all&orby=az&page=$pageNumber").get()
-            .select("div.content-genres-item").map {
-                MangaModel(
-                    title = it.select("a[href^=http]").attr("title"),
-                    description = it.select("div.genres-item-description").text(),
-                    mangaUrl = it.select("a[href^=http]").attr("abs:href"),
-                    imageUrl = it.select("img").select("img[src^=http]").attr("abs:src"),
-                    source = Sources.MANGANELO
-                )
-            }.filter { it.title.isNotEmpty() }
+        Jsoup.connect("https://m.manganelo.com/advanced_search?s=all&orby=az&page=$pageNumber").get().toMangaModel()
+
+    private fun Document.toMangaModel() = select("div.content-genres-item").map {
+        MangaModel(
+            title = it.select("a[href^=http]").attr("title"),
+            description = it.select("div.genres-item-description").text(),
+            mangaUrl = it.select("a[href^=http]").attr("abs:href"),
+            imageUrl = it.select("img").select("img[src^=http]").attr("abs:src"),
+            source = Sources.MANGANELO
+        )
+    }.filter { it.title.isNotEmpty() }
 
     override fun toInfoModel(model: MangaModel): MangaInfoModel {
         val doc = Jsoup.connect(model.mangaUrl).get()

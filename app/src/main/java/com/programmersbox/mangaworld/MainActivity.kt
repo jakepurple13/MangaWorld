@@ -8,7 +8,7 @@ import androidx.core.widget.doOnTextChanged
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.programmersbox.helpfulutils.requestPermissions
-import com.programmersbox.helpfulutils.setEnumItems
+import com.programmersbox.helpfulutils.setEnumSingleChoiceItems
 import com.programmersbox.manga_sources.mangasources.MangaModel
 import com.programmersbox.manga_sources.mangasources.Sources
 import com.programmersbox.mangaworld.adapters.MangaListAdapter
@@ -41,7 +41,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun loadNewManga() {
         GlobalScope.launch {
-            mangaList.addAll(source.source().getManga(pageNumber++))
+            mangaList.addAll(source().getManga(pageNumber++))
             runOnUiThread { adapter.addItems(mangaList) }
         }
     }
@@ -52,7 +52,7 @@ class MainActivity : AppCompatActivity() {
 
         mangaRV.addOnScrollListener(object : EndlessScrollingListener(mangaRV.layoutManager!!) {
             override fun onLoadMore(page: Int, totalItemsCount: Int, view: RecyclerView?) {
-                if (source.source().hasMorePages && search_info.text.isNullOrEmpty()) loadNewManga()
+                if (source().hasMorePages && search_info.text.isNullOrEmpty()) loadNewManga()
             }
         })
     }
@@ -61,7 +61,7 @@ class MainActivity : AppCompatActivity() {
         changeSources.setOnClickListener {
             MaterialAlertDialogBuilder(this)
                 .setTitle("Choose a Source")
-                .setEnumItems<Sources>(Sources.values().map(Sources::name).toTypedArray()) { source, dialog ->
+                .setEnumSingleChoiceItems(Sources.values().map(Sources::name).toTypedArray(), source) { source, dialog ->
                     mangaList.clear()
                     adapter.setListNotify(mangaList)
                     this.source = source
@@ -76,7 +76,13 @@ class MainActivity : AppCompatActivity() {
 
     private fun searchSetup() {
         search_layout.hint = "Search ${this.source.name}"
-        search_info.doOnTextChanged { text, _, _, _ -> adapter.setListNotify(mangaList.filter { it.title.contains(text.toString(), true) }) }
+        search_info.doOnTextChanged { text, _, _, _ -> adapter.setListNotify(source().searchManga(text.toString(), pageNumber, mangaList)) }
+        /*val searching = MutableStateFlow("")
+        searching
+            .debounce(500)
+            .map { source().searchManga(it, pageNumber, mangaList) }
+            .collectOnUi { adapter.setListNotify(it) }*/
+        //search_info.doOnTextChanged { text, _, _, _ -> searching(text.toString()) }
     }
 
 }

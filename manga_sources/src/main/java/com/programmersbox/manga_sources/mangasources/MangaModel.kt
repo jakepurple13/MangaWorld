@@ -4,6 +4,9 @@ interface MangaSource {
     fun getManga(pageNumber: Int = 1): List<MangaModel>
     fun toInfoModel(model: MangaModel): MangaInfoModel
     fun getPageInfo(chapterModel: ChapterModel): PageModel
+    fun searchManga(searchText: CharSequence, pageNumber: Int = 1, mangaList: List<MangaModel>): List<MangaModel> =
+        mangaList.filter { it.title.contains(searchText, true) }
+
     val hasMorePages: Boolean
 }
 

@@ -64,7 +64,7 @@ object MangaEden : MangaSource {
             imageUrl = "$imageUrl${it.im}",
             source = Sources.MANGA_EDEN
         )
-    } ?: emptyList()
+    }?.sortedBy(MangaModel::title) ?: emptyList()
 
     override fun toInfoModel(model: MangaModel): MangaInfoModel {
         val details = getJsonApi<MangaDetails>(model.mangaUrl)
