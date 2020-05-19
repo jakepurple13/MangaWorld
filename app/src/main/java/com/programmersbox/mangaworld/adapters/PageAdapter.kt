@@ -17,7 +17,6 @@ class PageAdapter(private val context: Context, dataList: MutableList<String>) :
 
     override fun PageHolder.onBind(item: String, position: Int) {
         image.load(item) {
-            placeholder(R.mipmap.ic_launcher)
             error(android.R.drawable.ic_delete)
         }
     }

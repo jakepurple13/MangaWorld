@@ -11,4 +11,13 @@
         android:layout_height="wrap_content"
         tools:src="@tools:sample/avatars" />
 
+    <!--<com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
+        android:id="@+id/chapterPage"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:panEnabled="true"
+        app:quickScaleEnabled="true"
+        app:zoomEnabled="true"
+        tools:src="@tools:sample/avatars" />-->
+
 </RelativeLayout>
