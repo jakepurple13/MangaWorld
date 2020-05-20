@@ -3,11 +3,9 @@ package com.programmersbox.mangaworld
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.RecyclerView
 import com.programmersbox.gsonutils.fromJson
 import com.programmersbox.manga_sources.mangasources.ChapterModel
 import com.programmersbox.mangaworld.adapters.PageAdapter
-import com.programmersbox.mangaworld.views.EndlessScrollingListener
 import kotlinx.android.synthetic.main.activity_read.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -25,7 +23,7 @@ class ReadActivity : AppCompatActivity() {
         var chapter = intent.getIntExtra("chapter", 1)
         val chapters = intent.getObjectExtra<List<ChapterModel>>("nextChapter", null)
 
-        pageRV.addOnScrollListener(object : EndlessScrollingListener(pageRV.layoutManager!!) {
+        /*pageRV.addOnScrollListener(object : EndlessScrollingListener(pageRV.layoutManager!!) {
             override fun onLoadMore(page: Int, totalItemsCount: Int, view: RecyclerView?) {
                 GlobalScope.launch {
                     chapter++
@@ -33,7 +31,7 @@ class ReadActivity : AppCompatActivity() {
                     runOnUiThread { adapter.addItems(pages) }
                 }
             }
-        })
+        })*/
 
         GlobalScope.launch {
             val pages = chapters?.getOrNull(chapter)?.getPageInfo()?.pages.orEmpty()
