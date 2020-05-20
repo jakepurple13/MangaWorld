@@ -2,6 +2,7 @@ package com.programmersbox.manga_sources
 
 import com.programmersbox.gsonutils.getApi
 import com.programmersbox.manga_sources.mangasources.INKR
+import com.programmersbox.manga_sources.mangasources.MangaFourLife
 import com.programmersbox.manga_sources.mangasources.MangaFox
 import com.programmersbox.manga_sources.mangasources.MangaHere
 import org.jsoup.Jsoup
@@ -51,6 +52,16 @@ class ExampleUnitTest {
         println(s)
         //val p = INKR.decodeMri(getApi(s.pages.first())!!)
         //println(p)
+    }
+
+    @Test
+    fun life() {
+        val f = MangaFourLife.getManga()
+        println(f.size)
+        val d = f.find { it.title == "Dragon Ball" }!!.toInfoModel()
+        println(d)
+        val s = d.chapters.random().getPageInfo()
+        println(s)
     }
 
     @Test
