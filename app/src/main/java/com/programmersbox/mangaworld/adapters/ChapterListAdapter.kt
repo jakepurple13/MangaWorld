@@ -27,7 +27,12 @@ class ChapterListAdapter(private val context: Context, dataList: MutableList<Cha
         swatch?.titleTextColor?.let { name.setTextColor(it) }
         swatch?.bodyTextColor?.let { uploaded.setTextColor(it) }
         itemView.setOnClickListener {
-            context.startActivity(Intent(context, ReadActivity::class.java).apply { putExtra("chapter", item) })
+            context.startActivity(
+                Intent(context, ReadActivity::class.java).apply {
+                    putExtra("chapter", position)
+                    putExtra("nextChapter", dataList)
+                }
+            )
         }
     }
 }
