@@ -1,6 +1,5 @@
 package com.programmersbox.mangaworld
 
-import android.app.ProgressDialog
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.programmersbox.gsonutils.getObjectExtra
@@ -33,16 +32,11 @@ class ReadActivity : AppCompatActivity() {
             }
         })*/
 
-        val progress = ProgressDialog(this)
-        progress.setTitle("Loading Pages...")
-        progress.show()
-
         GlobalScope.launch {
             //val pages = chapters?.getOrNull(chapter)?.getPageInfo()?.pages.orEmpty()
             val pages = intent.getObjectExtra<ChapterModel>("currentChapter")?.getPageInfo()?.pages.orEmpty()
             runOnUiThread {
                 adapter.addItems(pages)
-                progress.hide()
             }
         }
 

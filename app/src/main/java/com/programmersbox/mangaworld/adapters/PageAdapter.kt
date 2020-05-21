@@ -45,8 +45,5 @@ class PageHolder(itemView: View) : PageViewHolder(itemView) {
 
 class PageLoadingHolder(itemView: View) : PageViewHolder(itemView) {
     //private val loading = itemView.pageLoading!!
-
-    override fun render(item: String?) {
-
-    }
+    override fun render(item: String?) = Unit
 }
