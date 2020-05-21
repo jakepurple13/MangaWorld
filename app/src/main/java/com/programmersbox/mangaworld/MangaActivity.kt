@@ -2,14 +2,18 @@ package com.programmersbox.mangaworld
 
 import android.content.res.ColorStateList
 import android.os.Bundle
+import android.view.View
 import android.widget.ImageView
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.databinding.BindingAdapter
 import androidx.databinding.DataBindingUtil
+import androidx.lifecycle.ViewModel
 import androidx.palette.graphics.Palette
 import coil.api.load
 import com.google.android.material.chip.Chip
+import com.google.android.material.chip.ChipGroup
 import com.programmersbox.gsonutils.getObjectExtra
 import com.programmersbox.helpfulutils.ConstraintRange
 import com.programmersbox.helpfulutils.ItemRange
@@ -24,6 +28,8 @@ import kotlinx.coroutines.launch
 
 class MangaActivity : AppCompatActivity() {
 
+    private lateinit var range: ItemRange<String>
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         GlobalScope.launch {
@@ -33,6 +39,7 @@ class MangaActivity : AppCompatActivity() {
                 val swatch = intent.getObjectExtra<Palette.Swatch>("swatch", null)
                 moreInfoSetup(swatch)
                 binding.info = model
+                binding.swatch = SwatchInfo(swatch?.rgb, swatch?.titleTextColor, swatch?.bodyTextColor)
                 mangaSetup(model, swatch)
             }
         }
@@ -41,25 +48,15 @@ class MangaActivity : AppCompatActivity() {
     private fun mangaSetup(mangaInfoModel: MangaInfoModel?, swatch: Palette.Swatch?) {
         Loged.r(mangaInfoModel)
         mangaInfoModel?.let { manga ->
+            range = ItemRange(manga.title, *manga.alternativeNames.toTypedArray())
             swatch?.rgb?.let { mangaInfoLayout.setBackgroundColor(it) }
-            swatch?.titleTextColor?.let { mangaInfoTitle.setTextColor(it) }
-            swatch?.bodyTextColor?.let { mangaInfoDescription.setTextColor(it) }
-            manga.genres.forEach {
-                genreList.addView(Chip(this@MangaActivity).apply {
-                    text = it
-                    isCheckable = false
-                    isClickable = false
-                    swatch?.rgb?.let { setTextColor(it) }
-                    swatch?.bodyTextColor?.let { chipBackgroundColor = ColorStateList.valueOf(it) }
-                })
-            }
-            var range = ItemRange(manga.title, *manga.alternativeNames.toTypedArray())
-            mangaInfoTitle.setOnClickListener {
-                range++
-                mangaInfoTitle.text = range.item
-            }
             mangaInfoChapterList.adapter = ChapterListAdapter(dataList = manga.chapters.toMutableList(), context = this, swatch = swatch)
         }
+    }
+
+    fun titles(view: View) {
+        range++
+        mangaInfoTitle.text = range.item
     }
 
     private fun moreInfoSetup(swatch: Palette.Swatch?) {
@@ -83,3 +80,38 @@ fun loadImage(view: ImageView, imageUrl: String) {
         crossfade(true)
     }
 }
+
+@BindingAdapter("otherNames")
+fun otherNames(view: TextView, names: List<String>) {
+    view.text = names.joinToString("\n\n")
+}
+
+@BindingAdapter("genreList", "swatch")
+fun loadGenres(view: ChipGroup, genres: List<String>, swatchInfo: SwatchInfo) {
+    genres.forEach {
+        view.addView(Chip(view.context).apply {
+            text = it
+            isCheckable = false
+            isClickable = false
+            swatchInfo.rgb?.let { setTextColor(it) }
+            swatchInfo.bodyColor?.let { chipBackgroundColor = ColorStateList.valueOf(it) }
+        })
+    }
+}
+
+@BindingAdapter("titleColor")
+fun titleColor(view: TextView, swatchInfo: SwatchInfo) {
+    swatchInfo.titleColor?.let { view.setTextColor(it) }
+}
+
+@BindingAdapter("bodyColor")
+fun bodyColor(view: TextView, swatchInfo: SwatchInfo) {
+    swatchInfo.bodyColor?.let { view.setTextColor(it) }
+}
+
+@BindingAdapter("linkColor")
+fun linkColor(view: TextView, swatchInfo: SwatchInfo) {
+    swatchInfo.bodyColor?.let { view.setLinkTextColor(it) }
+}
+
+data class SwatchInfo(val rgb: Int?, val titleColor: Int?, val bodyColor: Int?) : ViewModel()

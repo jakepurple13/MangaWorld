@@ -15,6 +15,32 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:src="@tools:sample/avatars" />
 
+    <LinearLayout
+        android:id="@+id/moreInfoLayout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_margin="5dp"
+        android:orientation="vertical"
+        app:layout_constraintEnd_toEndOf="@id/mangaInfoCover"
+        app:layout_constraintStart_toStartOf="@id/mangaInfoCover"
+        app:layout_constraintTop_toBottomOf="@id/mangaInfoCover">
+
+        <TextView
+            android:id="@+id/mangaUrl"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:autoLink="web"
+            android:linksClickable="true"
+            tools:text="@tools:sample/full_names" />
+
+        <TextView
+            android:id="@+id/alternateNames"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            tools:text="@tools:sample/lorem/random" />
+
+    </LinearLayout>
+
     <TextView
         android:id="@+id/mangaInfoTitle"
         style="@style/TextAppearance.MaterialComponents.Headline5"
@@ -30,6 +56,7 @@
         android:id="@+id/genreListLayout"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginHorizontal="5dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/mangaInfoCover"
         app:layout_constraintTop_toBottomOf="@id/mangaInfoTitle">

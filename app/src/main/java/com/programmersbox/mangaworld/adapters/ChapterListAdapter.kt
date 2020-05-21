@@ -10,8 +10,8 @@ import com.programmersbox.gsonutils.putExtra
 import com.programmersbox.helpfulutils.layoutInflater
 import com.programmersbox.manga_sources.mangasources.ChapterModel
 import com.programmersbox.mangaworld.ReadActivity
+import com.programmersbox.mangaworld.SwatchInfo
 import com.programmersbox.mangaworld.databinding.ChapterListItemBinding
-import kotlinx.android.synthetic.main.chapter_list_item.view.*
 
 class ChapterListAdapter(private val context: Context, dataList: MutableList<ChapterModel>, private val swatch: Palette.Swatch?) :
     DragSwipeAdapter<ChapterModel, ChapterHolder>(dataList) {
@@ -20,10 +20,7 @@ class ChapterListAdapter(private val context: Context, dataList: MutableList<Cha
         ChapterHolder(ChapterListItemBinding.inflate(context.layoutInflater, parent, false))
 
     override fun ChapterHolder.onBind(item: ChapterModel, position: Int) {
-        bind(item)
-        swatch?.rgb?.let { card.setCardBackgroundColor(it) }
-        swatch?.titleTextColor?.let { name.setTextColor(it) }
-        swatch?.bodyTextColor?.let { uploaded.setTextColor(it) }
+        bind(item, SwatchInfo(swatch?.rgb, swatch?.titleTextColor, swatch?.bodyTextColor))
         itemView.setOnClickListener {
             context.startActivity(
                 Intent(context, ReadActivity::class.java).apply {
@@ -37,12 +34,9 @@ class ChapterListAdapter(private val context: Context, dataList: MutableList<Cha
 }
 
 class ChapterHolder(private val binding: ChapterListItemBinding) : RecyclerView.ViewHolder(binding.root) {
-    val name = itemView.chapterName!!
-    val uploaded = itemView.uploadedInfo!!
-    val card = itemView.chapterListCard!!
-
-    fun bind(item: ChapterModel) {
+    fun bind(item: ChapterModel, swatchInfo: SwatchInfo) {
         binding.chapter = item
+        binding.swatch = swatchInfo
         binding.executePendingBindings()
     }
 }

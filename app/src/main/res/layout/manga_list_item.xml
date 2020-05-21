@@ -16,8 +16,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="5dp"
-        tools:cardBackgroundColor="@sample/sample_colors"
-        tools:showIn="@layout/activity_main">
+        tools:cardBackgroundColor="@sample/sample_colors">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/mangaListConstraintLayout"

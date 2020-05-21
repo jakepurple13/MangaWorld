@@ -9,13 +9,19 @@
         <variable
             name="chapter"
             type="com.programmersbox.manga_sources.mangasources.ChapterModel" />
+
+        <variable
+            name="swatch"
+            type="com.programmersbox.mangaworld.SwatchInfo" />
     </data>
 
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/chapterListCard"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="5dp">
+        android:layout_margin="5dp"
+        app:cardBackgroundColor="@{swatch.rgb}"
+        tools:cardBackgroundColor="@sample/sample_colors">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -31,7 +37,9 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                tools:text="@tools:sample/full_names" />
+                app:titleColor="@{swatch}"
+                tools:text="@tools:sample/full_names"
+                tools:textColor="@sample/sample_colors" />
 
             <TextView
                 android:id="@+id/uploadedInfo"
@@ -39,9 +47,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@{chapter.uploaded}"
+                app:bodyColor="@{swatch}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/chapterName"
-                tools:text="@tools:sample/date/mmddyy" />
+                tools:text="@tools:sample/date/mmddyy"
+                tools:textColor="@sample/sample_colors" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
