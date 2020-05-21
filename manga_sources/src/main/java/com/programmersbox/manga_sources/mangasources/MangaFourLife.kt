@@ -21,8 +21,7 @@ object MangaFourLife : MangaSource {
 
     override fun toInfoModel(model: MangaModel): MangaInfoModel {
         val doc = Jsoup.connect(model.mangaUrl).get()
-        val info = doc.select("div.list-group-item")
-        val description = info.last().text()
+        val description = doc.select("div.BoxBody > div.row").select("div.Content").text()
         val genres = "\"genre\":[^:]+(?=,|\$)".toRegex().find(doc.html())
             ?.groupValues?.get(0)?.removePrefix("\"genre\": ")?.fromJson<List<String>>().orEmpty()
         val altNames = "\"alternateName\":[^:]+(?=,|\$)".toRegex().find(doc.html())
