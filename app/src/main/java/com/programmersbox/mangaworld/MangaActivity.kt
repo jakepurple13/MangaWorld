@@ -17,6 +17,7 @@ import com.google.android.material.chip.ChipGroup
 import com.programmersbox.gsonutils.getObjectExtra
 import com.programmersbox.helpfulutils.ConstraintRange
 import com.programmersbox.helpfulutils.ItemRange
+import com.programmersbox.helpfulutils.addAll
 import com.programmersbox.loggingutils.Loged
 import com.programmersbox.manga_sources.mangasources.MangaInfoModel
 import com.programmersbox.manga_sources.mangasources.MangaModel
@@ -28,7 +29,7 @@ import kotlinx.coroutines.launch
 
 class MangaActivity : AppCompatActivity() {
 
-    private lateinit var range: ItemRange<String>
+    private var range: ItemRange<String> = ItemRange()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,7 +49,7 @@ class MangaActivity : AppCompatActivity() {
     private fun mangaSetup(mangaInfoModel: MangaInfoModel?, swatch: Palette.Swatch?) {
         Loged.r(mangaInfoModel)
         mangaInfoModel?.let { manga ->
-            range = ItemRange(manga.title, *manga.alternativeNames.toTypedArray())
+            range.itemList.addAll(manga.title, *manga.alternativeNames.toTypedArray())
             swatch?.rgb?.let { mangaInfoLayout.setBackgroundColor(it) }
             mangaInfoChapterList.adapter = ChapterListAdapter(dataList = manga.chapters.toMutableList(), context = this, swatch = swatch)
         }

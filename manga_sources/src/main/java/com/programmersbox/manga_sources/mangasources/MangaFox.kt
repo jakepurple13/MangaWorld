@@ -4,7 +4,7 @@ import org.jsoup.Jsoup
 
 object MangaFox : MangaSource {
 
-    private val url = "http://mangafox.me"
+    private const val url = "http://mangafox.me"
 
     override fun getManga(pageNumber: Int): List<MangaModel> {
         val doc = Jsoup.connect("$url/manga/").get()
