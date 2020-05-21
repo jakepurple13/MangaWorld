@@ -1,9 +1,8 @@
 package com.programmersbox.mangaworld
 
-import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.programmersbox.gsonutils.fromJson
+import com.programmersbox.gsonutils.getObjectExtra
 import com.programmersbox.manga_sources.mangasources.ChapterModel
 import com.programmersbox.mangaworld.adapters.PageAdapter
 import kotlinx.android.synthetic.main.activity_read.*
@@ -20,8 +19,8 @@ class ReadActivity : AppCompatActivity() {
 
         pageRV.adapter = adapter
 
-        var chapter = intent.getIntExtra("chapter", 1)
-        val chapters = intent.getObjectExtra<List<ChapterModel>>("nextChapter", null)
+        //var chapter = intent.getIntExtra("chapter", 1)
+        //val chapters = intent.getObjectExtra<List<ChapterModel>>("nextChapter", null)
 
         /*pageRV.addOnScrollListener(object : EndlessScrollingListener(pageRV.layoutManager!!) {
             override fun onLoadMore(page: Int, totalItemsCount: Int, view: RecyclerView?) {
@@ -34,15 +33,10 @@ class ReadActivity : AppCompatActivity() {
         })*/
 
         GlobalScope.launch {
-            val pages = chapters?.getOrNull(chapter)?.getPageInfo()?.pages.orEmpty()
+            //val pages = chapters?.getOrNull(chapter)?.getPageInfo()?.pages.orEmpty()
+            val pages = intent.getObjectExtra<ChapterModel>("currentChapter")?.getPageInfo()?.pages.orEmpty()
             runOnUiThread { adapter.addItems(pages) }
         }
 
-    }
-
-    private inline fun <reified T> Intent.getObjectExtra(key: String, defaultValue: T? = null): T? = try {
-        getStringExtra(key).fromJson<T>() ?: defaultValue
-    } catch (e: Exception) {
-        defaultValue
     }
 }

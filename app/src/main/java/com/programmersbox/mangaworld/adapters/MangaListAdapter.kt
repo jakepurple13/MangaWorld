@@ -3,7 +3,6 @@ package com.programmersbox.mangaworld.adapters
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
-import android.view.View
 import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.palette.graphics.Palette
@@ -19,13 +18,15 @@ import com.programmersbox.helpfulutils.layoutInflater
 import com.programmersbox.manga_sources.mangasources.MangaModel
 import com.programmersbox.mangaworld.MangaActivity
 import com.programmersbox.mangaworld.R
+import com.programmersbox.mangaworld.databinding.MangaListItemBinding
 import com.programmersbox.mangaworld.utils.usePalette
 import kotlinx.android.synthetic.main.manga_list_item.view.*
 
 class MangaListAdapter(private val context: Context) : DragSwipeAdapter<MangaModel, MangaHolder>() {
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MangaHolder =
-        MangaHolder(context.layoutInflater.inflate(R.layout.manga_list_item, parent, false))
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MangaHolder {
+        return MangaHolder(MangaListItemBinding.inflate(context.layoutInflater, parent, false))
+    }
 
     override fun MangaHolder.onBind(item: MangaModel, position: Int) {
 
@@ -47,8 +48,7 @@ class MangaListAdapter(private val context: Context) : DragSwipeAdapter<MangaMod
             range++
             true
         }
-        title.text = item.title
-        description.text = item.description
+        bind(item)
         cover.load(item.imageUrl) {
             size(360, 480)
             placeholder(R.mipmap.ic_launcher)
@@ -73,13 +73,17 @@ class MangaListAdapter(private val context: Context) : DragSwipeAdapter<MangaMod
             }
         }
     }
-
 }
 
-class MangaHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+class MangaHolder(private val binding: MangaListItemBinding) : RecyclerView.ViewHolder(binding.root) {
     val cover = itemView.mangaListCover!!
     val title = itemView.mangaListTitle!!
     val description = itemView.mangaListDescription!!
     val layout = itemView.mangaListLayout!!
     val constraintLayout = itemView.mangaListConstraintLayout!!
+
+    fun bind(item: MangaModel) {
+        binding.model = item
+        binding.executePendingBindings()
+    }
 }

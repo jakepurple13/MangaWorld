@@ -2,8 +2,11 @@ package com.programmersbox.mangaworld
 
 import android.content.res.ColorStateList
 import android.os.Bundle
+import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintSet
+import androidx.databinding.BindingAdapter
+import androidx.databinding.DataBindingUtil
 import androidx.palette.graphics.Palette
 import coil.api.load
 import com.google.android.material.chip.Chip
@@ -14,6 +17,7 @@ import com.programmersbox.loggingutils.Loged
 import com.programmersbox.manga_sources.mangasources.MangaInfoModel
 import com.programmersbox.manga_sources.mangasources.MangaModel
 import com.programmersbox.mangaworld.adapters.ChapterListAdapter
+import com.programmersbox.mangaworld.databinding.ActivityMangaBinding
 import kotlinx.android.synthetic.main.activity_manga.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -22,12 +26,15 @@ class MangaActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_manga)
-        val swatch = intent.getObjectExtra<Palette.Swatch>("swatch", null)
-        moreInfoSetup(swatch)
         GlobalScope.launch {
             val model = intent.getObjectExtra<MangaModel>("manga", null)?.toInfoModel()
-            runOnUiThread { mangaSetup(model, swatch) }
+            runOnUiThread {
+                val binding: ActivityMangaBinding = DataBindingUtil.setContentView(this@MangaActivity, R.layout.activity_manga)
+                val swatch = intent.getObjectExtra<Palette.Swatch>("swatch", null)
+                moreInfoSetup(swatch)
+                binding.info = model
+                mangaSetup(model, swatch)
+            }
         }
     }
 
@@ -37,14 +44,6 @@ class MangaActivity : AppCompatActivity() {
             swatch?.rgb?.let { mangaInfoLayout.setBackgroundColor(it) }
             swatch?.titleTextColor?.let { mangaInfoTitle.setTextColor(it) }
             swatch?.bodyTextColor?.let { mangaInfoDescription.setTextColor(it) }
-            mangaInfoTitle.text = manga.title
-            mangaInfoDescription.text = manga.description
-            mangaInfoCover.load(manga.imageUrl) {
-                size(360, 480)
-                placeholder(R.mipmap.ic_launcher)
-                error(R.mipmap.ic_launcher)
-                crossfade(true)
-            }
             manga.genres.forEach {
                 genreList.addView(Chip(this@MangaActivity).apply {
                     text = it
@@ -73,5 +72,14 @@ class MangaActivity : AppCompatActivity() {
         swatch?.rgb?.let { moreInfo.setBackgroundColor(it) }
         swatch?.titleTextColor?.let { moreInfo.setTextColor(it) }
     }
+}
 
+@BindingAdapter("coverImage")
+fun loadImage(view: ImageView, imageUrl: String) {
+    view.load(imageUrl) {
+        size(360, 480)
+        placeholder(R.mipmap.ic_launcher)
+        error(R.mipmap.ic_launcher)
+        crossfade(true)
+    }
 }

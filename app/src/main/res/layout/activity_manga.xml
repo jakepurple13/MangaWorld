@@ -1,114 +1,129 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:id="@+id/mangaInfoFullLayout"
-    tools:context=".MangaActivity">
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/mangaInfoLayout"
+    <data>
+
+        <variable
+            name="info"
+            type="com.programmersbox.manga_sources.mangasources.MangaInfoModel" />
+    </data>
+
+    <RelativeLayout
+        android:id="@+id/mangaInfoFullLayout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="5dp">
+        android:layout_height="match_parent"
+        tools:context=".MangaActivity">
 
-        <ImageView
-            android:id="@+id/mangaInfoCover"
-            android:layout_width="360px"
-            android:layout_height="480px"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:src="@tools:sample/avatars" />
-
-        <TextView
-            android:id="@+id/mangaInfoTitle"
-            style="@style/TextAppearance.MaterialComponents.Headline5"
-            android:layout_width="0dp"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/mangaInfoLayout"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center"
-            android:maxLines="2"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/mangaInfoCover"
-            app:layout_constraintTop_toTopOf="@id/mangaInfoCover"
-            tools:text="@tools:sample/full_names" />
+            android:layout_margin="5dp">
 
-        <HorizontalScrollView
-            android:id="@+id/genreListLayout"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/mangaInfoCover"
-            app:layout_constraintTop_toBottomOf="@id/mangaInfoTitle">
-
-            <com.google.android.material.chip.ChipGroup
-                android:id="@+id/genreList"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="5dp"
-                app:singleLine="true">
-
-                <com.google.android.material.chip.Chip
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Comedy"
-                    android:visibility="gone"
-                    tools:visibility="visible" />
-
-            </com.google.android.material.chip.ChipGroup>
-
-        </HorizontalScrollView>
-
-        <ScrollView
-            android:id="@+id/descriptionLayout"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_margin="5dp"
-            app:layout_constraintBottom_toBottomOf="@id/mangaInfoCover"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/mangaInfoCover"
-            app:layout_constraintTop_toBottomOf="@id/genreListLayout">
+            <ImageView
+                android:id="@+id/mangaInfoCover"
+                android:layout_width="360px"
+                android:layout_height="480px"
+                app:coverImage="@{info.imageUrl}"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:ignore="PxUsage"
+                tools:src="@tools:sample/avatars" />
 
             <TextView
-                android:id="@+id/mangaInfoDescription"
-                style="@style/TextAppearance.MaterialComponents.Body2"
-                android:layout_width="wrap_content"
+                android:id="@+id/mangaInfoTitle"
+                style="@style/TextAppearance.MaterialComponents.Headline5"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                tools:text="@tools:sample/lorem/random" />
+                android:maxLines="2"
+                android:text="@{info.title}"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/mangaInfoCover"
+                app:layout_constraintTop_toTopOf="@id/mangaInfoCover"
+                tools:text="@tools:sample/full_names" />
 
-        </ScrollView>
+            <HorizontalScrollView
+                android:id="@+id/genreListLayout"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/mangaInfoCover"
+                app:layout_constraintTop_toBottomOf="@id/mangaInfoTitle">
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/genreList"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="5dp"
+                    app:singleLine="true">
 
-    <LinearLayout
-        android:id="@+id/optionsBar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/mangaInfoLayout"
-        android:orientation="horizontal">
+                    <com.google.android.material.chip.Chip
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:visibility="gone"
+                        tools:text="Comedy"
+                        tools:visibility="visible" />
 
-    </LinearLayout>
+                </com.google.android.material.chip.ChipGroup>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/mangaInfoChapterList"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_above="@id/moreInfo"
-        android:layout_below="@id/optionsBar"
-        android:orientation="vertical"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        tools:listitem="@layout/chapter_list_item" />
+            </HorizontalScrollView>
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/moreInfo"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_margin="0dp"
-        android:insetBottom="0dp"
-        android:padding="0dp"
-        android:text="More Info"
-        app:cornerRadius="0dp" />
+            <ScrollView
+                android:id="@+id/descriptionLayout"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_margin="5dp"
+                app:layout_constraintBottom_toBottomOf="@id/mangaInfoCover"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/mangaInfoCover"
+                app:layout_constraintTop_toBottomOf="@id/genreListLayout">
 
-</RelativeLayout>
+                <TextView
+                    android:id="@+id/mangaInfoDescription"
+                    style="@style/TextAppearance.MaterialComponents.Body2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="@{info.description}"
+                    tools:text="@tools:sample/lorem/random" />
+
+            </ScrollView>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <LinearLayout
+            android:id="@+id/optionsBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/mangaInfoLayout"
+            android:orientation="horizontal">
+
+        </LinearLayout>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/mangaInfoChapterList"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@id/moreInfo"
+            android:layout_below="@id/optionsBar"
+            android:orientation="vertical"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            tools:listitem="@layout/chapter_list_item" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/moreInfo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_margin="0dp"
+            android:insetBottom="0dp"
+            android:padding="0dp"
+            android:text="More Info"
+            app:cornerRadius="0dp"
+            tools:ignore="HardcodedText" />
+
+    </RelativeLayout>
+</layout>

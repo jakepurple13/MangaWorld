@@ -1,59 +1,73 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/mangaListLayout"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_margin="5dp"
-    tools:cardBackgroundColor="@sample/sample_colors"
     tools:showIn="@layout/activity_main">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/mangaListConstraintLayout"
+    <data>
+
+        <variable
+            name="model"
+            type="com.programmersbox.manga_sources.mangasources.MangaModel" />
+    </data>
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/mangaListLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="5dp">
+        android:layout_margin="5dp"
+        tools:cardBackgroundColor="@sample/sample_colors"
+        tools:showIn="@layout/activity_main">
 
-        <ImageView
-            android:id="@+id/mangaListCover"
-            android:layout_width="360px"
-            android:layout_height="480px"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:ignore="ContentDescription,PxUsage"
-            tools:src="@tools:sample/avatars" />
-
-        <TextView
-            android:id="@+id/mangaListTitle"
-            style="@style/TextAppearance.MaterialComponents.Headline5"
-            android:layout_width="0dp"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/mangaListConstraintLayout"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="5dp"
-            android:gravity="center"
-            android:maxLines="3"
-            app:layout_constraintBottom_toTopOf="@id/mangaListDescription"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/mangaListCover"
-            app:layout_constraintTop_toTopOf="@id/mangaListCover"
-            tools:text="@tools:sample/full_names"
-            tools:textColor="@sample/sample_colors" />
+            android:layout_margin="5dp">
 
-        <TextView
-            android:id="@+id/mangaListDescription"
-            style="@style/TextAppearance.MaterialComponents.Body2"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_marginStart="5dp"
-            android:gravity="center"
-            app:layout_constraintBottom_toBottomOf="@id/mangaListCover"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/mangaListCover"
-            app:layout_constraintTop_toBottomOf="@id/mangaListTitle"
-            tools:text="@tools:sample/lorem/random"
-            tools:textColor="@sample/sample_colors" />
+            <ImageView
+                android:id="@+id/mangaListCover"
+                android:layout_width="360px"
+                android:layout_height="480px"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:ignore="ContentDescription,PxUsage"
+                tools:src="@tools:sample/avatars" />
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+            <TextView
+                android:id="@+id/mangaListTitle"
+                style="@style/TextAppearance.MaterialComponents.Headline5"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="5dp"
+                android:gravity="center"
+                android:maxLines="3"
+                android:text="@{model.title}"
+                app:layout_constraintBottom_toTopOf="@id/mangaListDescription"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/mangaListCover"
+                app:layout_constraintTop_toTopOf="@id/mangaListCover"
+                tools:text="@tools:sample/full_names"
+                tools:textColor="@sample/sample_colors" />
 
-</com.google.android.material.card.MaterialCardView>
+            <TextView
+                android:id="@+id/mangaListDescription"
+                style="@style/TextAppearance.MaterialComponents.Body2"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_marginStart="5dp"
+                android:gravity="center"
+                android:text="@{model.description}"
+                app:layout_constraintBottom_toBottomOf="@id/mangaListCover"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/mangaListCover"
+                app:layout_constraintTop_toBottomOf="@id/mangaListTitle"
+                tools:text="@tools:sample/lorem/random"
+                tools:textColor="@sample/sample_colors" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+
+</layout>
