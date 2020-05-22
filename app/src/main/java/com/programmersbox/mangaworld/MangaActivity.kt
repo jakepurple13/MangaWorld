@@ -6,6 +6,7 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.databinding.BindingAdapter
 import androidx.databinding.DataBindingUtil
@@ -15,9 +16,9 @@ import coil.api.load
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import com.programmersbox.gsonutils.getObjectExtra
-import com.programmersbox.helpfulutils.ConstraintRange
 import com.programmersbox.helpfulutils.ItemRange
 import com.programmersbox.helpfulutils.addAll
+import com.programmersbox.helpfulutils.animateChildren
 import com.programmersbox.loggingutils.Loged
 import com.programmersbox.manga_sources.mangasources.MangaInfoModel
 import com.programmersbox.manga_sources.mangasources.MangaModel
@@ -61,15 +62,51 @@ class MangaActivity : AppCompatActivity() {
     }
 
     private fun moreInfoSetup(swatch: Palette.Swatch?) {
-        var range = ConstraintRange(
-            mangaInfoLayout,
-            ConstraintSet().apply { clone(mangaInfoLayout) },
-            ConstraintSet().apply { clone(this@MangaActivity, R.layout.manga_info_layout_alt) }
+        var set = ConstraintRangeSet(
+            mangaInfoFullLayout,
+            ConstraintRanges(
+                mangaInfoFullLayout,
+                ConstraintSet().apply { clone(mangaInfoFullLayout) },
+                ConstraintSet().apply { clone(this@MangaActivity, R.layout.activity_manga_alt) }
+            ),
+            ConstraintRanges(
+                mangaInfoLayout,
+                ConstraintSet().apply { clone(mangaInfoLayout) },
+                ConstraintSet().apply { clone(this@MangaActivity, R.layout.manga_info_layout_alt) }
+            )
         )
-        moreInfo.setOnClickListener { range++ }
+        moreInfo.setOnClickListener { set++ }
         swatch?.rgb?.let { moreInfo.setBackgroundColor(it) }
         swatch?.titleTextColor?.let { moreInfo.setTextColor(it) }
     }
+
+    private class ConstraintRangeSet(private val rootLayout: ConstraintLayout, vararg items: ConstraintRanges, loop: Boolean = true) :
+        ItemRange<ConstraintRanges>(*items, loop = loop) {
+        override operator fun inc(): ConstraintRangeSet {
+            super.inc()
+            rootLayout.animateChildren {
+                itemList.forEach {
+                    it.inc()
+                    it.item.applyTo(it.layout)
+                }
+            }
+            return this
+        }
+
+        override operator fun dec(): ConstraintRangeSet {
+            super.dec()
+            rootLayout.animateChildren {
+                itemList.forEach {
+                    it.dec()
+                    it.item.applyTo(it.layout)
+                }
+            }
+            return this
+        }
+    }
+
+    private class ConstraintRanges(val layout: ConstraintLayout, vararg items: ConstraintSet, loop: Boolean = true) :
+        ItemRange<ConstraintSet>(*items, loop = loop)
 }
 
 @BindingAdapter("coverImage")
