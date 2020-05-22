@@ -5,6 +5,10 @@ import androidx.appcompat.app.AppCompatActivity
 import com.programmersbox.gsonutils.getObjectExtra
 import com.programmersbox.manga_sources.mangasources.ChapterModel
 import com.programmersbox.mangaworld.adapters.PageAdapter
+import com.veinhorn.scrollgalleryview.MediaInfo
+import com.veinhorn.scrollgalleryview.ScrollGalleryView
+import com.veinhorn.scrollgalleryview.builder.GallerySettings
+import com.veinhorn.scrollgalleryview.loader.GlideImageLoader
 import kotlinx.android.synthetic.main.activity_read.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -19,9 +23,28 @@ class ReadActivity : AppCompatActivity() {
 
         pageRV.adapter = adapter
 
+        val g = ScrollGalleryView.from(galleryView)
+            .settings(
+                GallerySettings
+                    .from(supportFragmentManager)
+                    .thumbnailSize(100)
+                    .enableZoom(true)
+                    .build()
+            )
+            .onImageLongClickListener { println("Downloading $it...") }
+            .build()
+            .hideThumbnailsOnClick(true)
+            .hideThumbnailsAfter(2500)
+
         GlobalScope.launch {
             val pages = intent.getObjectExtra<ChapterModel>("currentChapter")?.getPageInfo()?.pages.orEmpty()
-            runOnUiThread { adapter.addItems(pages) }
+                .map { MediaInfo.mediaLoader(GlideImageLoader(it)) }
+            //GlideImageLoader(it)
+            runOnUiThread {
+                //adapter.addItems(pages)
+                //testImage.load(pages[0])
+                g.addMedia(pages)
+            }
         }
 
     }

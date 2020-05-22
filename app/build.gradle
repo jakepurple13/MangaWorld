@@ -59,6 +59,11 @@ dependencies {
     implementation "io.coil-kt:coil:0.11.0"
     implementation 'androidx.palette:palette:1.0.0'
 
+    //implementation 'com.veinhorn.scrollgalleryview:library:1.2.6'
+    implementation project(':library')
+    //implementation 'com.veinhorn.scrollgalleryview:glide-loader:1.2.4'
+    //implementation 'com.veinhorn.scrollgalleryview:picasso-loader:1.2.7'
+
     implementation project(':manga_sources')
 
     implementation "com.github.jakepurple13.HelpfulTools:flowutils:$jakepurple13"

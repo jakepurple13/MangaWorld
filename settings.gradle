@@ -1,3 +1,4 @@
+include ':library'
 include ':manga_sources'
 include ':app'
 rootProject.name = "Manga World"
