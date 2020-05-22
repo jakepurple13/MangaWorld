@@ -24,9 +24,9 @@
             android:id="@+id/mangaInfoLayout"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toTopOf="@id/moreInfo"
             android:layout_margin="5dp"
+            app:layout_constraintBottom_toTopOf="@id/optionsBar"
+            app:layout_constraintTop_toTopOf="parent"
             tools:background="@sample/sample_colors">
 
             <ImageView
@@ -143,14 +143,27 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <LinearLayout
-            android:visibility="gone"
-            app:layout_constraintTop_toBottomOf="@id/mangaInfoLayout"
-            app:layout_constraintBottom_toTopOf="@id/mangaInfoChapterList"
             android:id="@+id/optionsBar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/mangaInfoLayout"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            app:layout_constraintBottom_toTopOf="@id/mangaInfoChapterList"
+            app:layout_constraintTop_toBottomOf="@id/mangaInfoLayout">
+
+            <com.airbnb.lottie.LottieAnimationView
+                android:id="@+id/favoriteManga"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:lottie_loop="true"
+                app:lottie_rawRes="@raw/heart"
+                app:tint="#ffffff" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Add To Favorites"
+                tools:ignore="HardcodedText" />
 
         </LinearLayout>
 
@@ -160,11 +173,11 @@
             android:layout_height="0dp"
             android:layout_above="@id/moreInfo"
             android:layout_below="@id/optionsBar"
-            android:visibility="gone"
-            app:layout_constraintTop_toBottomOf="@id/optionsBar"
-            app:layout_constraintBottom_toTopOf="@id/moreInfo"
             android:orientation="vertical"
+            android:visibility="gone"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            app:layout_constraintBottom_toTopOf="@id/moreInfo"
+            app:layout_constraintTop_toBottomOf="@id/optionsBar"
             tools:listitem="@layout/chapter_list_item" />
 
         <com.google.android.material.button.MaterialButton
@@ -172,12 +185,12 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
-            app:layout_constraintBottom_toBottomOf="parent"
             android:layout_margin="0dp"
             android:insetBottom="0dp"
             android:padding="0dp"
             android:text="More Info"
             app:cornerRadius="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
             tools:backgroundTint="@sample/sample_colors"
             tools:ignore="HardcodedText"
             tools:textColor="@sample/sample_colors" />

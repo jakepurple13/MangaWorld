@@ -1,9 +1,14 @@
 package com.programmersbox.mangaworld
 
+import android.animation.ValueAnimator
 import android.content.res.ColorStateList
+import android.graphics.Color
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
 import android.os.Bundle
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
@@ -12,8 +17,13 @@ import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModel
 import androidx.palette.graphics.Palette
 import coil.api.load
+import com.airbnb.lottie.LottieAnimationView
+import com.airbnb.lottie.LottieProperty
+import com.airbnb.lottie.model.KeyPath
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
+import com.programmersbox.flowutils.collectOnUi
+import com.programmersbox.flowutils.invoke
 import com.programmersbox.gsonutils.getObjectExtra
 import com.programmersbox.helpfulutils.ItemRange
 import com.programmersbox.helpfulutils.addAll
@@ -25,11 +35,16 @@ import com.programmersbox.mangaworld.adapters.ChapterListAdapter
 import com.programmersbox.mangaworld.databinding.ActivityMangaBinding
 import kotlinx.android.synthetic.main.activity_manga.*
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 class MangaActivity : AppCompatActivity() {
 
     private var range: ItemRange<String> = ItemRange()
+
+    @Suppress("EXPERIMENTAL_API_USAGE")
+    private var isFavorite = MutableStateFlow(false)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,9 +58,23 @@ class MangaActivity : AppCompatActivity() {
                 binding.swatch = SwatchInfo(swatch?.rgb, swatch?.titleTextColor, swatch?.bodyTextColor)
                 binding.presenter = this@MangaActivity
                 mangaSetup(model, swatch)
+                favoriteManga.changeTint(swatch?.rgb ?: Color.WHITE)
+                isFavorite
+                    .map { if (it) 1f else 0f }
+                    .map { ValueAnimator.ofFloat(favoriteManga.progress, it) }
+                    .collectOnUi {
+                        it.addUpdateListener { animation: ValueAnimator -> favoriteManga.progress = animation.animatedValue as Float }
+                        it.start()
+                    }
+                isFavorite.collectOnUi { favoriteInfo.text = if (it) "Remove from Favorites" else "Add to Favorites" }
+                isFavorite.collectOnUi { Toast.makeText(this@MangaActivity, "Work in Progress...", Toast.LENGTH_SHORT).show() }
+                favoriteManga.setOnClickListener { isFavorite(!isFavorite()) }
             }
         }
     }
+
+    private fun LottieAnimationView.changeTint(newColor: Int) =
+        addValueCallback(KeyPath("**"), LottieProperty.COLOR_FILTER) { PorterDuffColorFilter(newColor, PorterDuff.Mode.SRC_ATOP) }
 
     private fun mangaSetup(mangaInfoModel: MangaInfoModel?, swatch: Palette.Swatch?) {
         Loged.r(mangaInfoModel)
