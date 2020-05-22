@@ -21,7 +21,6 @@ import androidx.transition.Transition;
 import androidx.transition.TransitionManager;
 import androidx.viewpager.widget.ViewPager;
 
-import com.programmersbox.loggingutils.Loged;
 import com.veinhorn.scrollgalleryview.builder.GalleryBuilder;
 import com.veinhorn.scrollgalleryview.builder.GalleryBuilderImpl;
 import com.veinhorn.scrollgalleryview.loader.MediaLoader;
@@ -342,7 +341,6 @@ public class ScrollGalleryView extends LinearLayout {
     }
 
     public static GalleryBuilder from(ScrollGalleryView galleryView) {
-        Loged.e("Hello from the other side");
         return new GalleryBuilderImpl(galleryView);
     }
 
