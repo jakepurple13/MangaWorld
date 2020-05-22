@@ -10,7 +10,6 @@ import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.RequestOptions
 import com.bumptech.glide.request.target.Target
-import com.veinhorn.scrollgalleryview.R
 import com.veinhorn.scrollgalleryview.loader.MediaLoader.SuccessCallback
 
 
@@ -22,8 +21,7 @@ class GlideImageLoader : MediaLoader {
 
     constructor(url: String) {
         this.url = url
-        requestOptions = RequestOptions()
-            .placeholder(R.drawable.placeholder_image)
+        requestOptions = RequestOptions()//.placeholder(R.drawable.placeholder_image)
     }
 
     constructor(url: String, width: Int, height: Int) {
@@ -31,7 +29,7 @@ class GlideImageLoader : MediaLoader {
         this.width = width
         this.height = height
         requestOptions = RequestOptions()
-            .placeholder(R.drawable.placeholder_image)
+            //.placeholder(R.drawable.placeholder_image)
             .override(width, height)
     }
 

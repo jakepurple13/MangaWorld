@@ -1,12 +1,11 @@
 package com.veinhorn.scrollgalleryview.loader
 
-import android.R
 import android.content.Context
 import android.widget.ImageView
 import com.squareup.picasso.Callback
 import com.squareup.picasso.Picasso
+import com.veinhorn.scrollgalleryview.R
 import com.veinhorn.scrollgalleryview.loader.MediaLoader.SuccessCallback
-
 
 /**
  * Created by veinhorn on 2/4/18.
@@ -33,7 +32,7 @@ class PicassoImageLoader : MediaLoader {
     override fun loadMedia(context: Context, imageView: ImageView, callback: SuccessCallback) {
         Picasso.get()
             .load(url)
-            .placeholder(R.mipmap.sym_def_app_icon)
+            .placeholder(R.drawable.placeholder_image)
             .into(imageView, ImageCallback(callback))
     }
 
@@ -48,7 +47,7 @@ class PicassoImageLoader : MediaLoader {
                 thumbnailWidth ?: 100,
                 thumbnailHeight ?: 100
             )
-            .placeholder(R.mipmap.sym_def_app_icon)
+            .placeholder(R.drawable.placeholder_image)
             .centerInside()
             .into(thumbnailView, ImageCallback(callback))
     }
