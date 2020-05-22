@@ -68,7 +68,12 @@ class MangaActivity : AppCompatActivity() {
                     }
                 isFavorite.collectOnUi { favoriteInfo.text = if (it) "Remove from Favorites" else "Add to Favorites" }
                 isFavorite.collectOnUi { Toast.makeText(this@MangaActivity, "Work in Progress...", Toast.LENGTH_SHORT).show() }
+                //on this click you will send the request to favorite or unfavorite
+                //on reply, update isFavorite
+                //OR
+                //change isFavorite here and when this activity is opened, get the response from wherever to check if this is in favorite
                 favoriteManga.setOnClickListener { isFavorite(!isFavorite()) }
+                favoriteInfo.setOnClickListener { favoriteManga.performClick() }
             }
         }
     }
