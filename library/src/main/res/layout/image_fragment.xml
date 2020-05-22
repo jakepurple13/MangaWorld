@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
@@ -11,4 +11,16 @@
         android:layout_gravity="center"
         android:scaleType="fitCenter"
         android:src="@drawable/placeholder_image" />
-</LinearLayout>
+
+    <ProgressBar
+        android:id="@+id/loadingBar"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_alignStart="@id/photoView"
+        android:layout_alignLeft="@id/photoView"
+        android:layout_alignTop="@id/photoView"
+        android:layout_alignEnd="@id/photoView"
+        android:layout_alignRight="@id/photoView"
+        android:layout_alignBottom="@id/photoView" />
+
+</RelativeLayout>

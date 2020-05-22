@@ -5,8 +5,10 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 
 import com.github.chrisbanes.photoview.PhotoView;
@@ -21,6 +23,7 @@ public class ImageFragment extends Fragment {
 
     private HackyViewPager viewPager;
     private PhotoView photoView;
+    private ProgressBar loadingBar;
 
     private ScrollGalleryView.OnImageClickListener onImageClickListener;
     private ScrollGalleryView.OnImageLongClickListener onImageLongClickListener;
@@ -47,25 +50,18 @@ public class ImageFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         View rootView = inflater.inflate(R.layout.image_fragment, container, false);
+        loadingBar = rootView.findViewById(R.id.loadingBar);
         photoView = rootView.findViewById(R.id.photoView);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
             photoView.setTransitionName(transitionName);
         if (onImageClickListener != null) {
-            photoView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    onImageClickListener.onClick(getPosition());
-                }
-            });
+            photoView.setOnClickListener(view -> onImageClickListener.onClick(getPosition()));
         }
         if (onImageLongClickListener != null) {
-            photoView.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View v) {
-                    onImageLongClickListener.onClick(getPosition());
-                    return true;
-                }
+            photoView.setOnLongClickListener(v -> {
+                onImageLongClickListener.onClick(getPosition());
+                return true;
             });
         }
 
@@ -88,8 +84,10 @@ public class ImageFragment extends Fragment {
     private void loadImageToView() {
         if (mMediaInfo != null) {
             mMediaInfo.getLoader().loadMedia(getActivity(), photoView, new MediaLoader.SuccessCallback() {
+                @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
                 @Override
                 public void onSuccess() {
+                    loadingBar.animate().alpha(0f).withEndAction(() -> loadingBar.setVisibility(View.GONE)).start();
                 }
             });
         }
