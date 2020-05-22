@@ -2,7 +2,6 @@ package com.programmersbox.mangaworld
 
 import android.content.res.ColorStateList
 import android.os.Bundle
-import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -42,6 +41,7 @@ class MangaActivity : AppCompatActivity() {
                 moreInfoSetup(swatch)
                 binding.info = model
                 binding.swatch = SwatchInfo(swatch?.rgb, swatch?.titleTextColor, swatch?.bodyTextColor)
+                binding.presenter = this@MangaActivity
                 mangaSetup(model, swatch)
             }
         }
@@ -56,7 +56,7 @@ class MangaActivity : AppCompatActivity() {
         }
     }
 
-    fun titles(view: View) {
+    fun titles() {
         range++
         mangaInfoTitle.text = range.item
     }
