@@ -12,6 +12,7 @@ import com.programmersbox.helpfulutils.setEnumSingleChoiceItems
 import com.programmersbox.manga_sources.mangasources.MangaModel
 import com.programmersbox.manga_sources.mangasources.Sources
 import com.programmersbox.mangaworld.adapters.MangaListAdapter
+import com.programmersbox.mangaworld.utils.currentSource
 import com.programmersbox.mangaworld.views.EndlessScrollingListener
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.GlobalScope
@@ -24,7 +25,6 @@ class MainActivity : AppCompatActivity() {
     private val adapter = MangaListAdapter(this)
 
     private var pageNumber = 1
-    private var source = Sources.values().random()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,7 +41,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun loadNewManga() {
         GlobalScope.launch {
-            mangaList.addAll(source().getManga(pageNumber++))
+            mangaList.addAll(currentSource!!().getManga(pageNumber++))
             runOnUiThread { adapter.addItems(mangaList) }
         }
     }
@@ -52,7 +52,7 @@ class MainActivity : AppCompatActivity() {
 
         mangaRV.addOnScrollListener(object : EndlessScrollingListener(mangaRV.layoutManager!!) {
             override fun onLoadMore(page: Int, totalItemsCount: Int, view: RecyclerView?) {
-                if (source().hasMorePages && search_info.text.isNullOrEmpty()) loadNewManga()
+                if (currentSource!!().hasMorePages && search_info.text.isNullOrEmpty()) loadNewManga()
             }
         })
     }
@@ -61,11 +61,11 @@ class MainActivity : AppCompatActivity() {
         changeSources.setOnClickListener {
             MaterialAlertDialogBuilder(this)
                 .setTitle("Choose a Source")
-                .setEnumSingleChoiceItems(Sources.values().map(Sources::name).toTypedArray(), source) { source, dialog ->
+                .setEnumSingleChoiceItems(Sources.values().map(Sources::name).toTypedArray(), currentSource!!) { source, dialog ->
                     mangaList.clear()
                     adapter.setListNotify(mangaList)
-                    this.source = source
-                    search_layout.hint = "Search ${this.source.name}"
+                    currentSource = source
+                    search_layout.hint = "Search ${currentSource!!.name}"
                     pageNumber = 1
                     loadNewManga()
                     dialog.dismiss()
@@ -75,8 +75,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun searchSetup() {
-        search_layout.hint = "Search ${this.source.name}"
-        search_info.doOnTextChanged { text, _, _, _ -> adapter.setListNotify(source().searchManga(text.toString(), pageNumber, mangaList)) }
+        search_layout.hint = "Search ${currentSource!!.name}"
+        search_info.doOnTextChanged { text, _, _, _ -> adapter.setListNotify(currentSource!!().searchManga(text.toString(), pageNumber, mangaList)) }
         /*val searching = MutableStateFlow("")
         searching
             .debounce(500)

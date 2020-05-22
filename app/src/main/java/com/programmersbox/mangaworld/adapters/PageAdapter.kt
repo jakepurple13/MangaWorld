@@ -6,44 +6,40 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import coil.api.load
 import com.programmersbox.dragswipe.DragSwipeAdapter
+import com.programmersbox.helpfulutils.gone
 import com.programmersbox.helpfulutils.layoutInflater
+import com.programmersbox.helpfulutils.visible
 import com.programmersbox.mangaworld.R
 import kotlinx.android.synthetic.main.page_item.view.*
 
-class PageAdapter(private val context: Context, dataList: MutableList<String>) : DragSwipeAdapter<String, PageViewHolder>(dataList) {
+class PageAdapter(private val context: Context, dataList: MutableList<String>) : DragSwipeAdapter<String, PageHolder>(dataList) {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PageHolder =
+        PageHolder(context.layoutInflater.inflate(R.layout.page_item, parent, false))
 
-    override fun getItemCount(): Int = super.getItemCount() + 1
-
-    override fun getItemViewType(position: Int): Int = when (position) {
-        dataList.size + 1 -> 0
-        else -> 1
-    }
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PageViewHolder = when (viewType) {
-        0 -> PageLoadingHolder(context.layoutInflater.inflate(R.layout.page_item, parent, false))
-        else -> PageHolder(context.layoutInflater.inflate(R.layout.page_item, parent, false))
-    }
-
-    override fun onBindViewHolder(holder: PageViewHolder, position: Int) = holder.render(dataList.getOrNull(position))
-    override fun PageViewHolder.onBind(item: String, position: Int) = Unit//render(item)
-
+    override fun PageHolder.onBind(item: String, position: Int) = render(item)
 }
 
-abstract class PageViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-    abstract fun render(item: String?)
-}
-
-class PageHolder(itemView: View) : PageViewHolder(itemView) {
+class PageHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     private val image = itemView.chapterPage!!
+    private val loading = itemView.loading!!
 
-    override fun render(item: String?) {
+    fun render(item: String?) {
         image.load(item) {
             error(android.R.drawable.ic_delete)
+            target(
+                onSuccess = {
+                    image.setImageDrawable(it)
+                    loading.gone()
+                },
+                onError = {
+                    image.setImageDrawable(it)
+                    loading.gone()
+                },
+                onStart = {
+                    image.setImageDrawable(it)
+                    loading.visible()
+                }
+            )
         }
     }
-}
-
-class PageLoadingHolder(itemView: View) : PageViewHolder(itemView) {
-    //private val loading = itemView.pageLoading!!
-    override fun render(item: String?) = Unit
 }

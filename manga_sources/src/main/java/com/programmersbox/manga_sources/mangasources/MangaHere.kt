@@ -19,7 +19,7 @@ object MangaHere : MangaSource {
                 imageUrl = it.select("img.manga-list-1-cover")?.first()?.attr("src") ?: "",
                 source = Sources.MANGA_HERE
             )
-        }.filter { it.title.isNotEmpty() }.sortedBy(MangaModel::title)
+        }.filter { it.title.isNotEmpty() }
 
     override fun toInfoModel(model: MangaModel): MangaInfoModel {
         val doc = Jsoup.connect(model.mangaUrl).get()

@@ -1,10 +1,7 @@
 package com.programmersbox.manga_sources
 
 import com.programmersbox.gsonutils.getApi
-import com.programmersbox.manga_sources.mangasources.INKR
-import com.programmersbox.manga_sources.mangasources.MangaFourLife
-import com.programmersbox.manga_sources.mangasources.MangaFox
-import com.programmersbox.manga_sources.mangasources.MangaHere
+import com.programmersbox.manga_sources.mangasources.*
 import org.jsoup.Jsoup
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -50,8 +47,6 @@ class ExampleUnitTest {
         println(d)
         val s = d.chapters.random().getPageInfo()
         println(s)
-        //val p = INKR.decodeMri(getApi(s.pages.first())!!)
-        //println(p)
     }
 
     @Test
@@ -68,6 +63,18 @@ class ExampleUnitTest {
     fun other() {
         val f = getApi("https://mangarock.com//query/android500/info?oid=mrs-serie-200307933&Country=")
         println(f)
+    }
+
+    @Test
+    fun dog() {
+        //val f1 = getApi("https://mangadog.club/index/latestupdate/getUpdateResult?page=1")
+        //println(f1)
+        val f = MangaDog.getManga()
+        println(f.size)
+        val d = f.first().toInfoModel()
+        println(d)
+        val s = d.chapters.random().getPageInfo()
+        println(s)
     }
 
 }

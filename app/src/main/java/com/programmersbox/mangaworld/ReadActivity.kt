@@ -19,25 +19,9 @@ class ReadActivity : AppCompatActivity() {
 
         pageRV.adapter = adapter
 
-        //var chapter = intent.getIntExtra("chapter", 1)
-        //val chapters = intent.getObjectExtra<List<ChapterModel>>("nextChapter", null)
-
-        /*pageRV.addOnScrollListener(object : EndlessScrollingListener(pageRV.layoutManager!!) {
-            override fun onLoadMore(page: Int, totalItemsCount: Int, view: RecyclerView?) {
-                GlobalScope.launch {
-                    chapter++
-                    val pages = chapters?.getOrNull(chapter)?.getPageInfo()?.pages.orEmpty()
-                    runOnUiThread { adapter.addItems(pages) }
-                }
-            }
-        })*/
-
         GlobalScope.launch {
-            //val pages = chapters?.getOrNull(chapter)?.getPageInfo()?.pages.orEmpty()
             val pages = intent.getObjectExtra<ChapterModel>("currentChapter")?.getPageInfo()?.pages.orEmpty()
-            runOnUiThread {
-                adapter.addItems(pages)
-            }
+            runOnUiThread { adapter.addItems(pages) }
         }
 
     }

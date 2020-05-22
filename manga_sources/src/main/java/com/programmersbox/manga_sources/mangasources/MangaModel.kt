@@ -19,6 +19,7 @@ data class MangaModel(
     val imageUrl: String,
     val source: Sources
 ) : ViewModel() {
+    internal val extras = mutableMapOf<String, Any>()
     fun toInfoModel() = source.source().toInfoModel(this)
 }
 
