@@ -1,5 +1,6 @@
 package com.programmersbox.manga_sources.mangasources
 
+import android.annotation.SuppressLint
 import com.programmersbox.gsonutils.getJsonApi
 import org.jsoup.Jsoup
 import java.text.SimpleDateFormat
@@ -15,13 +16,14 @@ object MangaDog : MangaSource {
         ?.map {
             MangaModel(
                 title = it.name.toString(),
-                description = it.name.toString(),
+                description = "Last Updated: ${it.last_update_time}",
                 mangaUrl = "/detail/${it.search_name}/${it.id}.html",
                 imageUrl = "$cdn${it.image?.replace("\\/", "/")}",
                 source = Sources.MANGA_DOG
             ).apply { extras["comic_id"] = it.comic_id.toString() }
         }.orEmpty()
 
+    @SuppressLint("DefaultLocale")
     override fun toInfoModel(model: MangaModel): MangaInfoModel {
         val doc = Jsoup.connect("$baseUrl/${model.mangaUrl}").get()
 
@@ -38,9 +40,11 @@ object MangaDog : MangaSource {
                         name = it.name.toString(),
                         url = "$baseUrl/read/read/${it.search_name}/${it.comic_id}.html",
                         uploaded = try {
-                            SimpleDateFormat("MM/dd/yyyy hh:mm a", Locale.getDefault()).format(it.create_date.toString())
+                            SimpleDateFormat("MM/dd/yyyy hh:mm a", Locale.getDefault()).format(
+                                SimpleDateFormat("yyyy-MM-dd", Locale.US).parse(it.create_date.toString())?.time
+                            )
                         } catch (e: Exception) {
-                            ""
+                            it.create_date.toString()
                         },
                         sources = Sources.MANGA_DOG
                     )
