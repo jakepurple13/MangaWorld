@@ -8,7 +8,6 @@ import android.graphics.PorterDuffColorFilter
 import android.os.Bundle
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
@@ -29,10 +28,17 @@ import com.programmersbox.helpfulutils.ItemRange
 import com.programmersbox.helpfulutils.addAll
 import com.programmersbox.helpfulutils.animateChildren
 import com.programmersbox.loggingutils.Loged
+import com.programmersbox.manga_db.MangaDatabase
 import com.programmersbox.manga_sources.mangasources.MangaInfoModel
 import com.programmersbox.manga_sources.mangasources.MangaModel
 import com.programmersbox.mangaworld.adapters.ChapterListAdapter
 import com.programmersbox.mangaworld.databinding.ActivityMangaBinding
+import com.programmersbox.mangaworld.utils.toMangaDbModel
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.addTo
+import io.reactivex.rxkotlin.subscribeBy
+import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_manga.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -43,13 +49,19 @@ class MangaActivity : AppCompatActivity() {
 
     private var range: ItemRange<String> = ItemRange()
 
+    private val disposable = CompositeDisposable()
+
     @Suppress("EXPERIMENTAL_API_USAGE")
     private var isFavorite = MutableStateFlow(false)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val dao = MangaDatabase.getInstance(this).mangaDao()
+
         GlobalScope.launch {
-            val model = intent.getObjectExtra<MangaModel>("manga", null)?.toInfoModel()
+            val manga = intent.getObjectExtra<MangaModel>("manga", null)
+            val model = manga?.toInfoModel()
             runOnUiThread {
                 val binding: ActivityMangaBinding = DataBindingUtil.setContentView(this@MangaActivity, R.layout.activity_manga)
                 val swatch = intent.getObjectExtra<Palette.Swatch>("swatch", null)
@@ -59,6 +71,15 @@ class MangaActivity : AppCompatActivity() {
                 binding.presenter = this@MangaActivity
                 mangaSetup(model, swatch)
                 favoriteManga.changeTint(swatch?.rgb ?: Color.WHITE)
+
+                manga?.mangaUrl?.let {
+                    dao.getMangaById(it)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribeBy(onSuccess = { isFavorite(true) }, onError = { isFavorite(false) })
+                        .addTo(disposable)
+                }
+
                 isFavorite
                     .map { if (it) 1f else 0f }
                     .map { ValueAnimator.ofFloat(favoriteManga.progress, it) }
@@ -67,12 +88,21 @@ class MangaActivity : AppCompatActivity() {
                         it.start()
                     }
                 isFavorite.collectOnUi { favoriteInfo.text = if (it) "Remove from Favorites" else "Add to Favorites" }
-                isFavorite.collectOnUi { Toast.makeText(this@MangaActivity, "Work in Progress...", Toast.LENGTH_SHORT).show() }
-                //on this click you will send the request to favorite or unfavorite
-                //on reply, update isFavorite
-                //OR
-                //change isFavorite here and when this activity is opened, get the response from wherever to check if this is in favorite
-                favoriteManga.setOnClickListener { isFavorite(!isFavorite()) }
+                favoriteManga.setOnClickListener {
+                    if (isFavorite()) {
+                        manga?.toMangaDbModel()
+                            ?.let { it1 -> dao.deleteManga(it1) }
+                            ?.subscribeOn(Schedulers.io())
+                            ?.observeOn(AndroidSchedulers.mainThread())
+                            ?.subscribe { isFavorite(false) }
+                    } else if (!isFavorite()) {
+                        manga?.toMangaDbModel()
+                            ?.let { dao.insertManga(it) }
+                            ?.subscribeOn(Schedulers.io())
+                            ?.observeOn(AndroidSchedulers.mainThread())
+                            ?.subscribe { isFavorite(true) }
+                    }
+                }
                 favoriteInfo.setOnClickListener { favoriteManga.performClick() }
             }
         }

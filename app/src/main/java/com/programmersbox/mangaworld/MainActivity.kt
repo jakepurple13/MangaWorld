@@ -1,6 +1,7 @@
 package com.programmersbox.mangaworld
 
 import android.Manifest
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -37,6 +38,7 @@ class MainActivity : AppCompatActivity() {
         searchSetup()
         sourceChangeSetup()
         rvSetup()
+        viewFavorites.setOnClickListener { startActivity(Intent(this, FavoriteActivity::class.java)) }
     }
 
     private fun loadNewManga() {
