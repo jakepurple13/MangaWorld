@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.programmersbox.manga_db.MangaDatabase
 import com.programmersbox.manga_db.MangaDbModel
+import com.programmersbox.manga_sources.mangasources.MangaModel
 import com.programmersbox.mangaworld.adapters.MangaListAdapter
 import com.programmersbox.mangaworld.utils.toMangaModel
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -26,9 +27,14 @@ class FavoriteActivity : AppCompatActivity() {
         MangaDatabase.getInstance(this).mangaDao().getAllManga()
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .map { it.map(MangaDbModel::toMangaModel) }
+            .map { it.map(MangaDbModel::toMangaModel).sortedBy(MangaModel::title) }
             .subscribe(adapter::setListNotify)
             .addTo(disposable)
 
+    }
+
+    override fun onDestroy() {
+        disposable.dispose()
+        super.onDestroy()
     }
 }

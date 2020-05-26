@@ -24,9 +24,7 @@ import com.google.android.material.chip.ChipGroup
 import com.programmersbox.flowutils.collectOnUi
 import com.programmersbox.flowutils.invoke
 import com.programmersbox.gsonutils.getObjectExtra
-import com.programmersbox.helpfulutils.ItemRange
-import com.programmersbox.helpfulutils.addAll
-import com.programmersbox.helpfulutils.animateChildren
+import com.programmersbox.helpfulutils.*
 import com.programmersbox.loggingutils.Loged
 import com.programmersbox.manga_db.MangaDatabase
 import com.programmersbox.manga_sources.mangasources.MangaInfoModel
@@ -44,6 +42,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import me.zhanghai.android.fastscroll.FastScrollerBuilder
 
 class MangaActivity : AppCompatActivity() {
 
@@ -117,6 +116,13 @@ class MangaActivity : AppCompatActivity() {
             range.itemList.addAll(manga.title, *manga.alternativeNames.toTypedArray())
             swatch?.rgb?.let { mangaInfoLayout.setBackgroundColor(it) }
             mangaInfoChapterList.adapter = ChapterListAdapter(dataList = manga.chapters.toMutableList(), context = this, swatch = swatch)
+            FastScrollerBuilder(mangaInfoChapterList)
+                .useMd2Style()
+                .whatIfNotNull(getDrawable(R.drawable.afs_md2_thumb)) { drawable ->
+                    swatch?.rgb?.let { drawable.changeDrawableColor(it) }
+                    setThumbDrawable(drawable)
+                }
+                .build()
         }
     }
 
@@ -171,6 +177,11 @@ class MangaActivity : AppCompatActivity() {
 
     private class ConstraintRanges(val layout: ConstraintLayout, vararg items: ConstraintSet, loop: Boolean = true) :
         ItemRange<ConstraintSet>(*items, loop = loop)
+
+    override fun onDestroy() {
+        disposable.dispose()
+        super.onDestroy()
+    }
 }
 
 @BindingAdapter("coverImage")

@@ -8,32 +8,20 @@ import com.programmersbox.manga_sources.mangasources.Sources
 
 class Converters {
     @TypeConverter
-    fun fromChapterModel(value: List<ChapterModel>): String {
-        return value.toJson()
-    }
+    fun fromChapterModel(value: List<ChapterModel>): String = value.toJson()
 
     @TypeConverter
-    fun stringToChapterModel(value: String): List<ChapterModel>? {
-        return value.fromJson<List<ChapterModel>>()
-    }
+    fun stringToChapterModel(value: String): List<ChapterModel>? = value.fromJson<List<ChapterModel>>()
 
     @TypeConverter
-    fun fromList(value: List<String>): String {
-        return value.toJson()
-    }
+    fun fromList(value: List<String>): String = value.toJson()
 
     @TypeConverter
-    fun toList(value: String): List<String>? {
-        return value.fromJson<List<String>>()
-    }
+    fun toList(value: String): List<String>? = value.fromJson<List<String>>()
 
     @TypeConverter
-    fun fromSource(value: Sources): String {
-        return value.toJson()
-    }
+    fun fromSource(value: Sources): String = value.toJson()
 
     @TypeConverter
-    fun toSource(value: String): Sources? {
-        return value.fromJson<Sources>()
-    }
+    fun toSource(value: String): Sources? = value.fromJson<Sources>()
 }
