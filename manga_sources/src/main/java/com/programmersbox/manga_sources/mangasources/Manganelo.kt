@@ -14,7 +14,7 @@ object Manganelo : MangaSource {
     //.toMangaModel()
 
     override fun getManga(pageNumber: Int): List<MangaModel> =
-        Jsoup.connect("https://m.manganelo.com/advanced_search?s=all&orby=az&page=$pageNumber").get().toMangaModel()
+        Jsoup.connect("https://m.manganelo.com/advanced_search?s=all&page=$pageNumber").get().toMangaModel()
 
     private fun Document.toMangaModel() = select("div.content-genres-item").map {
         MangaModel(
