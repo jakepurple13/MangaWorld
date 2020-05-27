@@ -17,6 +17,7 @@ import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import com.programmersbox.flowutils.collectOnUi
 import com.programmersbox.flowutils.invoke
+import com.programmersbox.gsonutils.getObjectExtra
 import com.programmersbox.helpfulutils.*
 import com.programmersbox.loggingutils.Loged
 import com.programmersbox.manga_db.MangaDatabase
@@ -24,7 +25,6 @@ import com.programmersbox.manga_sources.mangasources.MangaInfoModel
 import com.programmersbox.manga_sources.mangasources.MangaModel
 import com.programmersbox.mangaworld.adapters.ChapterListAdapter
 import com.programmersbox.mangaworld.databinding.ActivityMangaBinding
-import com.programmersbox.mangaworld.utils.intentDelegate
 import com.programmersbox.mangaworld.utils.toMangaDbModel
 import com.programmersbox.mangaworld.utils.usePalette
 import com.programmersbox.thirdpartyutils.changeTint
@@ -42,11 +42,8 @@ import me.zhanghai.android.fastscroll.FastScrollerBuilder
 
 class MangaActivity : AppCompatActivity() {
 
-    private val manga: MangaModel? by intentDelegate()
-    private val intentSwatch: Palette.Swatch? by intentDelegate("swatch")
-
+    private val dao by lazy { MangaDatabase.getInstance(this).mangaDao() }
     private var range: ItemRange<String> = ItemRange()
-
     private val disposable = CompositeDisposable()
 
     @Suppress("EXPERIMENTAL_API_USAGE")
@@ -54,57 +51,75 @@ class MangaActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val binding: ActivityMangaBinding = DataBindingUtil.setContentView(this@MangaActivity, R.layout.activity_manga)
 
-        val dao = MangaDatabase.getInstance(this).mangaDao()
+        val manga = intent.getObjectExtra<MangaModel>("manga", null)
 
+        isFavorite.collectOnUi { favoriteManga.check(it) }
+        isFavorite.collectOnUi { favoriteInfo.text = if (it) "Remove from Favorites" else "Add to Favorites" }
+
+        favoriteInfo.setOnClickListener { favoriteManga.performClick() }
+
+        loadMangaInfo(binding, manga)
+    }
+
+    private fun loadMangaInfo(binding: ActivityMangaBinding, manga: MangaModel?) {
         GlobalScope.launch {
             val model = manga?.toInfoModel()
             runOnUiThread {
-                val binding: ActivityMangaBinding = DataBindingUtil.setContentView(this@MangaActivity, R.layout.activity_manga)
-                val swatch = if (usePalette) intentSwatch else null
+                val swatch = if (usePalette) intent.getObjectExtra<Palette.Swatch>("swatch", null) else null
                 moreInfoSetup(swatch)
                 binding.info = model
                 binding.swatch = swatch?.let { SwatchInfo(it.rgb, it.titleTextColor, it.bodyTextColor) }
                 binding.presenter = this@MangaActivity
                 mangaSetup(model, swatch)
                 favoriteManga.changeTint(swatch?.rgb ?: Color.WHITE)
-
-                manga?.mangaUrl?.let {
-                    dao.getMangaById(it)
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribeBy(onSuccess = { isFavorite(true) }, onError = { isFavorite(false) })
-                        .addTo(disposable)
-                }
-
-                isFavorite.collectOnUi { favoriteManga.check(it) }
-                isFavorite.collectOnUi { favoriteInfo.text = if (it) "Remove from Favorites" else "Add to Favorites" }
-                favoriteManga.setOnClickListener {
-                    manga?.toMangaDbModel()
-                        ?.let { it1 -> if (isFavorite()) dao.deleteManga(it1) else if (!isFavorite()) dao.insertManga(it1) else null }
-                        ?.subscribeOn(Schedulers.io())
-                        ?.observeOn(AndroidSchedulers.mainThread())
-                        ?.subscribe { isFavorite(!isFavorite()) }
-                }
-                favoriteInfo.setOnClickListener { favoriteManga.performClick() }
+                dbLoad(manga)
             }
         }
     }
 
-    private fun mangaSetup(mangaInfoModel: MangaInfoModel?, swatch: Palette.Swatch?) {
-        Loged.r(mangaInfoModel)
-        mangaInfoModel?.let { manga ->
-            range.itemList.addAll(manga.title, *manga.alternativeNames.toTypedArray())
-            swatch?.rgb?.let { mangaInfoLayout.setBackgroundColor(it) }
-            mangaInfoChapterList.adapter = ChapterListAdapter(dataList = manga.chapters.toMutableList(), context = this, swatch = swatch)
-            FastScrollerBuilder(mangaInfoChapterList)
-                .useMd2Style()
-                .whatIfNotNull(getDrawable(R.drawable.afs_md2_thumb)) { drawable ->
-                    swatch?.rgb?.let { drawable.changeDrawableColor(it) }
-                    setThumbDrawable(drawable)
-                }
-                .build()
+    private fun dbLoad(manga: MangaModel?) {
+        favoriteManga.setOnClickListener {
+            manga?.toMangaDbModel()
+                ?.let { it1 -> if (isFavorite()) dao.deleteManga(it1) else if (!isFavorite()) dao.insertManga(it1) else null }
+                ?.subscribeOn(Schedulers.io())
+                ?.observeOn(AndroidSchedulers.mainThread())
+                ?.subscribe { isFavorite(!isFavorite()) }
         }
+
+        manga?.mangaUrl?.let {
+            dao.getMangaById(it)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeBy(onSuccess = { isFavorite(true) }, onError = { isFavorite(false) })
+                .addTo(disposable)
+        }
+    }
+
+    private fun mangaSetup(mangaInfoModel: MangaInfoModel?, swatch: Palette.Swatch?) {
+        GlobalScope.launch {
+            val read = mangaInfoModel?.mangaUrl?.let { dao.getReadChaptersByIdNonFlow(it) }
+            runOnUiThread {
+                Loged.r(mangaInfoModel)
+                mangaInfoModel?.let { manga ->
+                    range.itemList.addAll(manga.title, *manga.alternativeNames.toTypedArray())
+                    swatch?.rgb?.let { mangaInfoLayout.setBackgroundColor(it) }
+                    mangaInfoChapterList.adapter = ChapterListAdapter(
+                        dataList = manga.chapters.toMutableList(), context = this@MangaActivity, swatch = swatch,
+                        mangaUrl = mangaInfoModel.mangaUrl, dao = dao, chapters = read
+                    )
+                    FastScrollerBuilder(mangaInfoChapterList)
+                        .useMd2Style()
+                        .whatIfNotNull(getDrawable(R.drawable.afs_md2_thumb)) { drawable ->
+                            swatch?.rgb?.let { drawable.changeDrawableColor(it) }
+                            setThumbDrawable(drawable)
+                        }
+                        .build()
+                }
+            }
+        }
+
     }
 
     fun titles() {
@@ -166,7 +181,7 @@ class MangaActivity : AppCompatActivity() {
 }
 
 @BindingAdapter("coverImage")
-fun loadImage(view: ImageView, imageUrl: String) {
+fun loadImage(view: ImageView, imageUrl: String?) {
     view.load(imageUrl) {
         size(360, 480)
         placeholder(R.mipmap.ic_launcher)
@@ -176,13 +191,13 @@ fun loadImage(view: ImageView, imageUrl: String) {
 }
 
 @BindingAdapter("otherNames")
-fun otherNames(view: TextView, names: List<String>) {
-    view.text = names.joinToString("\n\n")
+fun otherNames(view: TextView, names: List<String>?) {
+    view.text = names?.joinToString("\n\n")
 }
 
 @BindingAdapter("genreList", "swatch")
-fun loadGenres(view: ChipGroup, genres: List<String>, swatchInfo: SwatchInfo?) {
-    genres.forEach {
+fun loadGenres(view: ChipGroup, genres: List<String>?, swatchInfo: SwatchInfo?) {
+    genres?.forEach {
         view.addView(Chip(view.context).apply {
             text = it
             isCheckable = false

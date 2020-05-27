@@ -36,4 +36,16 @@ interface MangaDao {
     @Query("SELECT * FROM FavoriteManga")
     fun getAllManga(): Flowable<List<MangaDbModel>>
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insertChapter(chapter: MangaReadChapter): Completable
+
+    @Delete
+    fun deleteChapter(chapter: MangaReadChapter): Completable
+
+    @Query("SELECT * FROM ChaptersRead WHERE mangaUrl = :url")
+    fun getReadChaptersById(url: String): Flowable<List<MangaReadChapter>>
+
+    @Query("SELECT * FROM ChaptersRead WHERE mangaUrl = :url")
+    fun getReadChaptersByIdNonFlow(url: String): List<MangaReadChapter>
+
 }

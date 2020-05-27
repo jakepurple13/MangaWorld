@@ -20,3 +20,13 @@ data class MangaDbModel(
     val source: Sources
 )
 
+@Entity(tableName = "ChaptersRead")
+data class MangaReadChapter(
+    @PrimaryKey
+    @ColumnInfo(name = "url")
+    val url: String,
+    @ColumnInfo(name = "name")
+    val name: String,
+    @ColumnInfo(name = "mangaUrl")
+    val mangaUrl: String
+)

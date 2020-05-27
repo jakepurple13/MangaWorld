@@ -6,7 +6,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 
-@Database(entities = [MangaDbModel::class], version = 1)
+@Database(entities = [MangaDbModel::class, MangaReadChapter::class], version = 1)
 @TypeConverters(Converters::class)
 abstract class MangaDatabase : RoomDatabase() {
 

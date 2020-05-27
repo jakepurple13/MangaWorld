@@ -28,6 +28,19 @@
             android:layout_height="wrap_content"
             android:layout_margin="5dp">
 
+            <CheckBox
+                android:id="@+id/readChapter"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:gravity="top"
+                app:checkedButtonTint="@{swatch}"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/chapterName"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@id/chapterName"
+                tools:checked="true"
+                tools:checkedButtonTint="@sample/sample_colors" />
+
             <TextView
                 android:id="@+id/chapterName"
                 style="@style/TextAppearance.MaterialComponents.Body1"
@@ -35,7 +48,7 @@
                 android:layout_height="wrap_content"
                 android:text="@{chapter.name}"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintStart_toEndOf="@id/readChapter"
                 app:layout_constraintTop_toTopOf="parent"
                 app:titleColor="@{swatch}"
                 tools:text="@tools:sample/full_names"
