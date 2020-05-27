@@ -25,8 +25,7 @@ class SettingsActivity : AppCompatActivity() {
         preferencesAdapter.setRootScreen(createRootScreen())
         //preferencesAdapter.onScreenChangeListener = this
         // Restore adapter state from saved state
-        savedInstanceState?.getParcelable<PreferencesAdapter.SavedState>("adapter")
-            ?.let(preferencesAdapter::loadSavedState)
+        savedInstanceState?.getParcelable<PreferencesAdapter.SavedState>("adapter")?.let(preferencesAdapter::loadSavedState)
     }
 
     private fun createRootScreen() = screen(this) {

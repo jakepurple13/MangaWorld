@@ -98,8 +98,7 @@
                 <com.google.android.material.chip.ChipGroup
                     android:id="@+id/genreList"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="5dp"
+                    android:layout_height="match_parent"
                     app:genreList="@{info.genres}"
                     app:singleLine="true"
                     app:swatch="@{swatch}">

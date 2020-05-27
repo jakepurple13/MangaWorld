@@ -1,10 +1,7 @@
 package com.programmersbox.mangaworld
 
-import android.animation.ValueAnimator
 import android.content.res.ColorStateList
 import android.graphics.Color
-import android.graphics.PorterDuff
-import android.graphics.PorterDuffColorFilter
 import android.os.Bundle
 import android.widget.ImageView
 import android.widget.TextView
@@ -16,14 +13,10 @@ import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModel
 import androidx.palette.graphics.Palette
 import coil.api.load
-import com.airbnb.lottie.LottieAnimationView
-import com.airbnb.lottie.LottieProperty
-import com.airbnb.lottie.model.KeyPath
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import com.programmersbox.flowutils.collectOnUi
 import com.programmersbox.flowutils.invoke
-import com.programmersbox.gsonutils.getObjectExtra
 import com.programmersbox.helpfulutils.*
 import com.programmersbox.loggingutils.Loged
 import com.programmersbox.manga_db.MangaDatabase
@@ -31,8 +24,11 @@ import com.programmersbox.manga_sources.mangasources.MangaInfoModel
 import com.programmersbox.manga_sources.mangasources.MangaModel
 import com.programmersbox.mangaworld.adapters.ChapterListAdapter
 import com.programmersbox.mangaworld.databinding.ActivityMangaBinding
+import com.programmersbox.mangaworld.utils.intentDelegate
 import com.programmersbox.mangaworld.utils.toMangaDbModel
 import com.programmersbox.mangaworld.utils.usePalette
+import com.programmersbox.thirdpartyutils.changeTint
+import com.programmersbox.thirdpartyutils.check
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
@@ -41,11 +37,13 @@ import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_manga.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import me.zhanghai.android.fastscroll.FastScrollerBuilder
 
 class MangaActivity : AppCompatActivity() {
+
+    private val manga: MangaModel? by intentDelegate()
+    private val intentSwatch: Palette.Swatch? by intentDelegate("swatch")
 
     private var range: ItemRange<String> = ItemRange()
 
@@ -57,16 +55,13 @@ class MangaActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        println("Are we using palette? $usePalette\n${defaultSharedPref.all.entries.joinToString("\n") { "${it.key} = ${it.value}" }}")
-
         val dao = MangaDatabase.getInstance(this).mangaDao()
 
         GlobalScope.launch {
-            val manga = intent.getObjectExtra<MangaModel>("manga", null)
             val model = manga?.toInfoModel()
             runOnUiThread {
                 val binding: ActivityMangaBinding = DataBindingUtil.setContentView(this@MangaActivity, R.layout.activity_manga)
-                val swatch = if (usePalette) intent.getObjectExtra<Palette.Swatch>("swatch", null) else null
+                val swatch = if (usePalette) intentSwatch else null
                 moreInfoSetup(swatch)
                 binding.info = model
                 binding.swatch = swatch?.let { SwatchInfo(it.rgb, it.titleTextColor, it.bodyTextColor) }
@@ -82,37 +77,19 @@ class MangaActivity : AppCompatActivity() {
                         .addTo(disposable)
                 }
 
-                isFavorite
-                    .map { if (it) 1f else 0f }
-                    .map { ValueAnimator.ofFloat(favoriteManga.progress, it) }
-                    .collectOnUi {
-                        it.addUpdateListener { animation: ValueAnimator -> favoriteManga.progress = animation.animatedValue as Float }
-                        it.start()
-                    }
-
+                isFavorite.collectOnUi { favoriteManga.check(it) }
                 isFavorite.collectOnUi { favoriteInfo.text = if (it) "Remove from Favorites" else "Add to Favorites" }
                 favoriteManga.setOnClickListener {
-                    if (isFavorite()) {
-                        manga?.toMangaDbModel()
-                            ?.let { it1 -> dao.deleteManga(it1) }
-                            ?.subscribeOn(Schedulers.io())
-                            ?.observeOn(AndroidSchedulers.mainThread())
-                            ?.subscribe { isFavorite(false) }
-                    } else if (!isFavorite()) {
-                        manga?.toMangaDbModel()
-                            ?.let { dao.insertManga(it) }
-                            ?.subscribeOn(Schedulers.io())
-                            ?.observeOn(AndroidSchedulers.mainThread())
-                            ?.subscribe { isFavorite(true) }
-                    }
+                    manga?.toMangaDbModel()
+                        ?.let { it1 -> if (isFavorite()) dao.deleteManga(it1) else if (!isFavorite()) dao.insertManga(it1) else null }
+                        ?.subscribeOn(Schedulers.io())
+                        ?.observeOn(AndroidSchedulers.mainThread())
+                        ?.subscribe { isFavorite(!isFavorite()) }
                 }
                 favoriteInfo.setOnClickListener { favoriteManga.performClick() }
             }
         }
     }
-
-    private fun LottieAnimationView.changeTint(newColor: Int) =
-        addValueCallback(KeyPath("**"), LottieProperty.COLOR_FILTER) { PorterDuffColorFilter(newColor, PorterDuff.Mode.SRC_ATOP) }
 
     private fun mangaSetup(mangaInfoModel: MangaInfoModel?, swatch: Palette.Swatch?) {
         Loged.r(mangaInfoModel)

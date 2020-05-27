@@ -19,6 +19,9 @@ interface MangaDao {
     @Query("SELECT * FROM FavoriteManga WHERE mangaUrl = :url")
     fun getMangaById(url: String): Single<MangaDbModel>
 
+    @Update
+    fun updateMangaById(model: MangaDbModel): Completable
+
     /**
      * Insert a user in the database. If the user already exists, replace it.
 
