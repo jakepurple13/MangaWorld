@@ -49,9 +49,9 @@
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/search_layout"
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                    app:endIconMode="clear_text"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    app:endIconMode="clear_text">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/search_info"
@@ -73,6 +73,15 @@
         android:layout_gravity="bottom|end"
         android:layout_margin="5dp"
         android:src="@android:drawable/ic_input_add"
+        app:layout_behavior="@string/hide_bottom_view_on_scroll_behavior" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/viewSettings"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:src="@android:drawable/ic_menu_preferences"
+        android:layout_gravity="bottom|start"
         app:layout_behavior="@string/hide_bottom_view_on_scroll_behavior" />
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton

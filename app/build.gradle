@@ -65,6 +65,7 @@ dependencies {
     implementation 'com.jakewharton.rxbinding2:rxbinding:2.2.0'
     implementation 'com.jakewharton.rxbinding2:rxbinding-kotlin:2.2.0'
     implementation 'me.zhanghai.android.fastscroll:library:1.1.4'
+    implementation 'de.Maxr1998.android:modernpreferences:0.5.6'
 
     implementation project(':library')
     implementation project(':manga_db')

@@ -22,9 +22,7 @@ import kotlinx.coroutines.launch
 class MainActivity : AppCompatActivity() {
 
     private val mangaList = mutableListOf<MangaModel>()
-
     private val adapter = MangaListAdapter(this)
-
     private var pageNumber = 1
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,12 +37,14 @@ class MainActivity : AppCompatActivity() {
         sourceChangeSetup()
         rvSetup()
         viewFavorites.setOnClickListener { startActivity(Intent(this, FavoriteActivity::class.java)) }
+        viewSettings.setOnClickListener { startActivity(Intent(this, SettingsActivity::class.java)) }
     }
 
     private fun loadNewManga() {
         GlobalScope.launch {
-            mangaList.addAll(currentSource!!().getManga(pageNumber++))
-            runOnUiThread { adapter.addItems(mangaList) }
+            val list = currentSource!!().getManga(pageNumber++).toList()
+            mangaList.addAll(list)
+            runOnUiThread { adapter.addItems(list) }
         }
     }
 

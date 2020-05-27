@@ -32,6 +32,7 @@ import com.programmersbox.manga_sources.mangasources.MangaModel
 import com.programmersbox.mangaworld.adapters.ChapterListAdapter
 import com.programmersbox.mangaworld.databinding.ActivityMangaBinding
 import com.programmersbox.mangaworld.utils.toMangaDbModel
+import com.programmersbox.mangaworld.utils.usePalette
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
@@ -56,6 +57,8 @@ class MangaActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        println("Are we using palette? $usePalette\n${defaultSharedPref.all.entries.joinToString("\n") { "${it.key} = ${it.value}" }}")
+
         val dao = MangaDatabase.getInstance(this).mangaDao()
 
         GlobalScope.launch {
@@ -63,10 +66,10 @@ class MangaActivity : AppCompatActivity() {
             val model = manga?.toInfoModel()
             runOnUiThread {
                 val binding: ActivityMangaBinding = DataBindingUtil.setContentView(this@MangaActivity, R.layout.activity_manga)
-                val swatch = intent.getObjectExtra<Palette.Swatch>("swatch", null)
+                val swatch = if (usePalette) intent.getObjectExtra<Palette.Swatch>("swatch", null) else null
                 moreInfoSetup(swatch)
                 binding.info = model
-                binding.swatch = SwatchInfo(swatch?.rgb, swatch?.titleTextColor, swatch?.bodyTextColor)
+                binding.swatch = swatch?.let { SwatchInfo(it.rgb, it.titleTextColor, it.bodyTextColor) }
                 binding.presenter = this@MangaActivity
                 mangaSetup(model, swatch)
                 favoriteManga.changeTint(swatch?.rgb ?: Color.WHITE)
@@ -86,6 +89,7 @@ class MangaActivity : AppCompatActivity() {
                         it.addUpdateListener { animation: ValueAnimator -> favoriteManga.progress = animation.animatedValue as Float }
                         it.start()
                     }
+
                 isFavorite.collectOnUi { favoriteInfo.text = if (it) "Remove from Favorites" else "Add to Favorites" }
                 favoriteManga.setOnClickListener {
                     if (isFavorite()) {
@@ -200,31 +204,31 @@ fun otherNames(view: TextView, names: List<String>) {
 }
 
 @BindingAdapter("genreList", "swatch")
-fun loadGenres(view: ChipGroup, genres: List<String>, swatchInfo: SwatchInfo) {
+fun loadGenres(view: ChipGroup, genres: List<String>, swatchInfo: SwatchInfo?) {
     genres.forEach {
         view.addView(Chip(view.context).apply {
             text = it
             isCheckable = false
             isClickable = false
-            swatchInfo.rgb?.let { setTextColor(it) }
-            swatchInfo.bodyColor?.let { chipBackgroundColor = ColorStateList.valueOf(it) }
+            swatchInfo?.rgb?.let { setTextColor(it) }
+            swatchInfo?.bodyColor?.let { chipBackgroundColor = ColorStateList.valueOf(it) }
         })
     }
 }
 
 @BindingAdapter("titleColor")
-fun titleColor(view: TextView, swatchInfo: SwatchInfo) {
-    swatchInfo.titleColor?.let { view.setTextColor(it) }
+fun titleColor(view: TextView, swatchInfo: SwatchInfo?) {
+    swatchInfo?.titleColor?.let { view.setTextColor(it) }
 }
 
 @BindingAdapter("bodyColor")
-fun bodyColor(view: TextView, swatchInfo: SwatchInfo) {
-    swatchInfo.bodyColor?.let { view.setTextColor(it) }
+fun bodyColor(view: TextView, swatchInfo: SwatchInfo?) {
+    swatchInfo?.bodyColor?.let { view.setTextColor(it) }
 }
 
 @BindingAdapter("linkColor")
-fun linkColor(view: TextView, swatchInfo: SwatchInfo) {
-    swatchInfo.bodyColor?.let { view.setLinkTextColor(it) }
+fun linkColor(view: TextView, swatchInfo: SwatchInfo?) {
+    swatchInfo?.bodyColor?.let { view.setLinkTextColor(it) }
 }
 
 data class SwatchInfo(val rgb: Int?, val titleColor: Int?, val bodyColor: Int?) : ViewModel()

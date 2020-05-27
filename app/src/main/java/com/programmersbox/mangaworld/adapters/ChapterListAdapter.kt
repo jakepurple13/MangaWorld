@@ -16,11 +16,13 @@ import com.programmersbox.mangaworld.databinding.ChapterListItemBinding
 class ChapterListAdapter(private val context: Context, dataList: MutableList<ChapterModel>, private val swatch: Palette.Swatch?) :
     DragSwipeAdapter<ChapterModel, ChapterHolder>(dataList) {
 
+    private val info = swatch?.let { SwatchInfo(it.rgb, it.titleTextColor, it.bodyTextColor) }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChapterHolder =
         ChapterHolder(ChapterListItemBinding.inflate(context.layoutInflater, parent, false))
 
     override fun ChapterHolder.onBind(item: ChapterModel, position: Int) {
-        bind(item, SwatchInfo(swatch?.rgb, swatch?.titleTextColor, swatch?.bodyTextColor))
+        bind(item, info)
         itemView.setOnClickListener {
             context.startActivity(
                 Intent(context, ReadActivity::class.java).apply {
@@ -34,7 +36,7 @@ class ChapterListAdapter(private val context: Context, dataList: MutableList<Cha
 }
 
 class ChapterHolder(private val binding: ChapterListItemBinding) : RecyclerView.ViewHolder(binding.root) {
-    fun bind(item: ChapterModel, swatchInfo: SwatchInfo) {
+    fun bind(item: ChapterModel, swatchInfo: SwatchInfo?) {
         binding.chapter = item
         binding.swatch = swatchInfo
         binding.executePendingBindings()
