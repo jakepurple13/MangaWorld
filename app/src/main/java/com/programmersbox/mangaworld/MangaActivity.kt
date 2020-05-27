@@ -25,6 +25,7 @@ import com.programmersbox.manga_sources.mangasources.MangaInfoModel
 import com.programmersbox.manga_sources.mangasources.MangaModel
 import com.programmersbox.mangaworld.adapters.ChapterListAdapter
 import com.programmersbox.mangaworld.databinding.ActivityMangaBinding
+import com.programmersbox.mangaworld.utils.MangaInfoCache
 import com.programmersbox.mangaworld.utils.toMangaDbModel
 import com.programmersbox.mangaworld.utils.usePalette
 import com.programmersbox.thirdpartyutils.changeTint
@@ -65,7 +66,7 @@ class MangaActivity : AppCompatActivity() {
 
     private fun loadMangaInfo(binding: ActivityMangaBinding, manga: MangaModel?) {
         GlobalScope.launch {
-            val model = manga?.toInfoModel()
+            val model = MangaInfoCache.getInfo()?.find { it.mangaUrl == manga?.mangaUrl } ?: manga?.toInfoModel()?.also(MangaInfoCache::newInfo)
             runOnUiThread {
                 val swatch = if (usePalette) intent.getObjectExtra<Palette.Swatch>("swatch", null) else null
                 moreInfoSetup(swatch)

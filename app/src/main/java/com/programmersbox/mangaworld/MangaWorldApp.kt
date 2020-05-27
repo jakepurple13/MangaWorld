@@ -7,10 +7,12 @@ import com.programmersbox.helpfulutils.createNotificationChannel
 import com.programmersbox.helpfulutils.createNotificationGroup
 import com.programmersbox.helpfulutils.defaultSharedPrefName
 import com.programmersbox.loggingutils.Loged
+import com.programmersbox.mangaworld.utils.MangaInfoCache
 
 class MangaWorldApp : Application() {
     override fun onCreate() {
         super.onCreate()
+        MangaInfoCache.init(this)
         Loged.FILTER_BY_PACKAGE_NAME = "programmersbox"
         Loged.TAG = "MangaWorld"
         defaultSharedPrefName = "mangaworld"

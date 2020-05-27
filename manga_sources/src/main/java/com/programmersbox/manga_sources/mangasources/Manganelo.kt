@@ -14,7 +14,7 @@ object Manganelo : MangaSource {
     //.toMangaModel()
 
     override fun getManga(pageNumber: Int): List<MangaModel> =
-        Jsoup.connect("https://m.manganelo.com/advanced_search?s=all&page=$pageNumber").get().toMangaModel()
+        Jsoup.connect("https://m.manganelo.com/advanced_search?s=all&orby=newest&page=$pageNumber").get().toMangaModel()
 
     private fun Document.toMangaModel() = select("div.content-genres-item").map {
         MangaModel(
@@ -29,8 +29,8 @@ object Manganelo : MangaSource {
     override fun toInfoModel(model: MangaModel): MangaInfoModel {
         val doc = Jsoup.connect(model.mangaUrl).get()
         val info = doc.select("tbody").select("tr").select("td.table-value")
-        val name = info[0].select("td.table-value").map { it.text() }
-        val genre = info[3].select("td.table-value").select("a").map { it.text() }
+        val name = info.getOrNull(0)?.select("td.table-value")?.map { it.text() }.orEmpty()
+        val genre = info.getOrNull(3)?.select("td.table-value")?.select("a")?.map { it.text() }.orEmpty()
         val chapters = doc.select("ul.row-content-chapter").select("li.a-h").map {
             ChapterModel(
                 name = it.select("a.chapter-name").text(),
