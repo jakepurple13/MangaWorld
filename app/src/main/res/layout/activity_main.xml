@@ -13,15 +13,22 @@
         android:layout_below="@+id/search_info"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/mangaRV"
+        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+            android:id="@+id/refresh"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-            tools:itemCount="10"
-            tools:listitem="@layout/manga_list_item" />
+            android:layout_height="match_parent">
 
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/mangaRV"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:itemCount="10"
+                tools:listitem="@layout/manga_list_item" />
+
+        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <com.google.android.material.appbar.AppBarLayout
@@ -65,32 +72,15 @@
         </com.google.android.material.appbar.CollapsingToolbarLayout>
     </com.google.android.material.appbar.AppBarLayout>
 
-    <!--TODO: FAB-->
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/changeSources"
+    <!--FABs go here-->
+    <com.leinardi.android.speeddial.SpeedDialView
+        android:id="@+id/menuOptions"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
-        android:layout_margin="5dp"
-        android:src="@android:drawable/ic_input_add"
-        app:layout_behavior="@string/hide_bottom_view_on_scroll_behavior" />
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/viewSettings"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        android:src="@android:drawable/ic_menu_preferences"
-        android:layout_gravity="bottom|start"
-        app:layout_behavior="@string/hide_bottom_view_on_scroll_behavior" />
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/viewFavorites"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="8dp"
-        android:src="@android:drawable/star_off"
-        app:layout_anchor="@id/app_bar"
-        app:layout_anchorGravity="bottom|right|end" />
+        app:sdExpansionMode="top"
+        app:sdUseReverseAnimationOnClose="true"
+        app:layout_behavior="@string/speeddial_scrolling_view_snackbar_behavior"
+        app:sdMainFabClosedSrc="@android:drawable/ic_input_add" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

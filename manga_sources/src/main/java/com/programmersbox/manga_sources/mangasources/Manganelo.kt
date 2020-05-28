@@ -7,8 +7,7 @@ object Manganelo : MangaSource {
 
     override val hasMorePages: Boolean = true
 
-    override fun searchManga(searchText: CharSequence, pageNumber: Int, mangaList: List<MangaModel>): List<MangaModel> =
-        mangaList.filter { it.title.contains(searchText, true) }
+    //override fun searchManga(searchText: CharSequence, pageNumber: Int, mangaList: List<MangaModel>): List<MangaModel> =
     //TODO: Work on this
     //Jsoup.connect("https://m.manganelo.com/advanced_search?s=all&orby=az&page=$pageNumber&keyw=${searchText.replace(" ".toRegex(), "_")}").get()
     //.toMangaModel()

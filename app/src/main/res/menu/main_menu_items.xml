@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/viewFavoritesMenu"
+        android:icon="@android:drawable/star_on"
+        android:title="View Favorites" />
+
+    <item
+        android:id="@+id/changeSourcesMenu"
+        android:icon="@android:drawable/ic_input_add"
+        android:title="Change Source" />
+
+    <item
+        android:id="@+id/viewSettingsMenu"
+        android:icon="@android:drawable/ic_menu_preferences"
+        android:title="View Settings" />
+
+</menu>

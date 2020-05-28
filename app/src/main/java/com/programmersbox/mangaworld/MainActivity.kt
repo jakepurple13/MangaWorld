@@ -34,17 +34,51 @@ class MainActivity : AppCompatActivity() {
         }
 
         searchSetup()
-        sourceChangeSetup()
         rvSetup()
-        viewFavorites.setOnClickListener { startActivity(Intent(this, FavoriteActivity::class.java)) }
-        viewSettings.setOnClickListener { startActivity(Intent(this, SettingsActivity::class.java)) }
+        menuSetup()
+    }
+
+    private fun menuSetup() {
+        menuOptions.inflate(R.menu.main_menu_items)
+        menuOptions.setOnActionSelectedListener {
+            when (it.id) {
+                R.id.viewFavoritesMenu -> {
+                    startActivity(Intent(this, FavoriteActivity::class.java))
+                    menuOptions.close() // To close the Speed Dial with animation
+                    return@setOnActionSelectedListener true // false will close it without animation
+                }
+                R.id.viewSettingsMenu -> {
+                    startActivity(Intent(this, SettingsActivity::class.java))
+                    menuOptions.close() // To close the Speed Dial with animation
+                    return@setOnActionSelectedListener true // false will close it without animation
+                }
+                R.id.changeSourcesMenu -> {
+                    MaterialAlertDialogBuilder(this)
+                        .setTitle("Choose a Source")
+                        .setEnumSingleChoiceItems(Sources.values().map(Sources::name).toTypedArray(), currentSource) { source, dialog ->
+                            currentSource = source
+                            search_layout.hint = "Search ${currentSource.name}"
+                            reset()
+                            dialog.dismiss()
+                        }
+                        .show()
+                    menuOptions.close() // To close the Speed Dial with animation
+                    return@setOnActionSelectedListener true // false will close it without animation
+                }
+            }
+            false
+        }
     }
 
     private fun loadNewManga() {
+        refresh.isRefreshing = true
         GlobalScope.launch {
-            val list = currentSource!!().getManga(pageNumber++).toList()
+            val list = currentSource().getManga(pageNumber++).toList()
             mangaList.addAll(list)
-            runOnUiThread { adapter.addItems(list) }
+            runOnUiThread {
+                adapter.addItems(list)
+                refresh.isRefreshing = false
+            }
         }
     }
 
@@ -54,37 +88,29 @@ class MainActivity : AppCompatActivity() {
 
         mangaRV.addOnScrollListener(object : EndlessScrollingListener(mangaRV.layoutManager!!) {
             override fun onLoadMore(page: Int, totalItemsCount: Int, view: RecyclerView?) {
-                if (currentSource!!().hasMorePages && search_info.text.isNullOrEmpty()) loadNewManga()
+                if (currentSource().hasMorePages && search_info.text.isNullOrEmpty()) loadNewManga()
             }
         })
+
+        refresh.setOnRefreshListener { reset() }
     }
 
-    private fun sourceChangeSetup() {
-        changeSources.setOnClickListener {
-            MaterialAlertDialogBuilder(this)
-                .setTitle("Choose a Source")
-                .setEnumSingleChoiceItems(Sources.values().map(Sources::name).toTypedArray(), currentSource!!) { source, dialog ->
-                    mangaList.clear()
-                    adapter.setListNotify(mangaList)
-                    currentSource = source
-                    search_layout.hint = "Search ${currentSource!!.name}"
-                    pageNumber = 1
-                    loadNewManga()
-                    dialog.dismiss()
-                }
-                .show()
-        }
+    private fun reset() {
+        mangaList.clear()
+        adapter.setListNotify(mangaList)
+        pageNumber = 1
+        loadNewManga()
     }
 
     private fun searchSetup() {
-        search_layout.hint = "Search ${currentSource!!.name}"
-        search_info.doOnTextChanged { text, _, _, _ -> adapter.setListNotify(currentSource!!().searchManga(text.toString(), pageNumber, mangaList)) }
-        /*val searching = MutableStateFlow("")
+        search_layout.hint = "Search ${currentSource.name}"
+        search_info.doOnTextChanged { text, _, _, _ -> adapter.setListNotify(currentSource().searchManga(text.toString(), pageNumber, mangaList)) }
+        /*val searching = MutableStateFlow<CharSequence>("")
         searching
             .debounce(500)
-            .map { source().searchManga(it, pageNumber, mangaList) }
-            .collectOnUi { adapter.setListNotify(it) }*/
-        //search_info.doOnTextChanged { text, _, _, _ -> searching(text.toString()) }
+            .map { currentSource!!().searchManga(it, pageNumber, mangaList) }
+            .collectOnUi { adapter.setListNotify(it) }
+        search_info.doOnTextChanged { text, _, _, _ -> searching(text!!) }*/
     }
 
 }
