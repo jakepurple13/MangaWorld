@@ -8,10 +8,7 @@ import com.programmersbox.mangaworld.utils.cacheSize
 import com.programmersbox.mangaworld.utils.useCache
 import com.programmersbox.mangaworld.utils.usePalette
 import de.Maxr1998.modernpreferences.PreferencesAdapter
-import de.Maxr1998.modernpreferences.helpers.onSeek
-import de.Maxr1998.modernpreferences.helpers.screen
-import de.Maxr1998.modernpreferences.helpers.seekBar
-import de.Maxr1998.modernpreferences.helpers.switch
+import de.Maxr1998.modernpreferences.helpers.*
 import de.Maxr1998.modernpreferences.preferences.TwoStatePreference
 
 class SettingsActivity : AppCompatActivity() {
@@ -33,6 +30,7 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun createRootScreen() = screen(this) {
+        categoryHeader("settingsHeader") { title = "Settings" }
         switch("usePalette") {
             title = "Use Palette"
             iconRes = android.R.drawable.sym_def_app_icon
@@ -46,7 +44,6 @@ class SettingsActivity : AppCompatActivity() {
         }
         switch("useCache") {
             title = "Use Cache"
-            iconRes = android.R.drawable.sym_def_app_icon
             defaultValue = useCache
             checkedChangeListener = object : TwoStatePreference.OnCheckedChangeListener {
                 override fun onCheckedChanged(preference: TwoStatePreference, holder: PreferencesAdapter.ViewHolder?, checked: Boolean): Boolean {
