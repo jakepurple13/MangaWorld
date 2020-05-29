@@ -65,6 +65,10 @@ class MainActivity : AppCompatActivity() {
                     menuOptions.close() // To close the Speed Dial with animation
                     return@setOnActionSelectedListener true // false will close it without animation
                 }
+                R.id.checkForUpdates -> {
+                    val showCheck = Intent(this, UpdateCheckService::class.java)
+                    startService(showCheck)
+                }
             }
             false
         }

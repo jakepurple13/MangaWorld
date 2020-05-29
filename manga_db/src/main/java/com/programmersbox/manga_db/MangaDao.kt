@@ -36,6 +36,9 @@ interface MangaDao {
     @Query("SELECT * FROM FavoriteManga")
     fun getAllManga(): Flowable<List<MangaDbModel>>
 
+    @Query("SELECT * FROM FavoriteManga")
+    fun getAllMangaSync(): List<MangaDbModel>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertChapter(chapter: MangaReadChapter): Completable
 

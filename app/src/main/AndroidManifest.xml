@@ -13,6 +13,10 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
+        <service
+            android:name=".UpdateCheckService"
+            android:exported="false" />
+
         <activity android:name=".SettingsActivity" />
         <activity android:name=".FavoriteActivity" />
         <activity android:name=".ReadActivity" />

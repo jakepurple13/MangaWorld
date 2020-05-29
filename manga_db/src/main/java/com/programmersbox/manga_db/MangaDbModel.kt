@@ -17,7 +17,9 @@ data class MangaDbModel(
     @ColumnInfo(name = "imageUrl")
     val imageUrl: String,
     @ColumnInfo(name = "sources")
-    val source: Sources
+    val source: Sources,
+    @ColumnInfo(name = "numChapters", defaultValue = "0")
+    val numChapters: Int = 0
 )
 
 @Entity(tableName = "ChaptersRead")

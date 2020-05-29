@@ -16,4 +16,9 @@
         android:icon="@android:drawable/ic_menu_preferences"
         android:title="View Settings" />
 
+    <item
+        android:id="@+id/checkForUpdates"
+        android:icon="@mipmap/ic_launcher"
+        android:title="Check For Updates" />
+
 </menu>

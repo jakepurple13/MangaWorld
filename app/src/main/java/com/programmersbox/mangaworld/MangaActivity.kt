@@ -15,6 +15,7 @@ import androidx.palette.graphics.Palette
 import coil.api.load
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
+import com.programmersbox.dragswipe.DragSwipeAdapter
 import com.programmersbox.flowutils.collectOnUi
 import com.programmersbox.flowutils.invoke
 import com.programmersbox.gsonutils.getObjectExtra
@@ -59,8 +60,6 @@ class MangaActivity : AppCompatActivity() {
         isFavorite.collectOnUi { favoriteManga.check(it) }
         isFavorite.collectOnUi { favoriteInfo.text = if (it) "Remove from Favorites" else "Add to Favorites" }
 
-        favoriteInfo.setOnClickListener { favoriteManga.performClick() }
-
         loadMangaInfo(binding, manga)
     }
 
@@ -82,7 +81,7 @@ class MangaActivity : AppCompatActivity() {
 
     private fun dbLoad(manga: MangaModel?) {
         favoriteManga.setOnClickListener {
-            manga?.toMangaDbModel()
+            manga?.toMangaDbModel((mangaInfoChapterList.adapter as? DragSwipeAdapter<*, *>)?.itemCount ?: 0)
                 ?.let { it1 -> if (isFavorite()) dao.deleteManga(it1) else if (!isFavorite()) dao.insertManga(it1) else null }
                 ?.subscribeOn(Schedulers.io())
                 ?.observeOn(AndroidSchedulers.mainThread())
