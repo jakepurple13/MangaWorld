@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.res.ColorStateList
 import android.view.ViewGroup
 import android.widget.CheckBox
+import androidx.core.graphics.ColorUtils
 import androidx.databinding.BindingAdapter
 import androidx.palette.graphics.Palette
 import androidx.recyclerview.widget.RecyclerView
@@ -61,7 +62,7 @@ class ChapterListAdapter(
                     Snackbar.make(itemView, "${if (isChecked) "Added" else "Removed"} ${item.name}", Snackbar.LENGTH_SHORT)
                         .whatIfNotNull(info?.rgb) { setTextColor(it) }
                         .whatIfNotNull(info?.rgb) { setActionTextColor(it) }
-                        .whatIfNotNull(info?.bodyColor) { setBackgroundTint(it) }
+                        .whatIfNotNull(info?.bodyColor) { setBackgroundTint(ColorUtils.setAlphaComponent(it, 0xff)) }
                         .setAction("Undo") { readChapter.isChecked = !isChecked }
                         .show()
                 }

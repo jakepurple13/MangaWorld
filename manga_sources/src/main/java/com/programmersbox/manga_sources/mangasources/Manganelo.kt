@@ -28,25 +28,22 @@ object Manganelo : MangaSource {
     override fun toInfoModel(model: MangaModel): MangaInfoModel {
         val doc = Jsoup.connect(model.mangaUrl).get()
         val info = doc.select("tbody").select("tr").select("td.table-value")
-        val name = info.getOrNull(0)?.select("td.table-value")?.map { it.text() }.orEmpty()
-        val genre = info.getOrNull(3)?.select("td.table-value")?.select("a")?.map { it.text() }.orEmpty()
-        val chapters = doc.select("ul.row-content-chapter").select("li.a-h").map {
-            ChapterModel(
-                name = it.select("a.chapter-name").text(),
-                url = it.select("a.chapter-name").attr("abs:href"),
-                uploaded = it.select("span.chapter-time").attr("title"),
-                sources = model.source
-            )
-        }
 
         return MangaInfoModel(
             title = model.title,
-            description = model.description,
+            description = doc.select("div.panel-story-info-description").text().removePrefix("Description :").trim(),
             mangaUrl = model.mangaUrl,
             imageUrl = model.imageUrl,
-            chapters = chapters,
-            genres = genre,
-            alternativeNames = name
+            chapters = doc.select("ul.row-content-chapter").select("li.a-h").map {
+                ChapterModel(
+                    name = it.select("a.chapter-name").text(),
+                    url = it.select("a.chapter-name").attr("abs:href"),
+                    uploaded = it.select("span.chapter-time").attr("title"),
+                    sources = model.source
+                )
+            },
+            genres = info.getOrNull(3)?.select("td.table-value")?.select("a")?.map { it.text() }.orEmpty(),
+            alternativeNames = info.getOrNull(0)?.select("td.table-value")?.map { it.text() }.orEmpty()
         )
     }
 

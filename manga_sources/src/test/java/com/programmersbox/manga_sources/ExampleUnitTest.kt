@@ -77,4 +77,14 @@ class ExampleUnitTest {
         println(s)
     }
 
+    @Test
+    fun nelo() {
+        val f = Manganelo.getManga()
+        println(f.size)
+        val d = f.first().toInfoModel()
+        println(d)
+        val s = d.chapters.random().getPageInfo()
+        println(s)
+    }
+
 }

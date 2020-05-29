@@ -17,18 +17,18 @@ var Context.useCache: Boolean by sharedPrefNotNullDelegate(true)
 var Context.cacheSize: Int by sharedPrefNotNullDelegate(5)
 
 object MangaInfoCache {
-    private var context: Context? = null
+    private lateinit var context: Context
     fun init(context: Context) = run { this.context = context }
 
     fun getInfo() =
-        if (context!!.useCache) context!!.defaultSharedPref.getObject<List<MangaInfoModel>>("mangaInfoCache", defaultValue = emptyList()) else null
+        if (context.useCache) context.defaultSharedPref.getObject<List<MangaInfoModel>>("mangaInfoCache", defaultValue = emptyList()) else null
 
     fun newInfo(mangaInfoModel: MangaInfoModel) {
-        if (context!!.useCache) {
+        if (context.useCache) {
             val list = getInfo()!!.toMutableList()
             if (mangaInfoModel !in list) list.add(0, mangaInfoModel)
-            if (list.size > context!!.cacheSize) list.removeAt(list.lastIndex)
-            context!!.defaultSharedPref.edit().putObject("mangaInfoCache", list.distinctBy(MangaInfoModel::mangaUrl)).apply()
+            if (list.size > context.cacheSize) list.removeAt(list.lastIndex)
+            context.defaultSharedPref.edit().putObject("mangaInfoCache", list.distinctBy(MangaInfoModel::mangaUrl)).apply()
         }
     }
 }
