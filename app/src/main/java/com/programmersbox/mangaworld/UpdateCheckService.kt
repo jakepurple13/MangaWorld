@@ -32,13 +32,14 @@ class UpdateCheckService : IntentService("UpdateCheckIntentService") {
         sendRunningNotification(100, 0, "Starting Manga Update Checks")
         GlobalScope.launch {
             MangaDatabase.getInstance(this@UpdateCheckService).mangaDao().getAllMangaSync()
-                .map { model -> model.numChapters to model.toMangaModel().toInfoModel() }
+                .map { model -> Triple(model.numChapters, model.toMangaModel().toInfoModel(), model.source) }
                 .filter { it.first < it.second.chapters.size }
                 .let {
                     it.mapIndexed { index, pair ->
                         sendRunningNotification(it.size, index, pair.second.title)
                         pair.second.hashCode() to NotificationDslBuilder.builder(this@UpdateCheckService, "mangaChannel", R.mipmap.ic_launcher) {
                             title = pair.second.title
+                            subText = pair.third.name
                             bigTextStyle {
                                 bigText = "${pair.second.title} had an update. ${pair.second.chapters.firstOrNull()?.name}"
                             }

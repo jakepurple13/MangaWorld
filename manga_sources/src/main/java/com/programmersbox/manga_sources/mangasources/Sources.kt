@@ -1,7 +1,7 @@
 package com.programmersbox.manga_sources.mangasources
 
 enum class Sources {
-    MANGA_EDEN, MANGANELO, MANGA_HERE, INKR, MANGA_4_LIFE, MANGA_DOG;
+    MANGA_EDEN, MANGANELO, MANGA_HERE, INKR, MANGA_4_LIFE, MANGA_DOG, TSUMINO;
 
     operator fun invoke() = source()
     fun source(): MangaSource = when (this) {
@@ -11,5 +11,6 @@ enum class Sources {
         INKR -> com.programmersbox.manga_sources.mangasources.INKR
         MANGA_4_LIFE -> MangaFourLife
         MANGA_DOG -> MangaDog
+        TSUMINO -> Tsumino
     }
 }
