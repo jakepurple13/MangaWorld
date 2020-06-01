@@ -19,7 +19,7 @@ data class MangaDbModel(
     @ColumnInfo(name = "sources")
     val source: Sources,
     @ColumnInfo(name = "numChapters", defaultValue = "0")
-    val numChapters: Int = 0
+    var numChapters: Int = 0
 )
 
 @Entity(tableName = "ChaptersRead")

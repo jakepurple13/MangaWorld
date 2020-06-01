@@ -10,7 +10,6 @@ import com.programmersbox.helpfulutils.notificationManager
 import com.programmersbox.loggingutils.Loged
 import com.programmersbox.loggingutils.f
 import com.programmersbox.manga_db.MangaDatabase
-import com.programmersbox.mangaworld.utils.toMangaDbModel
 import com.programmersbox.mangaworld.utils.toMangaModel
 import io.reactivex.disposables.CompositeDisposable
 import kotlinx.coroutines.GlobalScope
@@ -39,7 +38,13 @@ class UpdateCheckService : IntentService("UpdateCheckIntentService") {
             dao.getAllMangaSync()
                 .map { model -> Triple(model.numChapters, model.toMangaModel().toInfoModel(), model) }
                 .filter { it.first < it.second.chapters.size }
-                .also { it.forEach { triple -> dao.updateMangaById(triple.third.toMangaModel().toMangaDbModel(triple.first)) } }
+                .also {
+                    it.forEach { triple ->
+                        val manga = triple.third
+                        manga.numChapters = triple.second.chapters.size
+                        dao.updateMangaById(manga)
+                    }
+                }
                 .let {
                     it.mapIndexed { index, pair ->
                         sendRunningNotification(it.size, index, pair.second.title)

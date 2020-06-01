@@ -34,4 +34,4 @@ object MangaInfoCache {
 }
 
 fun MangaDbModel.toMangaModel() = MangaModel(title, description, mangaUrl, imageUrl, source)
-fun MangaModel.toMangaDbModel(numChapters: Int = 0) = MangaDbModel(title, description, mangaUrl, imageUrl, source, numChapters)
+fun MangaModel.toMangaDbModel(numChapters: Int) = MangaDbModel(title, description, mangaUrl, imageUrl, source, numChapters)
