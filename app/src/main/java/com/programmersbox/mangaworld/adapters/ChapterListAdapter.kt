@@ -17,6 +17,7 @@ import com.programmersbox.helpfulutils.whatIfNotNull
 import com.programmersbox.manga_db.MangaDao
 import com.programmersbox.manga_db.MangaReadChapter
 import com.programmersbox.manga_sources.mangasources.ChapterModel
+import com.programmersbox.mangaworld.R
 import com.programmersbox.mangaworld.ReadActivity
 import com.programmersbox.mangaworld.SwatchInfo
 import com.programmersbox.mangaworld.databinding.ChapterListItemBinding
@@ -60,11 +61,15 @@ class ChapterListAdapter(
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.io())
                 .subscribe {
-                    Snackbar.make(itemView, "${if (isChecked) "Added" else "Removed"} ${item.name}", Snackbar.LENGTH_SHORT)
+                    Snackbar.make(
+                        itemView,
+                        context.getString(if (isChecked) R.string.addChapter else R.string.removeChapter, item.name),
+                        Snackbar.LENGTH_SHORT
+                    )
                         .whatIfNotNull(info?.rgb) { setTextColor(it) }
                         .whatIfNotNull(info?.rgb) { setActionTextColor(it) }
                         .whatIfNotNull(info?.bodyColor) { setBackgroundTint(ColorUtils.setAlphaComponent(it, 0xff)) }
-                        .setAction("Undo") { readChapter.isChecked = !isChecked }
+                        .setAction(context.getText(R.string.undo)) { readChapter.isChecked = !isChecked }
                         .show()
                 }
         }
@@ -73,7 +78,8 @@ class ChapterListAdapter(
 
 class ChapterHolder(private val binding: ChapterListItemBinding) : RecyclerView.ViewHolder(binding.root) {
     val readChapter = itemView.readChapter!!
-    val chapterName = itemView.chapterName!!
+
+    //val chapterName = itemView.chapterName!!
     fun bind(item: ChapterModel, swatchInfo: SwatchInfo?) {
         binding.chapter = item
         binding.swatch = swatchInfo

@@ -14,7 +14,7 @@ import com.programmersbox.manga_sources.mangasources.Sources
 import com.programmersbox.mangaworld.adapters.MangaListAdapter
 import com.programmersbox.mangaworld.utils.toMangaDbModel
 import com.programmersbox.mangaworld.utils.toMangaModel
-import com.programmersbox.rxutils.invoke
+import com.programmersbox.rxutils.behaviorDelegate
 import com.programmersbox.rxutils.listMap
 import com.programmersbox.rxutils.toLatestFlowable
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -29,8 +29,9 @@ import java.util.concurrent.TimeUnit
 class FavoriteActivity : AppCompatActivity() {
     private val disposable = CompositeDisposable()
     private val adapter = MangaListAdapter(this)
-    private val sourcePublisher = BehaviorSubject.createDefault(listOf(*Sources.values()))
-    private val sourceFilters = mutableListOf(*Sources.values())
+    private val sourcePublisher = BehaviorSubject.createDefault(mutableListOf(*Sources.values()))
+    private var sourcesList by behaviorDelegate(sourcePublisher)
+    private val dao by lazy { MangaDatabase.getInstance(this).mangaDao() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,7 +40,7 @@ class FavoriteActivity : AppCompatActivity() {
         uiSetup()
 
         Flowables.combineLatest(
-            source1 = MangaDatabase.getInstance(this).mangaDao().getAllManga()
+            source1 = dao.getAllManga()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .listMap(MangaDbModel::toMangaModel),
@@ -54,15 +55,13 @@ class FavoriteActivity : AppCompatActivity() {
             .map(mapManga)
             .subscribe(adapter::setData)
             .addTo(disposable)
-
     }
 
     private fun uiSetup() {
         favoriteMangaRV.adapter = adapter
 
         DragSwipeUtils.setDragSwipeUp(
-            adapter,
-            favoriteMangaRV,
+            adapter, favoriteMangaRV,
             swipeDirs = listOf(Direction.START, Direction.END),
             dragSwipeActions = DragSwipeActionBuilder {
                 onSwiped { viewHolder, _, dragSwipeAdapter ->
@@ -85,33 +84,28 @@ class FavoriteActivity : AppCompatActivity() {
     }
 
     private val mapManga: (Triple<List<MangaModel>, List<Sources>, CharSequence>) -> List<MangaModel> = { pair ->
-        pair.first.sortedBy(MangaModel::title).filter {
-            (if (pair.second.isEmpty()) true else it.source in pair.second) &&
-                    if (pair.third.isBlank()) true else it.title.contains(pair.third, true)
-        }
+        pair.first.sortedBy(MangaModel::title).filter { it.source in pair.second && it.title.contains(pair.third, true) }
     }
 
     private fun addOrRemoveSource(isChecked: Boolean, sources: Sources) {
-        if (isChecked) sourceFilters.add(sources) else sourceFilters.remove(sources)
-        sourcePublisher(sourceFilters)
+        sourcesList = sourcesList?.apply { if (isChecked) add(sources) else remove(sources) }
     }
 
-    private fun addOrRemoveManga(item: MangaDbModel) =
-        MangaDatabase.getInstance(this@FavoriteActivity).mangaDao()
-            .deleteManga(item)
-            .subscribeOn(Schedulers.io())
-            .observeOn(Schedulers.io())
-            .subscribe {
-                Snackbar.make(favoriteMangaRV, "Removed ${item.title}", Snackbar.LENGTH_LONG)
-                    .setAction("Undo") {
-                        MangaDatabase.getInstance(this@FavoriteActivity).mangaDao()
-                            .insertManga(item)
-                            .subscribeOn(Schedulers.io())
-                            .observeOn(Schedulers.io())
-                            .subscribe()
-                    }
-                    .show()
-            }
+    private fun addOrRemoveManga(item: MangaDbModel) = dao
+        .deleteManga(item)
+        .subscribeOn(Schedulers.io())
+        .observeOn(Schedulers.io())
+        .subscribe {
+            Snackbar.make(favoriteMangaRV, getString(R.string.removed, item.title), Snackbar.LENGTH_LONG)
+                .setAction(getText(R.string.undo)) {
+                    dao
+                        .insertManga(item)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(Schedulers.io())
+                        .subscribe()
+                }
+                .show()
+        }
 
     override fun onDestroy() {
         disposable.dispose()

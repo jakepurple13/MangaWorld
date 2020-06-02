@@ -54,10 +54,10 @@ class MainActivity : AppCompatActivity() {
                 }
                 R.id.changeSourcesMenu -> {
                     MaterialAlertDialogBuilder(this)
-                        .setTitle("Choose a Source")
+                        .setTitle(getText(R.string.chooseASource))
                         .setEnumSingleChoiceItems(Sources.values().map(Sources::name).toTypedArray(), currentSource) { source, dialog ->
                             currentSource = source
-                            search_layout.hint = "Search ${currentSource.name}"
+                            search_layout.hint = getString(R.string.searchHint, currentSource.name)
                             reset()
                             dialog.dismiss()
                         }
@@ -107,7 +107,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun searchSetup() {
-        search_layout.hint = "Search ${currentSource.name}"
+        search_layout.hint = getString(R.string.searchHint, currentSource.name)
         search_info.doOnTextChanged { text, _, _, _ -> adapter.setListNotify(currentSource().searchManga(text.toString(), pageNumber, mangaList)) }
         /*val searching = MutableStateFlow<CharSequence>("")
         searching

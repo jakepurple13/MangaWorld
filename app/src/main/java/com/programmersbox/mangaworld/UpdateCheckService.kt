@@ -32,7 +32,7 @@ class UpdateCheckService : IntentService("UpdateCheckIntentService") {
     }
 
     override fun onHandleIntent(intent: Intent?) {
-        sendRunningNotification(100, 0, "Starting Manga Update Checks")
+        sendRunningNotification(100, 0, getText(R.string.startingUpdateCheck))
         val dao = MangaDatabase.getInstance(this@UpdateCheckService).mangaDao()
         GlobalScope.launch {
             dao.getAllMangaSync()
@@ -52,7 +52,7 @@ class UpdateCheckService : IntentService("UpdateCheckIntentService") {
                             title = pair.second.title
                             subText = pair.third.source.name
                             bigTextStyle {
-                                bigText = "${pair.second.title} had an update. ${pair.second.chapters.firstOrNull()?.name}"
+                                bigText = getString(R.string.hadAnUpdate, pair.second.title, pair.second.chapters.firstOrNull()?.name.orEmpty())
                             }
                             pendingIntent { context ->
                                 TaskStackBuilder.create(context)
@@ -72,7 +72,7 @@ class UpdateCheckService : IntentService("UpdateCheckIntentService") {
                     if (it.isNotEmpty()) n.notify(
                         42,
                         NotificationDslBuilder.builder(this@UpdateCheckService, "mangaChannel", R.mipmap.ic_launcher) {
-                            title = "There are ${it.size} update(s)"
+                            title = getString(R.string.updateNumber, it.size)
                             groupSummary = true
                         }
                     )
@@ -81,7 +81,7 @@ class UpdateCheckService : IntentService("UpdateCheckIntentService") {
         }
     }
 
-    private fun sendRunningNotification(max: Int, progress: Int, contextText: String = "") {
+    private fun sendRunningNotification(max: Int, progress: Int, contextText: CharSequence = "") {
         val notification = NotificationDslBuilder.builder(this, "updateCheckChannel", R.mipmap.ic_launcher) {
             onlyAlertOnce = true
             ongoing = true
@@ -91,7 +91,7 @@ class UpdateCheckService : IntentService("UpdateCheckIntentService") {
                 indeterminate = progress == 0
             }
             message = contextText
-            subText = "Checking for Manga Updates"
+            subText = getText(R.string.checkingUpdate)
         }
         notificationManager.notify(13, notification)
         Loged.f("Checking for $contextText")
@@ -100,7 +100,7 @@ class UpdateCheckService : IntentService("UpdateCheckIntentService") {
     private fun sendFinishedNotification() {
         val notification = NotificationDslBuilder.builder(this, "updateCheckChannel", R.mipmap.ic_launcher) {
             onlyAlertOnce = true
-            subText = "Finished Checking for Manga Updates"
+            subText = getText(R.string.finishedChecking)
             timeoutAfter = 750L
         }
         notificationManager.notify(13, notification)

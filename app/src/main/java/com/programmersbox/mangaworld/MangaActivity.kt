@@ -58,7 +58,7 @@ class MangaActivity : AppCompatActivity() {
         val manga = intent.getObjectExtra<MangaModel>("manga", null)
 
         isFavorite.collectOnUi { favoriteManga.check(it) }
-        isFavorite.collectOnUi { favoriteInfo.text = if (it) "Remove from Favorites" else "Add to Favorites" }
+        isFavorite.collectOnUi { favoriteInfo.text = getText(if (it) R.string.removeFromFavorites else R.string.addToFavorites) }
 
         loadMangaInfo(binding, manga)
     }
