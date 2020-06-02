@@ -55,16 +55,18 @@ object MangaEden : MangaSource {
 
     override val hasMorePages: Boolean = false
 
-    override fun getManga(pageNumber: Int): List<MangaModel> = getJsonApi<Eden?>("$baseUrl/api/list/0/")?.manga?.mapNotNull {
-        if (it.ld == null || it.t.isNullOrEmpty()) null
-        else MangaModel(
-            title = it.t,
-            description = "Last updated: ${SimpleDateFormat("MM/dd/yyyy hh:mm a", Locale.getDefault()).format(1000 * it.ld.toDouble())}",
-            mangaUrl = "$baseUrl/api/manga/${it.i}/",
-            imageUrl = "$imageUrl${it.im}",
-            source = Sources.MANGA_EDEN
-        )
-    }?.sortedBy(MangaModel::title) ?: emptyList()
+    override fun getManga(pageNumber: Int): List<MangaModel> = getJsonApi<Eden?>("$baseUrl/api/list/0/")?.manga
+        ?.sortedByDescending { m -> m.ld?.let { 1000 * it.toDouble() } }
+        ?.mapNotNull {
+            if (it.ld == null || it.t.isNullOrEmpty()) null
+            else MangaModel(
+                title = it.t,
+                description = "Last updated: ${SimpleDateFormat("MM/dd/yyyy hh:mm a", Locale.getDefault()).format(1000 * it.ld.toDouble())}",
+                mangaUrl = "$baseUrl/api/manga/${it.i}/",
+                imageUrl = "$imageUrl${it.im}",
+                source = Sources.MANGA_EDEN
+            )
+        } ?: emptyList()
 
     override fun toInfoModel(model: MangaModel): MangaInfoModel {
         val details = getJsonApi<MangaDetails>(model.mangaUrl)
