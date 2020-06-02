@@ -12,15 +12,29 @@ import com.programmersbox.dragswipe.DragSwipeAdapter
 import com.programmersbox.gsonutils.putExtra
 import com.programmersbox.helpfulutils.ConstraintRange
 import com.programmersbox.helpfulutils.layoutInflater
+import com.programmersbox.loggingutils.Loged
+import com.programmersbox.loggingutils.f
+import com.programmersbox.manga_db.MangaDatabase
 import com.programmersbox.manga_sources.mangasources.MangaModel
 import com.programmersbox.mangaworld.MangaActivity
 import com.programmersbox.mangaworld.R
 import com.programmersbox.mangaworld.databinding.MangaListItemBinding
+import com.programmersbox.mangaworld.utils.toMangaDbModel
 import com.programmersbox.mangaworld.utils.usePalette
+import com.programmersbox.thirdpartyutils.changeTint
+import com.programmersbox.thirdpartyutils.check
+import com.programmersbox.thirdpartyutils.checked
 import com.programmersbox.thirdpartyutils.into
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.addTo
+import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.manga_list_item.view.*
 
-class MangaListAdapter(private val context: Context) : DragSwipeAdapter<MangaModel, MangaHolder>() {
+class MangaListAdapter(private val context: Context, private val disposable: CompositeDisposable = CompositeDisposable()) :
+    DragSwipeAdapter<MangaModel, MangaHolder>() {
+
+    private val dao by lazy { MangaDatabase.getInstance(context).mangaDao() }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MangaHolder =
         MangaHolder(MangaListItemBinding.inflate(context.layoutInflater, parent, false))
@@ -45,6 +59,24 @@ class MangaListAdapter(private val context: Context) : DragSwipeAdapter<MangaMod
             range++
             true
         }
+
+        dao.getAllManga()
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .map { it.any { model -> model.mangaUrl == item.mangaUrl } }
+            .subscribe { favorite.check(it) }
+            .addTo(disposable)
+
+        favorite.setOnClickListener {
+            item.toMangaDbModel(0)
+                .let { it1 -> if (favorite.progress > 0.9f) dao.deleteManga(it1) else if (!favorite.checked) dao.insertManga(it1) else null }
+                ?.also { Loged.f("Hello ${favorite.progress}") }
+                ?.subscribeOn(Schedulers.io())
+                ?.observeOn(AndroidSchedulers.mainThread())
+                ?.subscribe()
+                ?.addTo(disposable)
+        }
+
         bind(item)
         Glide.with(cover)
             .asBitmap()
@@ -63,6 +95,7 @@ class MangaListAdapter(private val context: Context) : DragSwipeAdapter<MangaMod
                         dom?.rgb?.let { layout.setCardBackgroundColor(it) }
                         dom?.titleTextColor?.let { title.setTextColor(it) }
                         dom?.bodyTextColor?.let { description.setTextColor(it) }
+                        dom?.titleTextColor?.let { favorite.changeTint(it) }
 
                         swatch = dom
                     }
@@ -77,6 +110,7 @@ class MangaHolder(private val binding: MangaListItemBinding) : RecyclerView.View
     val description = itemView.mangaListDescription!!
     val layout = itemView.mangaListLayout!!
     val constraintLayout = itemView.mangaListConstraintLayout!!
+    val favorite = itemView.isFavoriteManga!!
 
     fun bind(item: MangaModel) {
         binding.model = item

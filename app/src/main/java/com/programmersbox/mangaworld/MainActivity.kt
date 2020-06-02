@@ -15,14 +15,16 @@ import com.programmersbox.manga_sources.mangasources.Sources
 import com.programmersbox.mangaworld.adapters.MangaListAdapter
 import com.programmersbox.mangaworld.utils.currentSource
 import com.programmersbox.mangaworld.views.EndlessScrollingListener
+import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
+    private val disposable = CompositeDisposable()
     private val mangaList = mutableListOf<MangaModel>()
-    private val adapter = MangaListAdapter(this)
+    private val adapter = MangaListAdapter(this, disposable)
     private var pageNumber = 1
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -115,6 +117,11 @@ class MainActivity : AppCompatActivity() {
             .map { currentSource!!().searchManga(it, pageNumber, mangaList) }
             .collectOnUi { adapter.setListNotify(it) }
         search_info.doOnTextChanged { text, _, _, _ -> searching(text!!) }*/
+    }
+
+    override fun onDestroy() {
+        disposable.dispose()
+        super.onDestroy()
     }
 
 }

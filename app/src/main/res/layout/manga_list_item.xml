@@ -44,11 +44,23 @@
                 android:maxLines="3"
                 android:text="@{model.title}"
                 app:layout_constraintBottom_toTopOf="@id/mangaListDescription"
-                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/isFavoriteManga"
                 app:layout_constraintStart_toEndOf="@id/mangaListCover"
                 app:layout_constraintTop_toTopOf="@id/mangaListCover"
                 tools:text="@tools:sample/full_names"
                 tools:textColor="@sample/sample_colors" />
+
+            <com.airbnb.lottie.LottieAnimationView
+                android:id="@+id/isFavoriteManga"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="5dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintBottom_toBottomOf="@id/mangaListTitle"
+                app:layout_constraintTop_toTopOf="@id/mangaListTitle"
+                app:lottie_loop="true"
+                app:lottie_rawRes="@raw/heart"
+                app:tint="#ffffff" />
 
             <TextView
                 android:id="@+id/mangaListDescription"
