@@ -14,7 +14,9 @@ import com.programmersbox.manga_sources.mangasources.Sources
 import com.programmersbox.mangaworld.adapters.MangaListAdapter
 import com.programmersbox.mangaworld.utils.toMangaDbModel
 import com.programmersbox.mangaworld.utils.toMangaModel
-import io.reactivex.BackpressureStrategy
+import com.programmersbox.rxutils.invoke
+import com.programmersbox.rxutils.listMap
+import com.programmersbox.rxutils.toLatestFlowable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.Flowables
@@ -40,12 +42,12 @@ class FavoriteActivity : AppCompatActivity() {
             source1 = MangaDatabase.getInstance(this).mangaDao().getAllManga()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .map { it.map(MangaDbModel::toMangaModel) },
-            source2 = sourcePublisher.toFlowable(BackpressureStrategy.LATEST),
+                .listMap(MangaDbModel::toMangaModel),
+            source2 = sourcePublisher.toLatestFlowable(),
             source3 = favorite_search_info
                 .textChanges()
                 .debounce(500, TimeUnit.MILLISECONDS)
-                .toFlowable(BackpressureStrategy.LATEST)
+                .toLatestFlowable()
         )
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
@@ -91,7 +93,7 @@ class FavoriteActivity : AppCompatActivity() {
 
     private fun addOrRemoveSource(isChecked: Boolean, sources: Sources) {
         if (isChecked) sourceFilters.add(sources) else sourceFilters.remove(sources)
-        sourcePublisher.onNext(sourceFilters)
+        sourcePublisher(sourceFilters)
     }
 
     private fun addOrRemoveManga(item: MangaDbModel) =
