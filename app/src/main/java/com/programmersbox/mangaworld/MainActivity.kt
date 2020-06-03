@@ -22,6 +22,7 @@ import com.programmersbox.mangaworld.adapters.GalleryListAdapter
 import com.programmersbox.mangaworld.adapters.MangaListAdapter
 import com.programmersbox.mangaworld.utils.MangaListView
 import com.programmersbox.mangaworld.utils.currentSource
+import com.programmersbox.mangaworld.utils.stayOnAdult
 import com.programmersbox.mangaworld.views.AutoFitGridLayoutManager
 import com.programmersbox.mangaworld.views.EndlessScrollingListener
 import io.reactivex.disposables.CompositeDisposable
@@ -68,14 +69,14 @@ class MainActivity : AppCompatActivity() {
                 }
                 R.id.changeSourcesMenu -> {
                     MaterialAlertDialogBuilder(this)
-                            .setTitle(getText(R.string.chooseASource))
-                            .setEnumSingleChoiceItems(Sources.values().map(Sources::name).toTypedArray(), currentSource) { source, dialog ->
-                                currentSource = source
-                                search_layout.hint = getString(R.string.searchHint, currentSource.name)
-                                reset()
-                                dialog.dismiss()
-                            }
-                            .show()
+                        .setTitle(getText(R.string.chooseASource))
+                        .setEnumSingleChoiceItems(Sources.values().map(Sources::name).toTypedArray(), currentSource) { source, dialog ->
+                            currentSource = source
+                            search_layout.hint = getString(R.string.searchHint, currentSource.name)
+                            reset()
+                            dialog.dismiss()
+                        }
+                        .show()
                     menuOptions.close() // To close the Speed Dial with animation
                     return@setOnActionSelectedListener true // false will close it without animation
                 }
@@ -123,7 +124,7 @@ class MainActivity : AppCompatActivity() {
     private fun LottieDrawable.check(checked: Boolean) {
         val endProgress = if (checked) 1f else 0f
         val animator = ValueAnimator.ofFloat(progress, endProgress)
-                .apply { addUpdateListener { animation: ValueAnimator -> progress = animation.animatedValue as Float } }
+            .apply { addUpdateListener { animation: ValueAnimator -> progress = animation.animatedValue as Float } }
         animator.start()
     }
 
@@ -138,10 +139,10 @@ class MainActivity : AppCompatActivity() {
 
         changeViewType.setOnClickListener {
             setMangaView(
-                    when (mangaViewType) {
-                        MangaListView.LINEAR -> MangaListView.GRID
-                        MangaListView.GRID -> MangaListView.LINEAR
-                    }
+                when (mangaViewType) {
+                    MangaListView.LINEAR -> MangaListView.GRID
+                    MangaListView.GRID -> MangaListView.LINEAR
+                }
             )
         }
 
@@ -176,6 +177,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
+        if (!stayOnAdult && currentSource.isAdult) currentSource = Sources.values().filterNot(Sources::isAdult).random()
         disposable.dispose()
         super.onDestroy()
     }

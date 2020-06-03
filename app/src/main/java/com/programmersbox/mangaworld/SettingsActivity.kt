@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.programmersbox.mangaworld.utils.cacheSize
+import com.programmersbox.mangaworld.utils.stayOnAdult
 import com.programmersbox.mangaworld.utils.useCache
 import com.programmersbox.mangaworld.utils.usePalette
 import de.Maxr1998.modernpreferences.PreferencesAdapter
@@ -31,6 +32,20 @@ class SettingsActivity : AppCompatActivity() {
 
     private fun createRootScreen() = screen(this) {
         categoryHeader("settingsHeader") { title = "Settings" }
+
+        switch("stayOnAdult") {
+            title = "Leave app while adult manga visible"
+            summary = "When you leave the app, we can choose a different source if you are on a source that's for adults"
+            iconRes = android.R.drawable.sym_def_app_icon
+            defaultValue = stayOnAdult
+            checkedChangeListener = object : TwoStatePreference.OnCheckedChangeListener {
+                override fun onCheckedChanged(preference: TwoStatePreference, holder: PreferencesAdapter.ViewHolder?, checked: Boolean): Boolean {
+                    stayOnAdult = checked
+                    return true
+                }
+            }
+        }
+
         switch("usePalette") {
             title = "Use Palette"
             iconRes = android.R.drawable.sym_def_app_icon

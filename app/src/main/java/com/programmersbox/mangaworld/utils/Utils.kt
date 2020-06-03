@@ -11,12 +11,11 @@ import com.programmersbox.manga_sources.mangasources.MangaInfoModel
 import com.programmersbox.manga_sources.mangasources.MangaModel
 import com.programmersbox.manga_sources.mangasources.Sources
 
-
 var Context.usePalette: Boolean by sharedPrefNotNullDelegate(true)
 var Context.currentSource: Sources by sharedPrefNotNullObjectDelegate(defaultValue = Sources.values().random())
 var Context.useCache: Boolean by sharedPrefNotNullDelegate(true)
 var Context.cacheSize: Int by sharedPrefNotNullDelegate(5)
-//var Context.mangaViewType: MangaListView by sharedPrefNotNullObjectDelegate(MangaListView.LINEAR)
+var Context.stayOnAdult: Boolean by sharedPrefNotNullDelegate(false)
 
 object MangaInfoCache {
     private lateinit var context: Context
