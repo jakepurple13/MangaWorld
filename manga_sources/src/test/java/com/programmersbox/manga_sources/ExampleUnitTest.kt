@@ -53,10 +53,17 @@ class ExampleUnitTest {
     fun life() {
         val f = MangaFourLife.getManga()
         println(f.size)
-        val d = f.find { it.title == "Dragon Ball" }!!.toInfoModel()
+        val d = f.filter { it.title.contains("Dragon", true) }.random().toInfoModel()
         println(d)
         val s = d.chapters.random().getPageInfo()
         println(s)
+    }
+
+    @Test
+    fun lifeTwo() {
+        val regex = "vm\\.Directory = (.*?);".toRegex()
+        val f = regex.find(Jsoup.connect("https://manga4life.com/search/?sort=lt&desc=true").get().html())
+        println(f?.groupValues?.get(1))
     }
 
     @Test

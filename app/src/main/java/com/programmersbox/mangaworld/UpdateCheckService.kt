@@ -3,6 +3,8 @@ package com.programmersbox.mangaworld
 import android.app.IntentService
 import android.app.PendingIntent
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import androidx.core.app.TaskStackBuilder
 import com.programmersbox.gsonutils.putExtra
 import com.programmersbox.helpfulutils.NotificationDslBuilder
@@ -14,6 +16,10 @@ import com.programmersbox.mangaworld.utils.toMangaModel
 import io.reactivex.disposables.CompositeDisposable
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import java.io.IOException
+import java.net.HttpURLConnection
+import java.net.URL
+
 
 class UpdateCheckService : IntentService("UpdateCheckIntentService") {
 
@@ -36,13 +42,19 @@ class UpdateCheckService : IntentService("UpdateCheckIntentService") {
         val dao = MangaDatabase.getInstance(this@UpdateCheckService).mangaDao()
         GlobalScope.launch {
             dao.getAllMangaSync()
-                .map { model -> Triple(model.numChapters, model.toMangaModel().toInfoModel(), model) }
+                .mapNotNull { model ->
+                    try {
+                        Triple(model.numChapters, model.toMangaModel().toInfoModel(), model)
+                    } catch (e: Exception) {
+                        null
+                    }
+                }
                 .filter { it.first < it.second.chapters.size }
                 .also {
                     it.forEach { triple ->
                         val manga = triple.third
                         manga.numChapters = triple.second.chapters.size
-                        dao.updateMangaById(manga)
+                        dao.updateMangaById(manga).subscribe()
                     }
                 }
                 .let {
@@ -51,16 +63,20 @@ class UpdateCheckService : IntentService("UpdateCheckIntentService") {
                         pair.second.hashCode() to NotificationDslBuilder.builder(this@UpdateCheckService, "mangaChannel", R.mipmap.ic_launcher) {
                             title = pair.second.title
                             subText = pair.third.source.name
-                            bigTextStyle {
+                            getBitmapFromURL(pair.second.imageUrl)?.let {
+                                pictureStyle {
+                                    bigPicture = it
+                                    largeIcon = it
+                                    summaryText =
+                                        getString(R.string.hadAnUpdate, pair.second.title, pair.second.chapters.firstOrNull()?.name.orEmpty())
+                                }
+                            } ?: bigTextStyle {
                                 bigText = getString(R.string.hadAnUpdate, pair.second.title, pair.second.chapters.firstOrNull()?.name.orEmpty())
                             }
                             pendingIntent { context ->
                                 TaskStackBuilder.create(context)
                                     .addParentStack(MainActivity::class.java)
-                                    .addNextIntent(
-                                        Intent(context, MangaActivity::class.java)
-                                            .apply { putExtra("manga", pair.third.toMangaModel()) }
-                                    )
+                                    .addNextIntent(Intent(context, MangaActivity::class.java).apply { putExtra("manga", pair.third.toMangaModel()) })
                                     .getPendingIntent(pair.second.hashCode(), PendingIntent.FLAG_UPDATE_CURRENT)
                             }
                         }
@@ -79,6 +95,17 @@ class UpdateCheckService : IntentService("UpdateCheckIntentService") {
                     sendFinishedNotification()
                 }
         }
+    }
+
+    private fun getBitmapFromURL(strURL: String?): Bitmap? = try {
+        val url = URL(strURL)
+        val connection: HttpURLConnection = url.openConnection() as HttpURLConnection
+        connection.doInput = true
+        connection.connect()
+        BitmapFactory.decodeStream(connection.inputStream)
+    } catch (e: IOException) {
+        e.printStackTrace()
+        null
     }
 
     private fun sendRunningNotification(max: Int, progress: Int, contextText: CharSequence = "") {

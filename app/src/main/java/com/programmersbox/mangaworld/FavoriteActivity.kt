@@ -65,7 +65,7 @@ class FavoriteActivity : AppCompatActivity() {
             swipeDirs = listOf(Direction.START, Direction.END),
             dragSwipeActions = DragSwipeActionBuilder {
                 onSwiped { viewHolder, _, dragSwipeAdapter ->
-                    val item = dragSwipeAdapter[viewHolder.adapterPosition].toMangaDbModel(0)
+                    val item = dragSwipeAdapter[viewHolder.adapterPosition].toMangaDbModel()
                     addOrRemoveManga(item)
                 }
             }

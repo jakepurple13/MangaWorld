@@ -12,8 +12,6 @@ import com.programmersbox.dragswipe.DragSwipeAdapter
 import com.programmersbox.gsonutils.putExtra
 import com.programmersbox.helpfulutils.ConstraintRange
 import com.programmersbox.helpfulutils.layoutInflater
-import com.programmersbox.loggingutils.Loged
-import com.programmersbox.loggingutils.f
 import com.programmersbox.manga_db.MangaDatabase
 import com.programmersbox.manga_sources.mangasources.MangaModel
 import com.programmersbox.mangaworld.MangaActivity
@@ -68,9 +66,8 @@ class MangaListAdapter(private val context: Context, private val disposable: Com
             .addTo(disposable)
 
         favorite.setOnClickListener {
-            item.toMangaDbModel(0)
+            item.toMangaDbModel()
                 .let { it1 -> if (favorite.progress > 0.9f) dao.deleteManga(it1) else if (!favorite.checked) dao.insertManga(it1) else null }
-                ?.also { Loged.f("Hello ${favorite.progress}") }
                 ?.subscribeOn(Schedulers.io())
                 ?.observeOn(AndroidSchedulers.mainThread())
                 ?.subscribe()
