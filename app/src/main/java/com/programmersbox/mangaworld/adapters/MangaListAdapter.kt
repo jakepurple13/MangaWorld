@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.view.ViewGroup
+import androidx.appcompat.widget.PopupMenu
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.palette.graphics.Palette
 import androidx.recyclerview.widget.RecyclerView
@@ -18,6 +19,7 @@ import com.programmersbox.manga_sources.mangasources.MangaModel
 import com.programmersbox.mangaworld.MangaActivity
 import com.programmersbox.mangaworld.R
 import com.programmersbox.mangaworld.databinding.MangaListItemBinding
+import com.programmersbox.mangaworld.databinding.MangaListItemGalleryViewBinding
 import com.programmersbox.mangaworld.utils.toMangaDbModel
 import com.programmersbox.mangaworld.utils.usePalette
 import com.programmersbox.thirdpartyutils.changeTint
@@ -29,9 +31,15 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.manga_list_item.view.*
+import kotlinx.android.synthetic.main.manga_list_item_gallery_view.view.*
 
-class MangaListAdapter(private val context: Context, private val disposable: CompositeDisposable = CompositeDisposable()) :
-    DragSwipeAdapter<MangaModel, MangaHolder>() {
+abstract class MangaViewAdapter<VH : RecyclerView.ViewHolder>(
+    protected val context: Context,
+    protected val disposable: CompositeDisposable = CompositeDisposable()
+) : DragSwipeAdapter<MangaModel, VH>()
+
+class MangaListAdapter(context: Context, disposable: CompositeDisposable = CompositeDisposable()) :
+    MangaViewAdapter<MangaHolder>(context, disposable) {
 
     private val dao by lazy { MangaDatabase.getInstance(context).mangaDao() }
 
@@ -110,6 +118,99 @@ class MangaHolder(private val binding: MangaListItemBinding) : RecyclerView.View
     val layout = itemView.mangaListLayout!!
     val constraintLayout = itemView.mangaListConstraintLayout!!
     val favorite = itemView.isFavoriteManga!!
+
+    fun bind(item: MangaModel) {
+        binding.model = item
+        binding.executePendingBindings()
+    }
+}
+
+class GalleryListAdapter(context: Context, disposable: CompositeDisposable = CompositeDisposable()) :
+    MangaViewAdapter<GalleryHolder>(context, disposable) {
+
+    private val dao by lazy { MangaDatabase.getInstance(context).mangaDao() }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GalleryHolder =
+        GalleryHolder(MangaListItemGalleryViewBinding.inflate(context.layoutInflater, parent, false))
+
+    override fun GalleryHolder.onBind(item: MangaModel, position: Int) {
+
+        var swatch: Palette.Swatch? = null
+
+        itemView.setOnClickListener {
+            context.startActivity(Intent(context, MangaActivity::class.java).apply {
+                putExtra("manga", item)
+                putExtra("swatch", swatch)
+            })
+        }
+
+        val menu = PopupMenu(context, itemView)
+            .apply {
+                setOnMenuItemClickListener {
+                    when (it.itemId) {
+                        1 -> dao.insertManga(item.toMangaDbModel())
+                        2 -> dao.deleteManga(item.toMangaDbModel())
+                        else -> null
+                    }
+                        ?.subscribeOn(Schedulers.io())
+                        ?.observeOn(AndroidSchedulers.mainThread())
+                        ?.subscribe()
+                        ?.addTo(disposable)
+                    true
+                }
+            }
+
+        itemView.setOnLongClickListener {
+            menu.show()
+            true
+        }
+
+        dao.getAllManga()
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .map { it.any { model -> model.mangaUrl == item.mangaUrl } }
+            .subscribe {
+                menu.menu.clear()
+                if (it) menu.menu.removeItem(1) else menu.menu.removeItem(2)
+                menu.menu.add(
+                    1,
+                    if (it) 2 else 1,
+                    1,
+                    if (it) context.getText(R.string.removeFromFavorites) else context.getText(R.string.addToFavorites)
+                )
+            }
+            .addTo(disposable)
+
+        bind(item)
+        Glide.with(cover)
+            .asBitmap()
+            .load(item.imageUrl)
+            .override(360, 480)
+            .transform(RoundedCorners(15))
+            .fallback(R.mipmap.ic_launcher)
+            .placeholder(R.mipmap.ic_launcher)
+            .error(R.mipmap.ic_launcher)
+            .into<Bitmap> {
+                resourceReady { image, _ ->
+                    cover.setImageBitmap(image)
+                    if (context.usePalette) {
+                        val p = Palette.from(image).generate()
+
+                        val dom = p.vibrantSwatch
+                        //dom?.rgb?.let { layout.setCardBackgroundColor(it) }
+                        //dom?.bodyTextColor?.let { title.setTextColor(it) }
+
+                        swatch = dom
+                    }
+                }
+            }
+    }
+}
+
+class GalleryHolder(private val binding: MangaListItemGalleryViewBinding) : RecyclerView.ViewHolder(binding.root) {
+    val cover = itemView.galleryListCover!!
+    val title = itemView.galleryListTitle!!
+    val layout = itemView.galleryListLayout!!
 
     fun bind(item: MangaModel) {
         binding.model = item

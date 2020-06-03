@@ -24,8 +24,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:orientation="vertical"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 tools:itemCount="10"
+                tools:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 tools:listitem="@layout/manga_list_item" />
 
         </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
@@ -78,9 +78,16 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
-        app:sdExpansionMode="top"
-        app:sdUseReverseAnimationOnClose="true"
         app:layout_behavior="@string/speeddial_scrolling_view_snackbar_behavior"
-        app:sdMainFabClosedSrc="@android:drawable/ic_input_add" />
+        app:sdExpansionMode="top"
+        app:sdMainFabClosedSrc="@android:drawable/ic_input_add"
+        app:sdUseReverseAnimationOnClose="true" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/changeViewType"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_anchor="@id/app_bar"
+        app:layout_anchorGravity="end|bottom" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

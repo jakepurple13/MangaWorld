@@ -11,10 +11,12 @@ import com.programmersbox.manga_sources.mangasources.MangaInfoModel
 import com.programmersbox.manga_sources.mangasources.MangaModel
 import com.programmersbox.manga_sources.mangasources.Sources
 
+
 var Context.usePalette: Boolean by sharedPrefNotNullDelegate(true)
 var Context.currentSource: Sources by sharedPrefNotNullObjectDelegate(defaultValue = Sources.values().random())
 var Context.useCache: Boolean by sharedPrefNotNullDelegate(true)
 var Context.cacheSize: Int by sharedPrefNotNullDelegate(5)
+//var Context.mangaViewType: MangaListView by sharedPrefNotNullObjectDelegate(MangaListView.LINEAR)
 
 object MangaInfoCache {
     private lateinit var context: Context
@@ -36,3 +38,5 @@ object MangaInfoCache {
 fun MangaDbModel.toMangaModel() = MangaModel(title, description, mangaUrl, imageUrl, source)
 fun MangaModel.toMangaDbModel(numChapters: Int? = null) = MangaDbModel(title, description, mangaUrl, imageUrl, source)
     .apply { if (numChapters != null) this.numChapters = numChapters }
+
+enum class MangaListView { LINEAR, GRID }

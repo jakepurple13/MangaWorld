@@ -11,9 +11,14 @@ import com.programmersbox.helpfulutils.*
 import com.programmersbox.loggingutils.Loged
 import com.programmersbox.mangaworld.utils.MangaInfoCache
 import io.reactivex.plugins.RxJavaPlugins
+import java.util.concurrent.TimeUnit
+import kotlin.math.roundToLong
+import kotlin.time.ExperimentalTime
+import kotlin.time.toDuration
 
 
 class MangaWorldApp : Application() {
+    @ExperimentalTime
     override fun onCreate() {
         super.onCreate()
         Stetho.initializeWithDefaults(this)
@@ -31,6 +36,11 @@ class MangaWorldApp : Application() {
 
         val updateCheckIntent = Intent(this, UpdateCheckService::class.java)
         val pendingIntent = PendingIntent.getService(this, 10, updateCheckIntent, 0)
-        alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), AlarmManager.INTERVAL_HOUR, pendingIntent)
+        alarmManager.setInexactRepeating(
+            AlarmManager.RTC_WAKEUP,
+            System.currentTimeMillis() + 30L.toDuration(TimeUnit.MINUTES).inMilliseconds.roundToLong(),
+            AlarmManager.INTERVAL_HOUR,
+            pendingIntent
+        )
     }
 }

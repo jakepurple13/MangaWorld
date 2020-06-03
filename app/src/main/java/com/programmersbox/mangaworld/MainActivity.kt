@@ -6,14 +6,21 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.doOnTextChanged
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.programmersbox.gsonutils.sharedPrefNotNullObjectDelegate
 import com.programmersbox.helpfulutils.requestPermissions
 import com.programmersbox.helpfulutils.setEnumSingleChoiceItems
 import com.programmersbox.manga_sources.mangasources.MangaModel
 import com.programmersbox.manga_sources.mangasources.Sources
+import com.programmersbox.mangaworld.adapters.GalleryListAdapter
 import com.programmersbox.mangaworld.adapters.MangaListAdapter
+import com.programmersbox.mangaworld.utils.MangaListView
+import com.programmersbox.mangaworld.utils.calculateNoOfColumns
 import com.programmersbox.mangaworld.utils.currentSource
+import com.programmersbox.mangaworld.views.AutoFitGridLayoutManager
 import com.programmersbox.mangaworld.views.EndlessScrollingListener
 import io.reactivex.disposables.CompositeDisposable
 import kotlinx.android.synthetic.main.activity_main.*
@@ -25,7 +32,9 @@ class MainActivity : AppCompatActivity() {
     private val disposable = CompositeDisposable()
     private val mangaList = mutableListOf<MangaModel>()
     private val adapter = MangaListAdapter(this, disposable)
+    private val adapter2 = GalleryListAdapter(this, disposable)
     private var pageNumber = 1
+    private var mangaViewType: MangaListView by sharedPrefNotNullObjectDelegate(MangaListView.LINEAR)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -83,13 +92,43 @@ class MainActivity : AppCompatActivity() {
             mangaList.addAll(list)
             runOnUiThread {
                 adapter.addItems(list)
+                adapter2.addItems(list)
                 refresh.isRefreshing = false
             }
         }
     }
 
-    private fun rvSetup() {
+    private fun listView() {
+        mangaRV.layoutManager = LinearLayoutManager(this).apply { orientation = LinearLayoutManager.VERTICAL }
         mangaRV.adapter = adapter
+    }
+
+    private fun galleryView() {
+        mangaRV.layoutManager = AutoFitGridLayoutManager(this, 360).apply { orientation = GridLayoutManager.VERTICAL }
+        mangaRV.adapter = adapter2
+    }
+
+    private fun setMangaView(mangaListView: MangaListView) {
+        mangaViewType = mangaListView
+        changeViewType.setImageResource(if (mangaListView == MangaListView.LINEAR) android.R.drawable.ic_menu_gallery else android.R.drawable.stat_notify_more)
+        when (mangaListView) {
+            MangaListView.LINEAR -> listView()
+            MangaListView.GRID -> galleryView()
+        }
+    }
+
+    private fun rvSetup() {
+        setMangaView(mangaViewType)
+
+        changeViewType.setOnClickListener {
+            setMangaView(
+                when (mangaViewType) {
+                    MangaListView.LINEAR -> MangaListView.GRID
+                    MangaListView.GRID -> MangaListView.LINEAR
+                }
+            )
+        }
+
         loadNewManga()
 
         mangaRV.addOnScrollListener(object : EndlessScrollingListener(mangaRV.layoutManager!!) {
@@ -104,6 +143,7 @@ class MainActivity : AppCompatActivity() {
     private fun reset() {
         mangaList.clear()
         adapter.setListNotify(mangaList)
+        adapter2.setListNotify(mangaList)
         pageNumber = 1
         loadNewManga()
     }
