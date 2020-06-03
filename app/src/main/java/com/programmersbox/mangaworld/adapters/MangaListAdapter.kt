@@ -8,6 +8,7 @@ import androidx.constraintlayout.widget.ConstraintSet
 import androidx.palette.graphics.Palette
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.programmersbox.dragswipe.DragSwipeAdapter
 import com.programmersbox.gsonutils.putExtra
 import com.programmersbox.helpfulutils.ConstraintRange
@@ -79,6 +80,7 @@ class MangaListAdapter(private val context: Context, private val disposable: Com
             .asBitmap()
             .load(item.imageUrl)
             .override(360, 480)
+            .transform(RoundedCorners(30))
             .fallback(R.mipmap.ic_launcher)
             .placeholder(R.mipmap.ic_launcher)
             .error(R.mipmap.ic_launcher)

@@ -50,6 +50,7 @@ class ChapterListAdapter(
             )
         }
 
+        startReading.setOnClickListener { itemView.performClick() }
 
         readChapter.setOnCheckedChangeListener(null)
         readChapter.isChecked = false
@@ -78,7 +79,7 @@ class ChapterListAdapter(
 
 class ChapterHolder(private val binding: ChapterListItemBinding) : RecyclerView.ViewHolder(binding.root) {
     val readChapter = itemView.readChapter!!
-
+    val startReading = itemView.startReading!!
     //val chapterName = itemView.chapterName!!
     fun bind(item: ChapterModel, swatchInfo: SwatchInfo?) {
         binding.chapter = item

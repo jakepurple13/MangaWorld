@@ -19,7 +19,9 @@
 
         <activity android:name=".SettingsActivity" />
         <activity android:name=".FavoriteActivity" />
-        <activity android:name=".ReadActivity" />
+        <activity
+            android:name=".ReadActivity"
+            android:theme="@style/AppTheme.Fullscreen" />
         <activity android:name=".MangaActivity" />
         <activity android:name=".MainActivity">
             <intent-filter>

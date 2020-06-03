@@ -5,10 +5,12 @@ import android.app.Application
 import android.app.PendingIntent
 import android.content.Intent
 import android.os.Build
+import android.widget.Toast
 import com.facebook.stetho.Stetho
 import com.programmersbox.helpfulutils.*
 import com.programmersbox.loggingutils.Loged
 import com.programmersbox.mangaworld.utils.MangaInfoCache
+import io.reactivex.plugins.RxJavaPlugins
 
 
 class MangaWorldApp : Application() {
@@ -24,6 +26,8 @@ class MangaWorldApp : Application() {
             createNotificationGroup("mangaGroup")
             createNotificationChannel("updateCheckChannel", importance = NotificationChannelImportance.MIN)
         }
+
+        RxJavaPlugins.setErrorHandler { runOnUIThread { Toast.makeText(this, it.cause?.localizedMessage, Toast.LENGTH_SHORT).show() } }
 
         val updateCheckIntent = Intent(this, UpdateCheckService::class.java)
         val pendingIntent = PendingIntent.getService(this, 10, updateCheckIntent, 0)

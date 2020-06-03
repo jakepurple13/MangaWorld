@@ -13,9 +13,13 @@ import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModel
 import androidx.palette.graphics.Palette
 import coil.api.load
+import coil.transform.RoundedCornersTransformation
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
+import com.programmersbox.dragswipe.Direction
+import com.programmersbox.dragswipe.DragSwipeActionBuilder
 import com.programmersbox.dragswipe.DragSwipeAdapter
+import com.programmersbox.dragswipe.DragSwipeUtils
 import com.programmersbox.flowutils.collectOnUi
 import com.programmersbox.flowutils.invoke
 import com.programmersbox.gsonutils.getObjectExtra
@@ -109,6 +113,19 @@ class MangaActivity : AppCompatActivity() {
                         dataList = manga.chapters.toMutableList(), context = this@MangaActivity, swatch = swatch,
                         mangaUrl = mangaInfoModel.mangaUrl, dao = dao, chapters = read
                     )
+
+                    DragSwipeUtils.setDragSwipeUp(
+                        mangaInfoChapterList.adapter as ChapterListAdapter,
+                        mangaInfoChapterList,
+                        swipeDirs = listOf(Direction.START, Direction.END),
+                        dragSwipeActions = DragSwipeActionBuilder {
+                            onSwiped { viewHolder, _, adapter ->
+                                adapter.notifyItemChanged(viewHolder.adapterPosition)
+                                viewHolder.itemView.performClick()
+                            }
+                        }
+                    )
+
                     FastScrollerBuilder(mangaInfoChapterList)
                         .useMd2Style()
                         .whatIfNotNull(getDrawable(R.drawable.afs_md2_thumb)) { drawable ->
@@ -187,6 +204,7 @@ fun loadImage(view: ImageView, imageUrl: String?) {
         placeholder(R.mipmap.ic_launcher)
         error(R.mipmap.ic_launcher)
         crossfade(true)
+        transformations(RoundedCornersTransformation(30f))
     }
 }
 
