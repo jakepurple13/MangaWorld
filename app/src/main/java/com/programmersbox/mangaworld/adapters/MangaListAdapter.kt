@@ -125,13 +125,13 @@ class MangaHolder(private val binding: MangaListItemBinding) : RecyclerView.View
     }
 }
 
-class GalleryListAdapter(context: Context, disposable: CompositeDisposable = CompositeDisposable()) :
-    MangaViewAdapter<GalleryHolder>(context, disposable) {
+class GalleryListAdapter(context: Context, disposable: CompositeDisposable = CompositeDisposable(), private val showMenu: Boolean = true) :
+        MangaViewAdapter<GalleryHolder>(context, disposable) {
 
     private val dao by lazy { MangaDatabase.getInstance(context).mangaDao() }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GalleryHolder =
-        GalleryHolder(MangaListItemGalleryViewBinding.inflate(context.layoutInflater, parent, false))
+            GalleryHolder(MangaListItemGalleryViewBinding.inflate(context.layoutInflater, parent, false))
 
     override fun GalleryHolder.onBind(item: MangaModel, position: Int) {
 
@@ -144,42 +144,44 @@ class GalleryListAdapter(context: Context, disposable: CompositeDisposable = Com
             })
         }
 
-        val menu = PopupMenu(context, itemView)
-            .apply {
-                setOnMenuItemClickListener {
-                    when (it.itemId) {
-                        1 -> dao.insertManga(item.toMangaDbModel())
-                        2 -> dao.deleteManga(item.toMangaDbModel())
-                        else -> null
+        if (showMenu) {
+            val menu = PopupMenu(context, itemView)
+                    .apply {
+                        setOnMenuItemClickListener {
+                            when (it.itemId) {
+                                1 -> dao.insertManga(item.toMangaDbModel())
+                                2 -> dao.deleteManga(item.toMangaDbModel())
+                                else -> null
+                            }
+                                    ?.subscribeOn(Schedulers.io())
+                                    ?.observeOn(AndroidSchedulers.mainThread())
+                                    ?.subscribe()
+                                    ?.addTo(disposable)
+                            true
+                        }
                     }
-                        ?.subscribeOn(Schedulers.io())
-                        ?.observeOn(AndroidSchedulers.mainThread())
-                        ?.subscribe()
-                        ?.addTo(disposable)
-                    true
-                }
+
+            itemView.setOnLongClickListener {
+                menu.show()
+                true
             }
 
-        itemView.setOnLongClickListener {
-            menu.show()
-            true
+            dao.getAllManga()
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .map { it.any { model -> model.mangaUrl == item.mangaUrl } }
+                    .subscribe {
+                        menu.menu.clear()
+                        if (it) menu.menu.removeItem(1) else menu.menu.removeItem(2)
+                        menu.menu.add(
+                                1,
+                                if (it) 2 else 1,
+                                1,
+                                if (it) context.getText(R.string.removeFromFavorites) else context.getText(R.string.addToFavorites)
+                        )
+                    }
+                    .addTo(disposable)
         }
-
-        dao.getAllManga()
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .map { it.any { model -> model.mangaUrl == item.mangaUrl } }
-            .subscribe {
-                menu.menu.clear()
-                if (it) menu.menu.removeItem(1) else menu.menu.removeItem(2)
-                menu.menu.add(
-                    1,
-                    if (it) 2 else 1,
-                    1,
-                    if (it) context.getText(R.string.removeFromFavorites) else context.getText(R.string.addToFavorites)
-                )
-            }
-            .addTo(disposable)
 
         bind(item)
         Glide.with(cover)
@@ -194,13 +196,7 @@ class GalleryListAdapter(context: Context, disposable: CompositeDisposable = Com
                 resourceReady { image, _ ->
                     cover.setImageBitmap(image)
                     if (context.usePalette) {
-                        val p = Palette.from(image).generate()
-
-                        val dom = p.vibrantSwatch
-                        //dom?.rgb?.let { layout.setCardBackgroundColor(it) }
-                        //dom?.bodyTextColor?.let { title.setTextColor(it) }
-
-                        swatch = dom
+                        swatch = Palette.from(image).generate().vibrantSwatch
                     }
                 }
             }

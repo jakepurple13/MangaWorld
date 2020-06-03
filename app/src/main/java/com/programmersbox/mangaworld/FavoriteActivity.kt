@@ -3,6 +3,7 @@ package com.programmersbox.mangaworld
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.GridLayoutManager
 import com.google.android.material.chip.Chip
 import com.google.android.material.snackbar.Snackbar
 import com.jakewharton.rxbinding2.widget.textChanges
@@ -11,9 +12,10 @@ import com.programmersbox.manga_db.MangaDatabase
 import com.programmersbox.manga_db.MangaDbModel
 import com.programmersbox.manga_sources.mangasources.MangaModel
 import com.programmersbox.manga_sources.mangasources.Sources
-import com.programmersbox.mangaworld.adapters.MangaListAdapter
+import com.programmersbox.mangaworld.adapters.GalleryListAdapter
 import com.programmersbox.mangaworld.utils.toMangaDbModel
 import com.programmersbox.mangaworld.utils.toMangaModel
+import com.programmersbox.mangaworld.views.AutoFitGridLayoutManager
 import com.programmersbox.rxutils.behaviorDelegate
 import com.programmersbox.rxutils.listMap
 import com.programmersbox.rxutils.toLatestFlowable
@@ -28,7 +30,7 @@ import java.util.concurrent.TimeUnit
 
 class FavoriteActivity : AppCompatActivity() {
     private val disposable = CompositeDisposable()
-    private val adapter = MangaListAdapter(this)
+    private val adapter = GalleryListAdapter(this, disposable, false)
     private val sourcePublisher = BehaviorSubject.createDefault(mutableListOf(*Sources.values()))
     private var sourcesList by behaviorDelegate(sourcePublisher)
     private val dao by lazy { MangaDatabase.getInstance(this).mangaDao() }
@@ -58,6 +60,7 @@ class FavoriteActivity : AppCompatActivity() {
     }
 
     private fun uiSetup() {
+        favoriteMangaRV.layoutManager = AutoFitGridLayoutManager(this, 360).apply { orientation = GridLayoutManager.VERTICAL }
         favoriteMangaRV.adapter = adapter
 
         DragSwipeUtils.setDragSwipeUp(

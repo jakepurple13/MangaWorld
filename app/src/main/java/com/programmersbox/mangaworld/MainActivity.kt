@@ -1,6 +1,7 @@
 package com.programmersbox.mangaworld
 
 import android.Manifest
+import android.animation.ValueAnimator
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
@@ -9,6 +10,8 @@ import androidx.core.widget.doOnTextChanged
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.airbnb.lottie.LottieCompositionFactory
+import com.airbnb.lottie.LottieDrawable
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.programmersbox.gsonutils.sharedPrefNotNullObjectDelegate
 import com.programmersbox.helpfulutils.requestPermissions
@@ -18,7 +21,6 @@ import com.programmersbox.manga_sources.mangasources.Sources
 import com.programmersbox.mangaworld.adapters.GalleryListAdapter
 import com.programmersbox.mangaworld.adapters.MangaListAdapter
 import com.programmersbox.mangaworld.utils.MangaListView
-import com.programmersbox.mangaworld.utils.calculateNoOfColumns
 import com.programmersbox.mangaworld.utils.currentSource
 import com.programmersbox.mangaworld.views.AutoFitGridLayoutManager
 import com.programmersbox.mangaworld.views.EndlessScrollingListener
@@ -35,6 +37,7 @@ class MainActivity : AppCompatActivity() {
     private val adapter2 = GalleryListAdapter(this, disposable)
     private var pageNumber = 1
     private var mangaViewType: MangaListView by sharedPrefNotNullObjectDelegate(MangaListView.LINEAR)
+    private val lottie = LottieDrawable()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -65,14 +68,14 @@ class MainActivity : AppCompatActivity() {
                 }
                 R.id.changeSourcesMenu -> {
                     MaterialAlertDialogBuilder(this)
-                        .setTitle(getText(R.string.chooseASource))
-                        .setEnumSingleChoiceItems(Sources.values().map(Sources::name).toTypedArray(), currentSource) { source, dialog ->
-                            currentSource = source
-                            search_layout.hint = getString(R.string.searchHint, currentSource.name)
-                            reset()
-                            dialog.dismiss()
-                        }
-                        .show()
+                            .setTitle(getText(R.string.chooseASource))
+                            .setEnumSingleChoiceItems(Sources.values().map(Sources::name).toTypedArray(), currentSource) { source, dialog ->
+                                currentSource = source
+                                search_layout.hint = getString(R.string.searchHint, currentSource.name)
+                                reset()
+                                dialog.dismiss()
+                            }
+                            .show()
                     menuOptions.close() // To close the Speed Dial with animation
                     return@setOnActionSelectedListener true // false will close it without animation
                 }
@@ -110,22 +113,35 @@ class MainActivity : AppCompatActivity() {
 
     private fun setMangaView(mangaListView: MangaListView) {
         mangaViewType = mangaListView
-        changeViewType.setImageResource(if (mangaListView == MangaListView.LINEAR) android.R.drawable.ic_menu_gallery else android.R.drawable.stat_notify_more)
+        lottie.check(mangaListView == MangaListView.LINEAR)
         when (mangaListView) {
             MangaListView.LINEAR -> listView()
             MangaListView.GRID -> galleryView()
         }
     }
 
+    private fun LottieDrawable.check(checked: Boolean) {
+        val endProgress = if (checked) 1f else 0f
+        val animator = ValueAnimator.ofFloat(progress, endProgress)
+                .apply { addUpdateListener { animation: ValueAnimator -> progress = animation.animatedValue as Float } }
+        animator.start()
+    }
+
     private fun rvSetup() {
+
+        LottieCompositionFactory.fromRawRes(this, R.raw.list_to_grid).addListener {
+            lottie.composition = it
+            changeViewType.setImageDrawable(lottie)
+        }
+
         setMangaView(mangaViewType)
 
         changeViewType.setOnClickListener {
             setMangaView(
-                when (mangaViewType) {
-                    MangaListView.LINEAR -> MangaListView.GRID
-                    MangaListView.GRID -> MangaListView.LINEAR
-                }
+                    when (mangaViewType) {
+                        MangaListView.LINEAR -> MangaListView.GRID
+                        MangaListView.GRID -> MangaListView.LINEAR
+                    }
             )
         }
 

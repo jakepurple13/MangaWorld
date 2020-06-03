@@ -23,7 +23,8 @@
             app:fastScrollHorizontalTrackDrawable="@drawable/line_drawable"
             app:fastScrollVerticalThumbDrawable="@drawable/thumb_drawable"
             app:fastScrollVerticalTrackDrawable="@drawable/line_drawable"
-            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+            app:spanCount="3"
             tools:itemCount="10"
             tools:listitem="@layout/manga_list_item" />
 
@@ -54,10 +55,10 @@
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/favorite_search_layout"
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                    app:endIconMode="clear_text"
-                    android:hint="Search Favorites"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    android:hint="Search Favorites"
+                    app:endIconMode="clear_text">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/favorite_search_info"
@@ -68,10 +69,10 @@
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <HorizontalScrollView
-                    android:layout_below="@id/favorite_search_layout"
                     android:layout_width="match_parent"
-                    android:layout_marginHorizontal="5dp"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/favorite_search_layout"
+                    android:layout_marginHorizontal="5dp">
 
                     <com.google.android.material.chip.ChipGroup
                         android:id="@+id/sourceFilter"
