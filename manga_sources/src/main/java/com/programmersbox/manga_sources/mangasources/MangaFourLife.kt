@@ -9,14 +9,31 @@ import org.jsoup.Jsoup
 
 object MangaFourLife : MangaSource {
 
-    override fun getManga(pageNumber: Int): List<MangaModel> = getJsonApi<List<Life>>("https://manga4life.com/_search.php")?.map {
-        MangaModel(
-            title = it.s.toString(),
-            description = "",
-            mangaUrl = "https://manga4life.com/manga/${it.i}",
-            imageUrl = "https://static.mangaboss.net/cover/${it.i}.jpg",
-            source = Sources.MANGA_4_LIFE
-        )
+    override fun getManga(pageNumber: Int): List<MangaModel> = try {
+        "vm\\.Directory = (.*?.*;)".toRegex()
+            .find(Jsoup.connect("https://manga4life.com/search/?sort=lt&desc=true").get().html())
+            ?.groupValues?.get(1)?.dropLast(1)
+            ?.fromJson<List<LifeBase>>()
+            ?.sortedByDescending { m -> m.lt?.let { 1000 * it.toDouble() } }
+            ?.map {
+                MangaModel(
+                    title = it.s.toString(),
+                    description = "Last updated: ${it.ls}",
+                    mangaUrl = "https://manga4life.com/manga/${it.i}",
+                    imageUrl = "https://static.mangaboss.net/cover/${it.i}.jpg",
+                    source = Sources.MANGA_4_LIFE
+                )
+            }
+    } catch (e: Exception) {
+        getJsonApi<List<Life>>("https://manga4life.com/_search.php")?.map {
+            MangaModel(
+                title = it.s.toString(),
+                description = "",
+                mangaUrl = "https://manga4life.com/manga/${it.i}",
+                imageUrl = "https://static.mangaboss.net/cover/${it.i}.jpg",
+                source = Sources.MANGA_4_LIFE
+            )
+        }
     }.orEmpty()
 
     override fun toInfoModel(model: MangaModel): MangaInfoModel {
@@ -88,5 +105,24 @@ object MangaFourLife : MangaSource {
     private data class Life(val i: String?, val s: String?, val a: List<String>?)
 
     private data class LifeChapter(val Chapter: String?, val Type: String?, val Date: String?, val ChapterName: String?)
+
+    private data class LifeBase(
+        val i: String?,
+        val s: String?,
+        val o: String?,
+        val ss: String?,
+        val ps: String?,
+        val t: String?,
+        val v: String?,
+        val vm: String?,
+        val y: String?,
+        val a: List<String>?,
+        val al: List<String>?,
+        val l: String?,
+        val lt: Number?,
+        val ls: String?,
+        val g: List<String>?,
+        val h: Boolean?
+    )
 
 }

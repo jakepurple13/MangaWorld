@@ -7,14 +7,13 @@ object Manganelo : MangaSource {
 
     override val hasMorePages: Boolean = true
 
-    override fun searchManga(searchText: CharSequence, pageNumber: Int, mangaList: List<MangaModel>): List<MangaModel> =
-        mangaList.filter { it.title.contains(searchText, true) }
+    //override fun searchManga(searchText: CharSequence, pageNumber: Int, mangaList: List<MangaModel>): List<MangaModel> =
     //TODO: Work on this
     //Jsoup.connect("https://m.manganelo.com/advanced_search?s=all&orby=az&page=$pageNumber&keyw=${searchText.replace(" ".toRegex(), "_")}").get()
     //.toMangaModel()
 
     override fun getManga(pageNumber: Int): List<MangaModel> =
-        Jsoup.connect("https://m.manganelo.com/advanced_search?s=all&orby=az&page=$pageNumber").get().toMangaModel()
+        Jsoup.connect("https://m.manganelo.com/advanced_search?s=all&orby=newest&page=$pageNumber").get().toMangaModel()
 
     private fun Document.toMangaModel() = select("div.content-genres-item").map {
         MangaModel(
@@ -29,25 +28,22 @@ object Manganelo : MangaSource {
     override fun toInfoModel(model: MangaModel): MangaInfoModel {
         val doc = Jsoup.connect(model.mangaUrl).get()
         val info = doc.select("tbody").select("tr").select("td.table-value")
-        val name = info[0].select("td.table-value").map { it.text() }
-        val genre = info[3].select("td.table-value").select("a").map { it.text() }
-        val chapters = doc.select("ul.row-content-chapter").select("li.a-h").map {
-            ChapterModel(
-                name = it.select("a.chapter-name").text(),
-                url = it.select("a.chapter-name").attr("abs:href"),
-                uploaded = it.select("span.chapter-time").attr("title"),
-                sources = model.source
-            )
-        }
 
         return MangaInfoModel(
             title = model.title,
-            description = model.description,
+            description = doc.select("div.panel-story-info-description").text().removePrefix("Description :").trim(),
             mangaUrl = model.mangaUrl,
             imageUrl = model.imageUrl,
-            chapters = chapters,
-            genres = genre,
-            alternativeNames = name
+            chapters = doc.select("ul.row-content-chapter").select("li.a-h").map {
+                ChapterModel(
+                    name = it.select("a.chapter-name").text(),
+                    url = it.select("a.chapter-name").attr("abs:href"),
+                    uploaded = it.select("span.chapter-time").attr("title"),
+                    sources = model.source
+                )
+            },
+            genres = info.getOrNull(3)?.select("td.table-value")?.select("a")?.map { it.text() }.orEmpty(),
+            alternativeNames = info.getOrNull(0)?.select("td.table-value")?.map { it.text() }.orEmpty()
         )
     }
 

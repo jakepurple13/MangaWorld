@@ -60,7 +60,7 @@ object MangaDog : MangaSource {
         pages = Jsoup.connect(chapterModel.url).get().body().select("img[data-src]").map { it.select("img").attr("data-src") }
     )
 
-    override val hasMorePages: Boolean get() = true
+    override val hasMorePages: Boolean = true
 
     private data class Base(val data: List<DataTwo>?, val code: Number?, val msg: String?)
 

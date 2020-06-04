@@ -28,16 +28,21 @@
             android:layout_height="wrap_content"
             android:layout_margin="5dp">
 
-            <TextView
-                android:id="@+id/chapterName"
+            <com.google.android.material.checkbox.MaterialCheckBox
+                android:id="@+id/readChapter"
                 style="@style/TextAppearance.MaterialComponents.Body1"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_marginEnd="5dp"
                 android:text="@{chapter.name}"
-                app:layout_constraintEnd_toEndOf="parent"
+                app:checkedButtonTint="@{swatch}"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/startReading"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:titleColor="@{swatch}"
+                tools:checked="true"
+                tools:checkedButtonTint="@sample/sample_colors"
                 tools:text="@tools:sample/full_names"
                 tools:textColor="@sample/sample_colors" />
 
@@ -48,10 +53,23 @@
                 android:layout_height="wrap_content"
                 android:text="@{chapter.uploaded}"
                 app:bodyColor="@{swatch}"
+                android:onClick="@{() -> startReading.performClick()}"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/chapterName"
+                app:layout_constraintBottom_toBottomOf="parent"
                 tools:text="@tools:sample/date/mmddyy"
                 tools:textColor="@sample/sample_colors" />
+
+            <ImageView
+                android:id="@+id/startReading"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:src="@android:drawable/ic_media_play"
+                app:layout_constraintBottom_toTopOf="@id/uploadedInfo"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="@+id/uploadedInfo"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:tint="@sample/sample_colors"
+                tools:ignore="ContentDescription" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

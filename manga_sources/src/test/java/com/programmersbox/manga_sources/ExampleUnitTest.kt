@@ -53,10 +53,17 @@ class ExampleUnitTest {
     fun life() {
         val f = MangaFourLife.getManga()
         println(f.size)
-        val d = f.find { it.title == "Dragon Ball" }!!.toInfoModel()
+        val d = f.filter { it.title.contains("Dragon", true) }.random().toInfoModel()
         println(d)
         val s = d.chapters.random().getPageInfo()
         println(s)
+    }
+
+    @Test
+    fun lifeTwo() {
+        val regex = "vm\\.Directory = (.*?);".toRegex()
+        val f = regex.find(Jsoup.connect("https://manga4life.com/search/?sort=lt&desc=true").get().html())
+        println(f?.groupValues?.get(1))
     }
 
     @Test
@@ -70,6 +77,16 @@ class ExampleUnitTest {
         //val f1 = getApi("https://mangadog.club/index/latestupdate/getUpdateResult?page=1")
         //println(f1)
         val f = MangaDog.getManga()
+        println(f.size)
+        val d = f.first().toInfoModel()
+        println(d)
+        val s = d.chapters.random().getPageInfo()
+        println(s)
+    }
+
+    @Test
+    fun nelo() {
+        val f = Manganelo.getManga()
         println(f.size)
         val d = f.first().toInfoModel()
         println(d)

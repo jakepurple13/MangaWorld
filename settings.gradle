@@ -1,3 +1,4 @@
+include ':manga_db'
 include ':library'
 include ':manga_sources'
 include ':app'

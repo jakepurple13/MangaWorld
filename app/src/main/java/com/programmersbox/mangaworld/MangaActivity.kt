@@ -1,14 +1,10 @@
 package com.programmersbox.mangaworld
 
-import android.animation.ValueAnimator
 import android.content.res.ColorStateList
 import android.graphics.Color
-import android.graphics.PorterDuff
-import android.graphics.PorterDuffColorFilter
 import android.os.Bundle
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
@@ -17,77 +13,130 @@ import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModel
 import androidx.palette.graphics.Palette
 import coil.api.load
-import com.airbnb.lottie.LottieAnimationView
-import com.airbnb.lottie.LottieProperty
-import com.airbnb.lottie.model.KeyPath
+import coil.transform.RoundedCornersTransformation
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
+import com.programmersbox.dragswipe.Direction
+import com.programmersbox.dragswipe.DragSwipeActionBuilder
+import com.programmersbox.dragswipe.DragSwipeAdapter
+import com.programmersbox.dragswipe.DragSwipeUtils
 import com.programmersbox.flowutils.collectOnUi
 import com.programmersbox.flowutils.invoke
 import com.programmersbox.gsonutils.getObjectExtra
-import com.programmersbox.helpfulutils.ItemRange
-import com.programmersbox.helpfulutils.addAll
-import com.programmersbox.helpfulutils.animateChildren
+import com.programmersbox.helpfulutils.*
 import com.programmersbox.loggingutils.Loged
+import com.programmersbox.manga_db.MangaDatabase
 import com.programmersbox.manga_sources.mangasources.MangaInfoModel
 import com.programmersbox.manga_sources.mangasources.MangaModel
 import com.programmersbox.mangaworld.adapters.ChapterListAdapter
 import com.programmersbox.mangaworld.databinding.ActivityMangaBinding
+import com.programmersbox.mangaworld.utils.MangaInfoCache
+import com.programmersbox.mangaworld.utils.toMangaDbModel
+import com.programmersbox.mangaworld.utils.usePalette
+import com.programmersbox.thirdpartyutils.changeTint
+import com.programmersbox.thirdpartyutils.check
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.addTo
+import io.reactivex.rxkotlin.subscribeBy
+import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_manga.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import me.zhanghai.android.fastscroll.FastScrollerBuilder
 
 class MangaActivity : AppCompatActivity() {
 
+    private val dao by lazy { MangaDatabase.getInstance(this).mangaDao() }
     private var range: ItemRange<String> = ItemRange()
+    private val disposable = CompositeDisposable()
 
     @Suppress("EXPERIMENTAL_API_USAGE")
     private var isFavorite = MutableStateFlow(false)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val binding: ActivityMangaBinding = DataBindingUtil.setContentView(this@MangaActivity, R.layout.activity_manga)
+
+        val manga = intent.getObjectExtra<MangaModel>("manga", null)
+
+        isFavorite.collectOnUi { favoriteManga.check(it) }
+        isFavorite.collectOnUi { favoriteInfo.text = getText(if (it) R.string.removeFromFavorites else R.string.addToFavorites) }
+
+        loadMangaInfo(binding, manga)
+    }
+
+    private fun loadMangaInfo(binding: ActivityMangaBinding, manga: MangaModel?) {
         GlobalScope.launch {
-            val model = intent.getObjectExtra<MangaModel>("manga", null)?.toInfoModel()
+            val model = MangaInfoCache.getInfo()?.find { it.mangaUrl == manga?.mangaUrl } ?: manga?.toInfoModel()?.also(MangaInfoCache::newInfo)
             runOnUiThread {
-                val binding: ActivityMangaBinding = DataBindingUtil.setContentView(this@MangaActivity, R.layout.activity_manga)
-                val swatch = intent.getObjectExtra<Palette.Swatch>("swatch", null)
+                val swatch = if (usePalette) intent.getObjectExtra<Palette.Swatch>("swatch", null) else null
                 moreInfoSetup(swatch)
                 binding.info = model
-                binding.swatch = SwatchInfo(swatch?.rgb, swatch?.titleTextColor, swatch?.bodyTextColor)
+                binding.swatch = swatch?.let { SwatchInfo(it.rgb, it.titleTextColor, it.bodyTextColor) }
                 binding.presenter = this@MangaActivity
                 mangaSetup(model, swatch)
                 favoriteManga.changeTint(swatch?.rgb ?: Color.WHITE)
-                isFavorite
-                    .map { if (it) 1f else 0f }
-                    .map { ValueAnimator.ofFloat(favoriteManga.progress, it) }
-                    .collectOnUi {
-                        it.addUpdateListener { animation: ValueAnimator -> favoriteManga.progress = animation.animatedValue as Float }
-                        it.start()
-                    }
-                isFavorite.collectOnUi { favoriteInfo.text = if (it) "Remove from Favorites" else "Add to Favorites" }
-                isFavorite.collectOnUi { Toast.makeText(this@MangaActivity, "Work in Progress...", Toast.LENGTH_SHORT).show() }
-                //on this click you will send the request to favorite or unfavorite
-                //on reply, update isFavorite
-                //OR
-                //change isFavorite here and when this activity is opened, get the response from wherever to check if this is in favorite
-                favoriteManga.setOnClickListener { isFavorite(!isFavorite()) }
-                favoriteInfo.setOnClickListener { favoriteManga.performClick() }
+                dbLoad(manga)
             }
         }
     }
 
-    private fun LottieAnimationView.changeTint(newColor: Int) =
-        addValueCallback(KeyPath("**"), LottieProperty.COLOR_FILTER) { PorterDuffColorFilter(newColor, PorterDuff.Mode.SRC_ATOP) }
+    private fun dbLoad(manga: MangaModel?) {
+        favoriteManga.setOnClickListener {
+            manga?.toMangaDbModel((mangaInfoChapterList.adapter as? DragSwipeAdapter<*, *>)?.itemCount ?: 0)
+                ?.let { it1 -> if (isFavorite()) dao.deleteManga(it1) else if (!isFavorite()) dao.insertManga(it1) else null }
+                ?.subscribeOn(Schedulers.io())
+                ?.observeOn(AndroidSchedulers.mainThread())
+                ?.subscribe { isFavorite(!isFavorite()) }
+        }
+
+        manga?.mangaUrl?.let {
+            dao.getMangaById(it)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeBy(onSuccess = { isFavorite(true) }, onError = { isFavorite(false) })
+                .addTo(disposable)
+        }
+    }
 
     private fun mangaSetup(mangaInfoModel: MangaInfoModel?, swatch: Palette.Swatch?) {
-        Loged.r(mangaInfoModel)
-        mangaInfoModel?.let { manga ->
-            range.itemList.addAll(manga.title, *manga.alternativeNames.toTypedArray())
-            swatch?.rgb?.let { mangaInfoLayout.setBackgroundColor(it) }
-            mangaInfoChapterList.adapter = ChapterListAdapter(dataList = manga.chapters.toMutableList(), context = this, swatch = swatch)
+        GlobalScope.launch {
+            val read = mangaInfoModel?.mangaUrl?.let { dao.getReadChaptersByIdNonFlow(it) }
+            runOnUiThread {
+                Loged.r(mangaInfoModel)
+                mangaInfoModel?.let { manga ->
+                    range.itemList.addAll(manga.title, *manga.alternativeNames.toTypedArray())
+                    swatch?.rgb?.let { mangaInfoLayout.setBackgroundColor(it) }
+                    mangaInfoChapterList.adapter = ChapterListAdapter(
+                        dataList = manga.chapters.toMutableList(), context = this@MangaActivity, swatch = swatch,
+                        mangaUrl = mangaInfoModel.mangaUrl, dao = dao, chapters = read
+                    )
+
+                    DragSwipeUtils.setDragSwipeUp(
+                        mangaInfoChapterList.adapter as ChapterListAdapter,
+                        mangaInfoChapterList,
+                        swipeDirs = listOf(Direction.START, Direction.END),
+                        dragSwipeActions = DragSwipeActionBuilder {
+                            onSwiped { viewHolder, _, adapter ->
+                                adapter.notifyItemChanged(viewHolder.adapterPosition)
+                                viewHolder.itemView.performClick()
+                            }
+                        }
+                    )
+
+                    FastScrollerBuilder(mangaInfoChapterList)
+                        .useMd2Style()
+                        .whatIfNotNull(getDrawable(R.drawable.afs_md2_thumb)) { drawable ->
+                            swatch?.bodyTextColor?.let { drawable.changeDrawableColor(it) }
+                            setThumbDrawable(drawable)
+                        }
+                        .build()
+                }
+            }
         }
+
     }
 
     fun titles() {
@@ -141,49 +190,55 @@ class MangaActivity : AppCompatActivity() {
 
     private class ConstraintRanges(val layout: ConstraintLayout, vararg items: ConstraintSet, loop: Boolean = true) :
         ItemRange<ConstraintSet>(*items, loop = loop)
+
+    override fun onDestroy() {
+        disposable.dispose()
+        super.onDestroy()
+    }
 }
 
 @BindingAdapter("coverImage")
-fun loadImage(view: ImageView, imageUrl: String) {
+fun loadImage(view: ImageView, imageUrl: String?) {
     view.load(imageUrl) {
         size(360, 480)
         placeholder(R.mipmap.ic_launcher)
         error(R.mipmap.ic_launcher)
         crossfade(true)
+        transformations(RoundedCornersTransformation(30f))
     }
 }
 
 @BindingAdapter("otherNames")
-fun otherNames(view: TextView, names: List<String>) {
-    view.text = names.joinToString("\n\n")
+fun otherNames(view: TextView, names: List<String>?) {
+    view.text = names?.joinToString("\n\n")
 }
 
 @BindingAdapter("genreList", "swatch")
-fun loadGenres(view: ChipGroup, genres: List<String>, swatchInfo: SwatchInfo) {
-    genres.forEach {
+fun loadGenres(view: ChipGroup, genres: List<String>?, swatchInfo: SwatchInfo?) {
+    genres?.forEach {
         view.addView(Chip(view.context).apply {
             text = it
             isCheckable = false
             isClickable = false
-            swatchInfo.rgb?.let { setTextColor(it) }
-            swatchInfo.bodyColor?.let { chipBackgroundColor = ColorStateList.valueOf(it) }
+            swatchInfo?.rgb?.let { setTextColor(it) }
+            swatchInfo?.bodyColor?.let { chipBackgroundColor = ColorStateList.valueOf(it) }
         })
     }
 }
 
 @BindingAdapter("titleColor")
-fun titleColor(view: TextView, swatchInfo: SwatchInfo) {
-    swatchInfo.titleColor?.let { view.setTextColor(it) }
+fun titleColor(view: TextView, swatchInfo: SwatchInfo?) {
+    swatchInfo?.titleColor?.let { view.setTextColor(it) }
 }
 
 @BindingAdapter("bodyColor")
-fun bodyColor(view: TextView, swatchInfo: SwatchInfo) {
-    swatchInfo.bodyColor?.let { view.setTextColor(it) }
+fun bodyColor(view: TextView, swatchInfo: SwatchInfo?) {
+    swatchInfo?.bodyColor?.let { view.setTextColor(it) }
 }
 
 @BindingAdapter("linkColor")
-fun linkColor(view: TextView, swatchInfo: SwatchInfo) {
-    swatchInfo.bodyColor?.let { view.setLinkTextColor(it) }
+fun linkColor(view: TextView, swatchInfo: SwatchInfo?) {
+    swatchInfo?.bodyColor?.let { view.setLinkTextColor(it) }
 }
 
 data class SwatchInfo(val rgb: Int?, val titleColor: Int?, val bodyColor: Int?) : ViewModel()

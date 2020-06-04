@@ -9,8 +9,10 @@ import org.jsoup.nodes.Document
 object MangaHere : MangaSource {
 
     private const val baseUrl = "https://www.mangahere.cc"
+    //http://www.mangahere.cc/mangalist/
 
-    override fun getManga(pageNumber: Int): List<MangaModel> = Jsoup.connect("$baseUrl/directory/$pageNumber.htm").get()
+    override fun getManga(pageNumber: Int): List<MangaModel> = Jsoup.connect("$baseUrl/directory/$pageNumber.htm?latest")
+        .cookie("isAdult", "1").get()
         .select(".manga-list-1-list li").map {
             MangaModel(
                 title = it.select("a").first().attr("title"),
@@ -41,9 +43,7 @@ object MangaHere : MangaSource {
         )
     }
 
-    override fun getPageInfo(chapterModel: ChapterModel): PageModel {
-        return pageListParse(Jsoup.connect(chapterModel.url).get())
-    }
+    override fun getPageInfo(chapterModel: ChapterModel): PageModel = pageListParse(Jsoup.connect(chapterModel.url).get())
 
     private fun pageListParse(document: Document): PageModel {
         val bar = document.select("script[src*=chapter_bar]")
@@ -160,6 +160,5 @@ object MangaHere : MangaSource {
     }
 
     override val hasMorePages: Boolean = true
-
 
 }

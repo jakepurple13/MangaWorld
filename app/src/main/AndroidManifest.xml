@@ -13,7 +13,15 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name=".ReadActivity"></activity>
+        <service
+            android:name=".UpdateCheckService"
+            android:exported="false" />
+
+        <activity android:name=".SettingsActivity" />
+        <activity android:name=".FavoriteActivity" />
+        <activity
+            android:name=".ReadActivity"
+            android:theme="@style/AppTheme.Fullscreen" />
         <activity android:name=".MangaActivity" />
         <activity android:name=".MainActivity">
             <intent-filter>
