@@ -92,7 +92,7 @@ class MainActivity : AppCompatActivity() {
     private fun loadNewManga() {
         refresh.isRefreshing = true
         GlobalScope.launch {
-            val list = currentSource().getManga(pageNumber++).toList()
+            val list = currentSource.getManga(pageNumber++).toList()
             mangaList.addAll(list)
             runOnUiThread {
                 adapter.addItems(list)
@@ -129,28 +129,19 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun rvSetup() {
-
         LottieCompositionFactory.fromRawRes(this, R.raw.list_to_grid).addListener {
             lottie.composition = it
             changeViewType.setImageDrawable(lottie)
         }
 
         setMangaView(mangaViewType)
-
-        changeViewType.setOnClickListener {
-            setMangaView(
-                when (mangaViewType) {
-                    MangaListView.LINEAR -> MangaListView.GRID
-                    MangaListView.GRID -> MangaListView.LINEAR
-                }
-            )
-        }
+        changeViewType.setOnClickListener { setMangaView(!mangaViewType) }
 
         loadNewManga()
 
         mangaRV.addOnScrollListener(object : EndlessScrollingListener(mangaRV.layoutManager!!) {
             override fun onLoadMore(page: Int, totalItemsCount: Int, view: RecyclerView?) {
-                if (currentSource().hasMorePages && search_info.text.isNullOrEmpty()) loadNewManga()
+                if (currentSource.hasMorePages && search_info.text.isNullOrEmpty()) loadNewManga()
             }
         })
 
@@ -167,7 +158,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun searchSetup() {
         search_layout.hint = getString(R.string.searchHint, currentSource.name)
-        search_info.doOnTextChanged { text, _, _, _ -> adapter.setListNotify(currentSource().searchManga(text.toString(), pageNumber, mangaList)) }
+        search_info.doOnTextChanged { text, _, _, _ -> adapter.setListNotify(currentSource.searchManga(text.toString(), pageNumber, mangaList)) }
         /*val searching = MutableStateFlow<CharSequence>("")
         searching
             .debounce(500)

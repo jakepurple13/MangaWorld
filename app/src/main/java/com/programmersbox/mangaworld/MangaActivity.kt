@@ -129,7 +129,7 @@ class MangaActivity : AppCompatActivity() {
                     FastScrollerBuilder(mangaInfoChapterList)
                         .useMd2Style()
                         .whatIfNotNull(getDrawable(R.drawable.afs_md2_thumb)) { drawable ->
-                            swatch?.rgb?.let { drawable.changeDrawableColor(it) }
+                            swatch?.bodyTextColor?.let { drawable.changeDrawableColor(it) }
                             setThumbDrawable(drawable)
                         }
                         .build()

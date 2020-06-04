@@ -15,8 +15,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="5dp"
-        app:cardCornerRadius="5dp"
-        tools:cardBackgroundColor="@sample/sample_colors">
+        app:cardCornerRadius="5dp">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/galleryListConstraintLayout"
@@ -28,6 +27,7 @@
                 android:layout_width="360px"
                 android:layout_height="480px"
                 android:src="@drawable/placeholder_image"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
@@ -36,15 +36,15 @@
 
             <TextView
                 android:id="@+id/galleryListTitle"
-                android:layout_width="0dp"
                 style="@style/TextAppearance.MaterialComponents.Body1"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_margin="5dp"
                 android:gravity="center"
                 android:maxLines="3"
+                android:text="@{model.title}"
                 android:textColor="#ffffff"
                 android:translationZ="1dp"
-                android:text="@{model.title}"
                 app:layout_constraintBottom_toBottomOf="@id/galleryListCover"
                 app:layout_constraintEnd_toEndOf="@id/galleryListCover"
                 app:layout_constraintStart_toStartOf="@id/galleryListCover"
@@ -54,12 +54,12 @@
                 android:id="@+id/gradient"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
-                app:layout_constraintTop_toTopOf="@id/galleryListCover"
-                app:layout_constraintBottom_toBottomOf="@id/galleryListCover"
-                app:layout_constraintStart_toStartOf="@id/galleryListCover"
-                app:layout_constraintEnd_toEndOf="@id/galleryListCover"
                 android:layout_gravity="bottom"
-                android:background="@drawable/gradient_shape" />
+                android:background="@drawable/gradient_shape"
+                app:layout_constraintBottom_toBottomOf="@id/galleryListCover"
+                app:layout_constraintEnd_toEndOf="@id/galleryListCover"
+                app:layout_constraintStart_toStartOf="@id/galleryListCover"
+                app:layout_constraintTop_toTopOf="@id/galleryListCover" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

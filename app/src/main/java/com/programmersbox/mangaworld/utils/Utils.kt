@@ -38,4 +38,11 @@ fun MangaDbModel.toMangaModel() = MangaModel(title, description, mangaUrl, image
 fun MangaModel.toMangaDbModel(numChapters: Int? = null) = MangaDbModel(title, description, mangaUrl, imageUrl, source)
     .apply { if (numChapters != null) this.numChapters = numChapters }
 
-enum class MangaListView { LINEAR, GRID }
+enum class MangaListView {
+    LINEAR, GRID;
+
+    operator fun not() = when (this) {
+        LINEAR -> GRID
+        GRID -> LINEAR
+    }
+}

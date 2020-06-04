@@ -1,7 +1,20 @@
 package com.programmersbox.manga_sources.mangasources
 
-enum class Sources(val isAdult: Boolean = false) {
-    MANGA_EDEN, MANGANELO, MANGA_HERE, INKR, MANGA_4_LIFE, MANGA_DOG, TSUMINO(true);
+enum class Sources(val isAdult: Boolean = false) : MangaSource {
+    MANGA_EDEN,
+    MANGANELO,
+    MANGA_HERE,
+    INKR,
+    MANGA_4_LIFE,
+    MANGA_DOG,
+    TSUMINO(true);
+
+    override val hasMorePages: Boolean get() = source().hasMorePages
+    override fun getManga(pageNumber: Int): List<MangaModel> = source().getManga(pageNumber)
+    override fun getPageInfo(chapterModel: ChapterModel): PageModel = source().getPageInfo(chapterModel)
+    override fun toInfoModel(model: MangaModel): MangaInfoModel = source().toInfoModel(model)
+    override fun searchManga(searchText: CharSequence, pageNumber: Int, mangaList: List<MangaModel>): List<MangaModel> =
+        source().searchManga(searchText, pageNumber, mangaList)
 
     operator fun invoke() = source()
     fun source(): MangaSource = when (this) {
