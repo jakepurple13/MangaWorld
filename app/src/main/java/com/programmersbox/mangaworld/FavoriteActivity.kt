@@ -62,6 +62,7 @@ class FavoriteActivity : AppCompatActivity() {
     private fun uiSetup() {
         favoriteMangaRV.layoutManager = AutoFitGridLayoutManager(this, 360).apply { orientation = GridLayoutManager.VERTICAL }
         favoriteMangaRV.adapter = adapter
+        favoriteMangaRV.setHasFixedSize(true)
 
         DragSwipeUtils.setDragSwipeUp(
             adapter, favoriteMangaRV,

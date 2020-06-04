@@ -144,6 +144,7 @@ class MainActivity : AppCompatActivity() {
                 if (currentSource.hasMorePages && search_info.text.isNullOrEmpty()) loadNewManga()
             }
         })
+        mangaRV.setHasFixedSize(true)
 
         refresh.setOnRefreshListener { reset() }
     }

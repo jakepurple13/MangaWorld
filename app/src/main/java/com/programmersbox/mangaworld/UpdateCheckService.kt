@@ -7,6 +7,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import androidx.core.app.TaskStackBuilder
 import com.programmersbox.gsonutils.putExtra
+import com.programmersbox.helpfulutils.GroupBehavior
 import com.programmersbox.helpfulutils.NotificationDslBuilder
 import com.programmersbox.helpfulutils.notificationManager
 import com.programmersbox.loggingutils.Loged
@@ -41,8 +42,11 @@ class UpdateCheckService : IntentService("UpdateCheckIntentService") {
         sendRunningNotification(100, 0, getText(R.string.startingUpdateCheck))
         val dao = MangaDatabase.getInstance(this@UpdateCheckService).mangaDao()
         GlobalScope.launch {
+            val mangaListSize: Int
             dao.getAllMangaSync()
-                .mapNotNull { model ->
+                .also { mangaListSize = it.size }
+                .mapIndexedNotNull { index, model ->
+                    sendRunningNotification(mangaListSize, index, model.title)
                     try {
                         Triple(model.numChapters, model.toMangaModel().toInfoModel(), model)
                     } catch (e: Exception) {
@@ -73,6 +77,7 @@ class UpdateCheckService : IntentService("UpdateCheckIntentService") {
                             } ?: bigTextStyle {
                                 bigText = getString(R.string.hadAnUpdate, pair.second.title, pair.second.chapters.firstOrNull()?.name.orEmpty())
                             }
+                            groupId = "mangaGroup"
                             pendingIntent { context ->
                                 TaskStackBuilder.create(context)
                                     .addParentStack(MainActivity::class.java)
@@ -88,10 +93,14 @@ class UpdateCheckService : IntentService("UpdateCheckIntentService") {
                     if (it.isNotEmpty()) n.notify(
                         42,
                         NotificationDslBuilder.builder(this@UpdateCheckService, "mangaChannel", R.mipmap.ic_launcher) {
-                            title = getString(R.string.updateNumber, it.size)
+                            title = getText(R.string.app_name)
+                            subText = resources.getQuantityString(R.plurals.updateAmount, it.size, it.size)
                             groupSummary = true
+                            groupAlertBehavior = GroupBehavior.ALL
+                            groupId = "mangaGroup"
                         }
                     )
+                    //maybe add bubble?
                     sendFinishedNotification()
                 }
         }

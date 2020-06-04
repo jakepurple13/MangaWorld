@@ -20,7 +20,7 @@ data class MangaModel(
     val source: Sources
 ) : ViewModel() {
     internal val extras = mutableMapOf<String, Any>()
-    fun toInfoModel() = source.source().toInfoModel(this)
+    fun toInfoModel() = source.toInfoModel(this)
 }
 
 data class MangaInfoModel(
@@ -34,7 +34,7 @@ data class MangaInfoModel(
 ) : ViewModel()
 
 data class ChapterModel(val name: String, val url: String, val uploaded: String, private val sources: Sources) : ViewModel() {
-    fun getPageInfo() = sources.source().getPageInfo(this)
+    fun getPageInfo() = sources.getPageInfo(this)
 }
 
 data class PageModel(val pages: List<String>)
