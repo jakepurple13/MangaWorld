@@ -178,7 +178,7 @@ class MainActivity : AppCompatActivity() {
 
         search_info
             .textChanges()
-            .map { it.isNullOrEmpty() }
+            .map(CharSequence::isEmpty)
             .subscribe(refresh::setEnabled)
             .addTo(disposable)
     }

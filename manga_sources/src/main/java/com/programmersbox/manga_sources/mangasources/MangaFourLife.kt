@@ -9,18 +9,6 @@ import org.jsoup.Jsoup
 
 object MangaFourLife : MangaSource {
 
-    override fun searchManga(searchText: CharSequence, pageNumber: Int, mangaList: List<MangaModel>): List<MangaModel> = try {
-        if (searchText.isBlank()) throw Exception("No search necessary")
-        "vm\\.Directory = (.*?.*;)".toRegex()
-            .find(Jsoup.connect("https://manga4life.com/search/?sort=lt&desc=true&name=$searchText").get().html())
-            ?.groupValues?.get(1)?.dropLast(1)
-            ?.fromJson<List<LifeBase>>()
-            ?.sortedByDescending { m -> m.lt?.let { 1000 * it.toDouble() } }
-            ?.map(toMangaModel)
-    } catch (e: Exception) {
-        super.searchManga(searchText, pageNumber, mangaList)
-    }.orEmpty()
-
     override fun getManga(pageNumber: Int): List<MangaModel> = try {
         "vm\\.Directory = (.*?.*;)".toRegex()
             .find(Jsoup.connect("https://manga4life.com/search/?sort=lt&desc=true").get().html())

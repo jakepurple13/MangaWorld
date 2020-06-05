@@ -58,10 +58,12 @@ class ExampleUnitTest {
     fun life() {
         val f = MangaFourLife.getManga()
         println(f.size)
-        val d = f.filter { it.title.contains("Dragon", true) }.random().toInfoModel()
+        val r = MangaFourLife.searchManga("solo", 1, f)
+        println(r)
+        /*val d = f.filter { it.title.contains("Dragon", true) }.random().toInfoModel()
         println(d)
         val s = d.chapters.random().getPageInfo()
-        println(s)
+        println(s)*/
     }
 
     @Test
