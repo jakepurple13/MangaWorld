@@ -27,13 +27,11 @@ class UpdateCheckService : IntentService("UpdateCheckIntentService") {
     private val disposable = CompositeDisposable()
 
     override fun onUnbind(intent: Intent?): Boolean {
-        notificationManager.cancel(42)
         disposable.dispose()
         return super.onUnbind(intent)
     }
 
     override fun onDestroy() {
-        notificationManager.cancel(42)
         disposable.dispose()
         super.onDestroy()
     }
