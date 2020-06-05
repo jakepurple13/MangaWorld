@@ -6,7 +6,7 @@ enum class Sources(val isAdult: Boolean = false) : MangaSource {
     MANGA_HERE,
     INKR,
     MANGA_4_LIFE,
-    MANGA_DOG,
+    //MANGA_DOG,
     TSUMINO(true);
 
     override val hasMorePages: Boolean get() = source().hasMorePages
@@ -23,7 +23,7 @@ enum class Sources(val isAdult: Boolean = false) : MangaSource {
         MANGA_HERE -> MangaHere
         INKR -> com.programmersbox.manga_sources.mangasources.INKR
         MANGA_4_LIFE -> MangaFourLife
-        MANGA_DOG -> MangaDog
+        //MANGA_DOG -> MangaDog
         TSUMINO -> Tsumino
     }
 }

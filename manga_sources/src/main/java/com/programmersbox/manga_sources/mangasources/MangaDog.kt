@@ -19,7 +19,7 @@ object MangaDog : MangaSource {
                 description = "Last Updated: ${it.last_update_time}",
                 mangaUrl = "/detail/${it.search_name}/${it.id}.html",
                 imageUrl = "$cdn${it.image?.replace("\\/", "/")}",
-                source = Sources.MANGA_DOG
+                source = Sources.INKR//MANGA_DOG
             ).apply { extras["comic_id"] = it.comic_id.toString() }
         }.orEmpty()
 
@@ -46,7 +46,7 @@ object MangaDog : MangaSource {
                         } catch (e: Exception) {
                             it.create_date.toString()
                         },
-                        sources = Sources.MANGA_DOG
+                        sources = Sources.INKR//MANGA_DOG
                     )
                 }
                 .orEmpty(),

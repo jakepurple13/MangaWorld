@@ -4,6 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_marginVertical="5dp"
     android:layout_gravity="center">
 
     <com.github.piasy.biv.view.BigImageView
@@ -19,4 +20,5 @@
         app:quickScaleEnabled="true"
         tools:ignore="ContentDescription"
         tools:src="@tools:sample/avatars" />
+
 </RelativeLayout>
