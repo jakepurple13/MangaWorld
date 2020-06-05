@@ -6,13 +6,13 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.widget.doOnTextChanged
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.airbnb.lottie.LottieCompositionFactory
 import com.airbnb.lottie.LottieDrawable
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.jakewharton.rxbinding2.widget.textChanges
 import com.programmersbox.gsonutils.sharedPrefNotNullObjectDelegate
 import com.programmersbox.helpfulutils.requestPermissions
 import com.programmersbox.helpfulutils.setEnumSingleChoiceItems
@@ -25,10 +25,14 @@ import com.programmersbox.mangaworld.utils.currentSource
 import com.programmersbox.mangaworld.utils.stayOnAdult
 import com.programmersbox.mangaworld.views.AutoFitGridLayoutManager
 import com.programmersbox.mangaworld.views.EndlessScrollingListener
+import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.addTo
+import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import java.util.concurrent.TimeUnit
 
 class MainActivity : AppCompatActivity() {
 
@@ -48,9 +52,9 @@ class MainActivity : AppCompatActivity() {
             if (!it.isGranted) Toast.makeText(this, "Need ${it.deniedPermissions} to work", Toast.LENGTH_SHORT).show()
         }
 
-        searchSetup()
         rvSetup()
         menuSetup()
+        searchSetup()
     }
 
     private fun menuSetup() {
@@ -154,18 +158,29 @@ class MainActivity : AppCompatActivity() {
         adapter.setListNotify(mangaList)
         adapter2.setListNotify(mangaList)
         pageNumber = 1
+        search_info.text?.clear()
         loadNewManga()
     }
 
     private fun searchSetup() {
         search_layout.hint = getString(R.string.searchHint, currentSource.name)
-        search_info.doOnTextChanged { text, _, _, _ -> adapter.setListNotify(currentSource.searchManga(text.toString(), pageNumber, mangaList)) }
-        /*val searching = MutableStateFlow<CharSequence>("")
-        searching
-            .debounce(500)
-            .map { currentSource!!().searchManga(it, pageNumber, mangaList) }
-            .collectOnUi { adapter.setListNotify(it) }
-        search_info.doOnTextChanged { text, _, _, _ -> searching(text!!) }*/
+        search_info
+            .textChanges()
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .debounce(500, TimeUnit.MILLISECONDS)
+            .map { currentSource.searchManga(it, 1, mangaList) }
+            .subscribe {
+                adapter.setData(it)
+                adapter2.setData(it)
+            }
+            .addTo(disposable)
+
+        search_info
+            .textChanges()
+            .map { it.isNullOrEmpty() }
+            .subscribe(refresh::setEnabled)
+            .addTo(disposable)
     }
 
     override fun onDestroy() {

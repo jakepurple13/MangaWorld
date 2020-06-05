@@ -2,23 +2,21 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_gravity="center">
 
-    <ImageView
+    <com.github.piasy.biv.view.BigImageView
         android:id="@+id/chapterPage"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="match_parent"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        app:optimizeDisplay="true"
+        app:tapToRetry="true"
+        app:zoomEnabled="true"
+        app:panEnabled="true"
+        app:quickScaleEnabled="true"
         tools:ignore="ContentDescription"
         tools:src="@tools:sample/avatars" />
-
-    <ProgressBar
-        android:id="@+id/loading"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_alignStart="@id/chapterPage"
-        android:layout_alignTop="@id/chapterPage"
-        android:layout_alignEnd="@id/chapterPage"
-        android:layout_alignBottom="@id/chapterPage" />
-
 </RelativeLayout>

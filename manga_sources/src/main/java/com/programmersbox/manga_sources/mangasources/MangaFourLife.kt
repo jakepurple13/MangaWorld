@@ -9,21 +9,25 @@ import org.jsoup.Jsoup
 
 object MangaFourLife : MangaSource {
 
+    override fun searchManga(searchText: CharSequence, pageNumber: Int, mangaList: List<MangaModel>): List<MangaModel> = try {
+        if (searchText.isBlank()) throw Exception("No search necessary")
+        "vm\\.Directory = (.*?.*;)".toRegex()
+            .find(Jsoup.connect("https://manga4life.com/search/?sort=lt&desc=true&name=$searchText").get().html())
+            ?.groupValues?.get(1)?.dropLast(1)
+            ?.fromJson<List<LifeBase>>()
+            ?.sortedByDescending { m -> m.lt?.let { 1000 * it.toDouble() } }
+            ?.map(toMangaModel)
+    } catch (e: Exception) {
+        super.searchManga(searchText, pageNumber, mangaList)
+    }.orEmpty()
+
     override fun getManga(pageNumber: Int): List<MangaModel> = try {
         "vm\\.Directory = (.*?.*;)".toRegex()
             .find(Jsoup.connect("https://manga4life.com/search/?sort=lt&desc=true").get().html())
             ?.groupValues?.get(1)?.dropLast(1)
             ?.fromJson<List<LifeBase>>()
             ?.sortedByDescending { m -> m.lt?.let { 1000 * it.toDouble() } }
-            ?.map {
-                MangaModel(
-                    title = it.s.toString(),
-                    description = "Last updated: ${it.ls}",
-                    mangaUrl = "https://manga4life.com/manga/${it.i}",
-                    imageUrl = "https://static.mangaboss.net/cover/${it.i}.jpg",
-                    source = Sources.MANGA_4_LIFE
-                )
-            }
+            ?.map(toMangaModel)
     } catch (e: Exception) {
         getJsonApi<List<Life>>("https://manga4life.com/_search.php")?.map {
             MangaModel(
@@ -35,6 +39,16 @@ object MangaFourLife : MangaSource {
             )
         }
     }.orEmpty()
+
+    private val toMangaModel: (LifeBase) -> MangaModel = {
+        MangaModel(
+            title = it.s.toString(),
+            description = "Last updated: ${it.ls}",
+            mangaUrl = "https://manga4life.com/manga/${it.i}",
+            imageUrl = "https://static.mangaboss.net/cover/${it.i}.jpg",
+            source = Sources.MANGA_4_LIFE
+        )
+    }
 
     override fun toInfoModel(model: MangaModel): MangaInfoModel {
         val doc = Jsoup.connect(model.mangaUrl).get()

@@ -49,5 +49,5 @@ dependencies {
     implementation "com.github.salomonbrys.kotson:kotson:2.5.0"
     implementation "com.github.jakepurple13.HelpfulTools:gsonutils:$jakepurple13"
     implementation "com.github.jakepurple13.HelpfulTools:helpfulutils:$jakepurple13"
-
+    testImplementation "org.json:json:20190722"
 }

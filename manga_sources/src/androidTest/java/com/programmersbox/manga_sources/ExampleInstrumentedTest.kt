@@ -2,6 +2,7 @@ package com.programmersbox.manga_sources
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import com.programmersbox.manga_sources.mangasources.INKR
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -18,5 +19,17 @@ class ExampleInstrumentedTest {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
         assertEquals("com.programmersbox.manga_sources.test", appContext.packageName)
+    }
+
+    @Test
+    fun inkr() {
+        val f = INKR.getManga()
+        println(f.size)
+        val r = INKR.searchManga("Breath", 1, f)
+        println(r)
+        val d = f.random().toInfoModel()
+        println(d)
+        val s = d.chapters.random().getPageInfo()
+        println(s)
     }
 }

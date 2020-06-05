@@ -3,18 +3,69 @@ package com.programmersbox.manga_sources.mangasources
 import androidx.annotation.WorkerThread
 import com.programmersbox.gsonutils.fromJson
 import com.programmersbox.gsonutils.getJsonApi
+import com.programmersbox.gsonutils.toJson
+import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
-import okhttp3.OkHttpClient
-import okhttp3.Response
-import okhttp3.ResponseBody
+import org.json.JSONObject
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.concurrent.TimeUnit
 import kotlin.experimental.and
 import kotlin.experimental.xor
 
 object INKR : MangaSource {
 
-    private val apiUrl = "https://api.mangarockhd.com/query/android500"
+    private const val apiUrl = "https://api.mangarockhd.com/query/android500"
+
+    //TODO: Work in progress
+    private fun searchMangaTest(searchText: CharSequence, pageNumber: Int, mangaList: List<MangaModel>): List<MangaModel> = try {
+        if (searchText.isBlank()) throw Exception("No search necessary")
+
+        val jsonType = "application/jsonType; charset=utf-8".toMediaTypeOrNull()
+
+        val client = OkHttpClient()
+
+        val request = Request.Builder()
+            .url("$apiUrl/mrs_search")
+            .post(RequestBody.create(jsonType, mapOf("type" to "series", "keywords" to searchText).toJson()))
+            .cacheControl(CacheControl.Builder().maxAge(10, TimeUnit.MINUTES).build())
+            .build()
+
+        val response = client.newCall(request).execute()
+
+        val idArray = JSONObject(response.body!!.string()).getJSONArray("data")
+
+        val request2 = Request.Builder()
+            .url("https://api.mangarockhd.com/meta")
+            .post(RequestBody.create(jsonType, idArray.toString()))
+            .cacheControl(CacheControl.Builder().maxAge(10, TimeUnit.MINUTES).build())
+            .build()
+
+        val response2 = client.newCall(request2).execute().body?.string() ?: throw Exception("Something went wrong")
+
+        val list = mutableListOf<MangaModel>()
+
+        val json = JSONObject(response2).getJSONObject("data")
+
+        for (i in 0 until idArray.length()) {
+            val id = idArray.get(i).toString()
+            list.add(
+                json.getJSONObject(id).let {
+                    MangaModel(
+                        title = it.getString("name"),
+                        description = "Total Chapters: ${it.getInt("total_chapters")}",
+                        mangaUrl = "$apiUrl/info?oid=${it.getString("oid")}&Country=",
+                        imageUrl = it.getString("thumbnail"),
+                        source = Sources.INKR
+                    )
+                }
+            )
+        }
+
+        list
+    } catch (e: Exception) {
+        super.searchManga(searchText, pageNumber, mangaList)
+    }
 
     override fun getManga(pageNumber: Int): List<MangaModel> = getJsonApi<InkrJson>("$apiUrl/mrs_latest")?.data?.map {
         MangaModel(
@@ -65,7 +116,7 @@ object INKR : MangaSource {
 
     @WorkerThread
     private fun getApis(url: String): String? {
-        val request = okhttp3.Request.Builder()
+        val request = Request.Builder()
             .url(url)
             .get()
             .build()

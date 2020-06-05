@@ -3,13 +3,12 @@ package com.programmersbox.mangaworld
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.programmersbox.gsonutils.getObjectExtra
 import com.programmersbox.helpfulutils.defaultSharedPref
+import com.programmersbox.helpfulutils.gone
 import com.programmersbox.manga_sources.mangasources.ChapterModel
-import com.veinhorn.scrollgalleryview.MediaInfo
-import com.veinhorn.scrollgalleryview.ScrollGalleryView
-import com.veinhorn.scrollgalleryview.builder.GallerySettings
-import com.veinhorn.scrollgalleryview.loader.GlideImageLoader
+import com.programmersbox.mangaworld.adapters.PageAdapter
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
@@ -20,33 +19,20 @@ import kotlinx.android.synthetic.main.activity_read.*
 class ReadActivity : AppCompatActivity() {
 
     private val disposable = CompositeDisposable()
-    private var pageList: List<String>? = null
     private var model: ChapterModel? = null
+    private val adapter = PageAdapter(this, mutableListOf())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_read)
 
+        readView.adapter = adapter
+
         model = intent.getObjectExtra<ChapterModel>("currentChapter")
 
-        val g = ScrollGalleryView.from(galleryView)
-            .settings(
-                GallerySettings
-                    .from(supportFragmentManager)
-                    .thumbnailSize(100)
-                    .enableZoom(true)
-                    .build()
-            )
-            .build()
-            .hideThumbnailsOnClick(true)
-            .hideThumbnailsAfter(2500)
-
-        Single.create<List<MediaInfo>> { emitter ->
+        Single.create<List<String>> { emitter ->
             try {
-                model?.getPageInfo()?.pages.orEmpty()
-                    .also { pageList = it }
-                    .map { MediaInfo.mediaLoader(GlideImageLoader(it)) }
-                    .run(emitter::onSuccess)
+                emitter.onSuccess(model?.getPageInfo()?.pages.orEmpty())
             } catch (e: Exception) {
                 emitter.onError(Throwable("Something went wrong. Please try again"))
             }
@@ -54,20 +40,24 @@ class ReadActivity : AppCompatActivity() {
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .doOnError { Toast.makeText(this, it.localizedMessage, Toast.LENGTH_SHORT).show() }
-            .subscribe { pages: List<MediaInfo> ->
-                g.addMedia(pages)
-                g.addOnImageLongClickListener { println("Downloading $it...") }
-                g.currentItem = model?.let { defaultSharedPref.getInt(it.url, 0) } ?: 0
+            .subscribe { pages: List<String> ->
+                readLoading
+                    .animate()
+                    .alpha(0f)
+                    .withEndAction { readLoading.gone() }
+                    .start()
+                adapter.addItems(pages)
+                readView.layoutManager!!.scrollToPosition(model?.url?.let { defaultSharedPref.getInt(it, 0) } ?: 0)
             }
             .addTo(disposable)
-
     }
 
     private fun saveCurrentChapterSpot() {
         model?.let {
             defaultSharedPref.edit().apply {
-                if (galleryView.currentItem == pageList?.lastIndex) remove(it.url)
-                else putInt(it.url, galleryView.currentItem)
+                val currentItem = (readView.layoutManager as LinearLayoutManager).findFirstCompletelyVisibleItemPosition()
+                if (currentItem >= adapter.dataList.size - 2) remove(it.url)
+                else putInt(it.url, currentItem)
             }.apply()
         }
     }

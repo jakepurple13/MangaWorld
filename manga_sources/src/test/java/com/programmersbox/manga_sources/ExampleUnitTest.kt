@@ -27,6 +27,9 @@ class ExampleUnitTest {
     fun here() {
         val f = MangaHere.getManga()
         println(f.size)
+        println(f.first())
+        val r = MangaHere.searchManga("Dragon", 1, f)
+        println(r)
         val d = f.first().toInfoModel()
         println(d)
         val c = d.chapters.first().getPageInfo()
@@ -43,6 +46,8 @@ class ExampleUnitTest {
     fun inkr() {
         val f = INKR.getManga()
         println(f.size)
+        val r = INKR.searchManga("Flower", 1, f)
+        println(r)
         val d = f.random().toInfoModel()
         println(d)
         val s = d.chapters.random().getPageInfo()

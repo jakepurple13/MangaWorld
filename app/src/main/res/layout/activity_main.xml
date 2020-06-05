@@ -65,7 +65,11 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_alignParentTop="true"
+                        android:imeOptions="actionSearch"
+                        android:inputType="text"
+                        android:maxLines="1"
                         tools:ignore="HardcodedText" />
+
                 </com.google.android.material.textfield.TextInputLayout>
 
             </RelativeLayout>
@@ -87,8 +91,8 @@
         android:id="@+id/changeViewType"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        tools:src="@drawable/baseline_list_black_18dp"
         app:layout_anchor="@id/app_bar"
-        app:layout_anchorGravity="end|bottom" />
+        app:layout_anchorGravity="end|bottom"
+        tools:src="@drawable/baseline_list_black_18dp" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

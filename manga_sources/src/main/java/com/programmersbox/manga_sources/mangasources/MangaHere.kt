@@ -1,10 +1,13 @@
 package com.programmersbox.manga_sources.mangasources
 
 import com.squareup.duktape.Duktape
+import okhttp3.CacheControl
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
+import java.util.concurrent.TimeUnit
 
 object MangaHere : MangaSource {
 
@@ -22,6 +25,42 @@ object MangaHere : MangaSource {
                 source = Sources.MANGA_HERE
             )
         }.filter { it.title.isNotEmpty() }
+
+    override fun searchManga(searchText: CharSequence, pageNumber: Int, mangaList: List<MangaModel>): List<MangaModel> = try {
+        if (searchText.isBlank()) throw Exception("No search necessary")
+        val url = "$baseUrl/search".toHttpUrlOrNull()!!.newBuilder().apply {
+            addEncodedQueryParameter("page", pageNumber.toString())
+            addEncodedQueryParameter("title", searchText.toString())
+            addEncodedQueryParameter("sort", null)
+            addEncodedQueryParameter("stype", 1.toString())
+            addEncodedQueryParameter("name", null)
+            addEncodedQueryParameter("author_method", "cw")
+            addEncodedQueryParameter("author", null)
+            addEncodedQueryParameter("artist_method", "cw")
+            addEncodedQueryParameter("artist", null)
+            addEncodedQueryParameter("rating_method", "eq")
+            addEncodedQueryParameter("rating", null)
+            addEncodedQueryParameter("released_method", "eq")
+            addEncodedQueryParameter("released", null)
+        }.build()
+        val request = Request.Builder()
+            .url(url)
+            .cacheControl(CacheControl.Builder().maxAge(10, TimeUnit.MINUTES).build())
+            .build()
+        val client = OkHttpClient().newCall(request).execute()
+        Jsoup.parse(client.body?.string()).select(".manga-list-4-list > li")
+            .map {
+                MangaModel(
+                    title = it.select("a").first().attr("title"),
+                    description = it.select("p.manga-list-4-item-tip").last().text(),
+                    mangaUrl = "$baseUrl${it.select(".manga-list-4-item-title > a").first().attr("href")}",
+                    imageUrl = it.select("img.manga-list-4-cover").first().attr("abs:src"),
+                    source = Sources.MANGA_HERE
+                )
+            }.filter { it.title.isNotEmpty() }
+    } catch (e: Exception) {
+        super.searchManga(searchText, pageNumber, mangaList)
+    }
 
     override fun toInfoModel(model: MangaModel): MangaInfoModel {
         val doc = Jsoup.connect(model.mangaUrl).get()
