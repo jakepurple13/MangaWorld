@@ -56,8 +56,11 @@
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/search_layout"
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_alignParentStart="true"
+                    android:layout_marginEnd="5dp"
+                    android:layout_toStartOf="@id/viewToggle"
                     app:endIconMode="clear_text">
 
                     <com.google.android.material.textfield.TextInputEditText
@@ -72,6 +75,34 @@
 
                 </com.google.android.material.textfield.TextInputLayout>
 
+                <com.google.android.material.button.MaterialButtonToggleGroup
+                    android:id="@+id/viewToggle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginEnd="5dp"
+                    android:orientation="horizontal"
+                    app:checkedButton="@id/showListView"
+                    app:selectionRequired="true"
+                    app:singleSelection="true">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/showListView"
+                        style="@style/Widget.App.Button.OutlinedButton.IconOnly"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:icon="@drawable/baseline_list_black_18dp" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/showGalleryView"
+                        style="@style/Widget.App.Button.OutlinedButton.IconOnly"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:icon="@drawable/baseline_view_module_black_18dp" />
+
+                </com.google.android.material.button.MaterialButtonToggleGroup>
+
             </RelativeLayout>
         </com.google.android.material.appbar.CollapsingToolbarLayout>
     </com.google.android.material.appbar.AppBarLayout>
@@ -84,15 +115,9 @@
         android:layout_gravity="bottom|end"
         app:layout_behavior="@string/speeddial_scrolling_view_snackbar_behavior"
         app:sdExpansionMode="top"
-        app:sdMainFabClosedSrc="@android:drawable/ic_input_add"
+        app:sdMainFabClosedBackgroundColor="@color/colorPrimary"
+        app:sdMainFabClosedSrc="@drawable/baseline_menu_black_18dp"
+        app:sdMainFabOpenedBackgroundColor="@color/colorPrimary"
         app:sdUseReverseAnimationOnClose="true" />
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/changeViewType"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_anchor="@id/app_bar"
-        app:layout_anchorGravity="end|bottom"
-        tools:src="@drawable/baseline_list_black_18dp" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

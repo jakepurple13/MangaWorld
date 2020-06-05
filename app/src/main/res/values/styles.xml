@@ -6,7 +6,8 @@
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="popupMenuStyle">@style/Widget.MaterialComponents.PopupMenu</item>
-        <item name="actionOverflowMenuStyle">@style/Widget.MaterialComponents.PopupMenu.Overflow</item>
+        <item name="actionOverflowMenuStyle">@style/Widget.MaterialComponents.PopupMenu.Overflow
+        </item>
     </style>
 
     <style name="AppTheme.Fullscreen" parent="AppTheme">
@@ -14,6 +15,17 @@
         <item name="android:windowActionBar">false</item>
         <item name="android:windowFullscreen">true</item>
         <item name="android:windowContentOverlay">@null</item>
+    </style>
+
+    <style name="Widget.App.Button.OutlinedButton.IconOnly" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="iconPadding">0dp</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:paddingLeft">12dp</item>
+        <item name="android:paddingRight">12dp</item>
+        <item name="android:minWidth">48dp</item>
+        <item name="android:minHeight">48dp</item>
+        <item name="strokeColor">@color/colorPrimary</item>
     </style>
 
 </resources>

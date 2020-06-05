@@ -1,7 +1,6 @@
 package com.programmersbox.mangaworld
 
 import android.Manifest
-import android.animation.ValueAnimator
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
@@ -9,8 +8,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.airbnb.lottie.LottieCompositionFactory
-import com.airbnb.lottie.LottieDrawable
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.jakewharton.rxbinding2.widget.textChanges
 import com.programmersbox.gsonutils.sharedPrefNotNullObjectDelegate
@@ -42,7 +39,6 @@ class MainActivity : AppCompatActivity() {
     private val adapter2 = GalleryListAdapter(this, disposable)
     private var pageNumber = 1
     private var mangaViewType: MangaListView by sharedPrefNotNullObjectDelegate(MangaListView.LINEAR)
-    private val lottie = LottieDrawable()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -118,28 +114,19 @@ class MainActivity : AppCompatActivity() {
 
     private fun setMangaView(mangaListView: MangaListView) {
         mangaViewType = mangaListView
-        lottie.check(mangaListView == MangaListView.LINEAR)
         when (mangaListView) {
             MangaListView.LINEAR -> listView()
             MangaListView.GRID -> galleryView()
         }
     }
 
-    private fun LottieDrawable.check(checked: Boolean) {
-        val endProgress = if (checked) 1f else 0f
-        val animator = ValueAnimator.ofFloat(progress, endProgress)
-            .apply { addUpdateListener { animation: ValueAnimator -> progress = animation.animatedValue as Float } }
-        animator.start()
-    }
-
     private fun rvSetup() {
-        LottieCompositionFactory.fromRawRes(this, R.raw.list_to_grid).addListener {
-            lottie.composition = it
-            changeViewType.setImageDrawable(lottie)
-        }
 
         setMangaView(mangaViewType)
-        changeViewType.setOnClickListener { setMangaView(!mangaViewType) }
+
+        viewToggle.check(if (mangaViewType == MangaListView.GRID) R.id.showGalleryView else R.id.showListView)
+        showGalleryView.setOnClickListener { setMangaView(MangaListView.GRID) }
+        showListView.setOnClickListener { setMangaView(MangaListView.LINEAR) }
 
         loadNewManga()
 
