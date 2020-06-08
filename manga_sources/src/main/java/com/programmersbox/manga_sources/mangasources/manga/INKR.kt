@@ -1,9 +1,10 @@
-package com.programmersbox.manga_sources.mangasources
+package com.programmersbox.manga_sources.mangasources.manga
 
 import androidx.annotation.WorkerThread
 import com.programmersbox.gsonutils.fromJson
 import com.programmersbox.gsonutils.getJsonApi
 import com.programmersbox.gsonutils.toJson
+import com.programmersbox.manga_sources.mangasources.*
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import org.json.JSONObject
@@ -86,7 +87,7 @@ object INKR : MangaSource {
             chapters = it?.chapters?.map {
                 ChapterModel(
                     name = it.name.toString(),
-                    url = "${apiUrl}/pagesv3?oid=${it.oid}",
+                    url = "$apiUrl/pagesv3?oid=${it.oid}",
                     uploaded = "Last updated: ${SimpleDateFormat(
                         "MM/dd/yyyy hh:mm a",
                         Locale.getDefault()
@@ -112,7 +113,11 @@ object INKR : MangaSource {
 
     //TODO: Still working on this
     override fun getPageInfo(chapterModel: ChapterModel): PageModel =
-        PageModel(getJsonApis<InkrPages>(chapterModel.url)?.data?.map { it.url.toString() }.orEmpty())
+        PageModel(
+            getJsonApis<InkrPages>(
+                chapterModel.url
+            )?.data?.map { it.url.toString() }.orEmpty()
+        )
 
     @WorkerThread
     private fun getApis(url: String): String? {
@@ -125,7 +130,8 @@ object INKR : MangaSource {
     }
 
     @WorkerThread
-    private inline fun <reified T> getJsonApis(url: String) = getApis(url).fromJson<T>()
+    private inline fun <reified T> getJsonApis(url: String) = getApis(url)
+        .fromJson<T>()
 
     override val hasMorePages: Boolean = false
 

@@ -1,5 +1,6 @@
-package com.programmersbox.manga_sources.mangasources
+package com.programmersbox.manga_sources.mangasources.manga
 
+import com.programmersbox.manga_sources.mangasources.*
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 
@@ -49,10 +50,11 @@ object Manganelo : MangaSource {
         )
     }
 
-    override fun getPageInfo(chapterModel: ChapterModel): PageModel = PageModel(
-        Jsoup.connect(chapterModel.url).get()
-            .select("div.container-chapter-reader").select("img")
-            .map { it.select("img[src^=http]").attr("abs:src") }
-    )
+    override fun getPageInfo(chapterModel: ChapterModel): PageModel =
+        PageModel(
+            Jsoup.connect(chapterModel.url).get()
+                .select("div.container-chapter-reader").select("img")
+                .map { it.select("img[src^=http]").attr("abs:src") }
+        )
 
 }

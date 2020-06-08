@@ -1,10 +1,11 @@
-package com.programmersbox.manga_sources.mangasources
+package com.programmersbox.manga_sources.mangasources.manga
 
 import com.github.salomonbrys.kotson.get
 import com.github.salomonbrys.kotson.string
 import com.google.gson.JsonElement
 import com.programmersbox.gsonutils.fromJson
 import com.programmersbox.gsonutils.getJsonApi
+import com.programmersbox.manga_sources.mangasources.*
 import org.jsoup.Jsoup
 
 object MangaFourLife : MangaSource {
@@ -51,10 +52,12 @@ object MangaFourLife : MangaSource {
             mangaUrl = model.mangaUrl,
             imageUrl = model.imageUrl,
             chapters = "vm.Chapters = (.*?);".toRegex().find(doc.html())
-                ?.groupValues?.get(0)?.removePrefix("vm.Chapters = ")?.removeSuffix(";")?.fromJson<List<LifeChapter>>()?.map {
+                ?.groupValues?.get(0)?.removePrefix("vm.Chapters = ")?.removeSuffix(";")
+                ?.fromJson<List<LifeChapter>>()?.map {
                     ChapterModel(
                         name = chapterImage(it.Chapter!!),
-                        url = "https://manga4life.com/read-online/${model.mangaUrl.split("/").last()}${chapterURLEncode(it.Chapter)}",
+                        url = "https://manga4life.com/read-online/${model.mangaUrl.split("/")
+                            .last()}${chapterURLEncode(it.Chapter)}",
                         uploaded = it.Date.toString(),
                         sources = Sources.MANGA_4_LIFE
                     )

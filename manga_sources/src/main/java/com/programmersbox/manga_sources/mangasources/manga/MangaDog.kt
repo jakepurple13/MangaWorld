@@ -1,7 +1,8 @@
-package com.programmersbox.manga_sources.mangasources
+package com.programmersbox.manga_sources.mangasources.manga
 
 import android.annotation.SuppressLint
 import com.programmersbox.gsonutils.getJsonApi
+import com.programmersbox.manga_sources.mangasources.*
 import org.jsoup.Jsoup
 import java.text.SimpleDateFormat
 import java.util.*
@@ -56,9 +57,10 @@ object MangaDog : MangaSource {
         )
     }
 
-    override fun getPageInfo(chapterModel: ChapterModel): PageModel = PageModel(
-        pages = Jsoup.connect(chapterModel.url).get().body().select("img[data-src]").map { it.select("img").attr("data-src") }
-    )
+    override fun getPageInfo(chapterModel: ChapterModel): PageModel =
+        PageModel(
+            pages = Jsoup.connect(chapterModel.url).get().body().select("img[data-src]").map { it.select("img").attr("data-src") }
+        )
 
     override val hasMorePages: Boolean = true
 

@@ -4,7 +4,11 @@ import com.programmersbox.gsonutils.fromJson
 import com.programmersbox.gsonutils.toJson
 import com.programmersbox.gsonutils.toPrettyJson
 import com.programmersbox.helpfulutils.toHexString
-import com.programmersbox.manga_sources.mangasources.*
+import com.programmersbox.manga_sources.mangasources.MangaModel
+import com.programmersbox.manga_sources.mangasources.MangaSource
+import com.programmersbox.manga_sources.mangasources.Sources
+import com.programmersbox.manga_sources.mangasources.manga.MangaEden
+import com.programmersbox.manga_sources.mangasources.manga.Manganelo
 import org.junit.Test
 
 /**

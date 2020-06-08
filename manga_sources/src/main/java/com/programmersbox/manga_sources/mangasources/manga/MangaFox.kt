@@ -1,5 +1,6 @@
-package com.programmersbox.manga_sources.mangasources
+package com.programmersbox.manga_sources.mangasources.manga
 
+import com.programmersbox.manga_sources.mangasources.*
 import org.jsoup.Jsoup
 
 object MangaFox : MangaSource {

@@ -2,7 +2,7 @@ package com.programmersbox.manga_sources
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import com.programmersbox.manga_sources.mangasources.INKR
+import com.programmersbox.manga_sources.mangasources.manga.INKR
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith

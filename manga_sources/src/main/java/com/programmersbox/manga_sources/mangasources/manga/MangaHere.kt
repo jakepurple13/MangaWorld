@@ -1,5 +1,6 @@
-package com.programmersbox.manga_sources.mangasources
+package com.programmersbox.manga_sources.mangasources.manga
 
+import com.programmersbox.manga_sources.mangasources.*
 import com.squareup.duktape.Duktape
 import okhttp3.CacheControl
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
@@ -53,7 +54,8 @@ object MangaHere : MangaSource {
                 MangaModel(
                     title = it.select("a").first().attr("title"),
                     description = it.select("p.manga-list-4-item-tip").last().text(),
-                    mangaUrl = "$baseUrl${it.select(".manga-list-4-item-title > a").first().attr("href")}",
+                    mangaUrl = "$baseUrl${it.select(".manga-list-4-item-title > a")
+                        .first().attr("href")}",
                     imageUrl = it.select("img.manga-list-4-cover").first().attr("abs:src"),
                     source = Sources.MANGA_HERE
                 )
@@ -82,7 +84,8 @@ object MangaHere : MangaSource {
         )
     }
 
-    override fun getPageInfo(chapterModel: ChapterModel): PageModel = pageListParse(Jsoup.connect(chapterModel.url).get())
+    override fun getPageInfo(chapterModel: ChapterModel): PageModel =
+        pageListParse(Jsoup.connect(chapterModel.url).get())
 
     private fun pageListParse(document: Document): PageModel {
         val bar = document.select("script[src*=chapter_bar]")

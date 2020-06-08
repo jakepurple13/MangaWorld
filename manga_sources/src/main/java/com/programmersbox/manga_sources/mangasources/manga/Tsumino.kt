@@ -1,6 +1,7 @@
-package com.programmersbox.manga_sources.mangasources
+package com.programmersbox.manga_sources.mangasources.manga
 
 import com.programmersbox.gsonutils.getJsonApi
+import com.programmersbox.manga_sources.mangasources.*
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 
@@ -65,11 +66,12 @@ object Tsumino : MangaSource {
         return stringBuilder.toString()
     }
 
-    override fun getPageInfo(chapterModel: ChapterModel): PageModel = PageModel(
-        chapterModel.name.toIntOrNull()?.let { 1..it }?.map {
-            "https://content.tsumino.com/thumbs/${chapterModel.url}/$it"
-        }.orEmpty()
-    )
+    override fun getPageInfo(chapterModel: ChapterModel): PageModel =
+        PageModel(
+            chapterModel.name.toIntOrNull()?.let { 1..it }?.map {
+                "https://content.tsumino.com/thumbs/${chapterModel.url}/$it"
+            }.orEmpty()
+        )
 
     override val hasMorePages: Boolean = true
 

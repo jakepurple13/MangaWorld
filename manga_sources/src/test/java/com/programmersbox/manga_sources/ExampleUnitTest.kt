@@ -1,7 +1,7 @@
 package com.programmersbox.manga_sources
 
 import com.programmersbox.gsonutils.getApi
-import com.programmersbox.manga_sources.mangasources.*
+import com.programmersbox.manga_sources.mangasources.manga.*
 import org.jsoup.Jsoup
 import org.junit.Assert.assertEquals
 import org.junit.Test

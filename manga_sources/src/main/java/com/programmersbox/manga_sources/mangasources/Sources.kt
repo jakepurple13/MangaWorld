@@ -1,11 +1,14 @@
 package com.programmersbox.manga_sources.mangasources
 
+import com.programmersbox.manga_sources.mangasources.manga.*
+
 enum class Sources(val isAdult: Boolean = false) : MangaSource {
     MANGA_EDEN,
     MANGANELO,
     MANGA_HERE,
     INKR,
     MANGA_4_LIFE,
+
     //MANGA_DOG,
     TSUMINO(true);
 
@@ -21,7 +24,7 @@ enum class Sources(val isAdult: Boolean = false) : MangaSource {
         MANGANELO -> Manganelo
         MANGA_EDEN -> MangaEden
         MANGA_HERE -> MangaHere
-        INKR -> com.programmersbox.manga_sources.mangasources.INKR
+        INKR -> com.programmersbox.manga_sources.mangasources.manga.INKR
         MANGA_4_LIFE -> MangaFourLife
         //MANGA_DOG -> MangaDog
         TSUMINO -> Tsumino
