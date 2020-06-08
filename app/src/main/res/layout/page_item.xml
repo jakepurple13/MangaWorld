@@ -16,7 +16,7 @@
         app:optimizeDisplay="true"
         app:panEnabled="true"
         app:quickScaleEnabled="true"
-        app:tapToRetry="true"
+        app:tapToRetry="false"
         app:zoomEnabled="true"
         tools:ignore="ContentDescription"
         tools:src="@tools:sample/avatars" />

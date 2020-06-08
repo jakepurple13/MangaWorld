@@ -13,6 +13,7 @@ import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.programmersbox.dragswipe.DragSwipeAdapter
 import com.programmersbox.gsonutils.putExtra
 import com.programmersbox.helpfulutils.ConstraintRange
+import com.programmersbox.helpfulutils.ItemRange
 import com.programmersbox.helpfulutils.layoutInflater
 import com.programmersbox.manga_db.MangaDatabase
 import com.programmersbox.manga_sources.mangasources.MangaModel
@@ -48,7 +49,7 @@ class MangaListAdapter(context: Context, disposable: CompositeDisposable = Compo
 
     override fun MangaHolder.onBind(item: MangaModel, position: Int) {
 
-        var range = ConstraintRange(
+        var range: ItemRange<ConstraintSet> = ConstraintRange(
             constraintLayout,
             ConstraintSet().apply { clone(constraintLayout) },
             ConstraintSet().apply { clone(context, R.layout.manga_list_item_alt) }

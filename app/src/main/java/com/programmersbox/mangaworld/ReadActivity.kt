@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.programmersbox.gsonutils.getObjectExtra
 import com.programmersbox.helpfulutils.defaultSharedPref
 import com.programmersbox.helpfulutils.gone
@@ -26,7 +27,31 @@ class ReadActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_read)
 
+        /*var range = ConstraintRange(
+            readLayout,
+            ConstraintSet().apply { clone(readLayout) },
+            ConstraintSet().apply { clone(this@ReadActivity, R.layout.actvity_read_alt) }
+        )
+
+        GlobalScope.launch {
+            runOnUiThread { range.current = 0 }
+            delay(5000)
+            runOnUiThread { range.current = 1 }
+        }*/
+
         readView.adapter = adapter
+
+        readView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+                val l = recyclerView.layoutManager as LinearLayoutManager
+                val image = l.findLastCompletelyVisibleItemPosition()
+                if (image > -1) {
+                    val total = l.itemCount
+                    pageCount.text = String.format("%d/%d", image + 1, total)
+                }
+            }
+        })
 
         model = intent.getObjectExtra<ChapterModel>("currentChapter")
 
