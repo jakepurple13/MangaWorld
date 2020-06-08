@@ -179,8 +179,10 @@ class MangaActivity : AppCompatActivity() {
         moreInfo.setOnClickListener { set++ }
         swatch?.rgb?.let { moreInfo.setBackgroundColor(it) }
         swatch?.titleTextColor?.let { moreInfo.setTextColor(it) }
-        swatch?.rgb?.let { markChapters.setBackgroundColor(it) }
-        swatch?.titleTextColor?.let { markChapters.setTextColor(it) }
+        swatch?.rgb?.let {
+            markChapters.strokeColor = ColorStateList.valueOf(it)
+            markChapters.setTextColor(it)
+        }
     }
 
     private class ConstraintRangeSet(private val rootLayout: ConstraintLayout, vararg items: ConstraintRanges, loop: Boolean = true) :
