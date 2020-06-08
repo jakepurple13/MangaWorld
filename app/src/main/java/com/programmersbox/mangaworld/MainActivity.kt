@@ -160,6 +160,7 @@ class MainActivity : AppCompatActivity() {
             .subscribe {
                 adapter.setData(it)
                 adapter2.setData(it)
+                mangaRV.smoothScrollToPosition(0)
             }
             .addTo(disposable)
 

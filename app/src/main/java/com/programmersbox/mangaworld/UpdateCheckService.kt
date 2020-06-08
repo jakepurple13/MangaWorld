@@ -9,10 +9,12 @@ import androidx.core.app.TaskStackBuilder
 import com.programmersbox.gsonutils.putExtra
 import com.programmersbox.helpfulutils.GroupBehavior
 import com.programmersbox.helpfulutils.NotificationDslBuilder
+import com.programmersbox.helpfulutils.intersect
 import com.programmersbox.helpfulutils.notificationManager
 import com.programmersbox.loggingutils.Loged
 import com.programmersbox.loggingutils.f
 import com.programmersbox.manga_db.MangaDatabase
+import com.programmersbox.manga_sources.mangasources.Sources
 import com.programmersbox.mangaworld.utils.toMangaModel
 import io.reactivex.disposables.CompositeDisposable
 import kotlinx.coroutines.GlobalScope
@@ -42,6 +44,11 @@ class UpdateCheckService : IntentService("UpdateCheckIntentService") {
         GlobalScope.launch {
             val mangaListSize: Int
             dao.getAllMangaSync()
+                .let {
+                    it.intersect(Sources.values().filterNot(Sources::isAdult)
+                        .filter { s -> it.any { m -> m.source == s } }
+                        .flatMap { m -> m.getManga() }) { o, n -> o.mangaUrl == n.mangaUrl }
+                }
                 .also { mangaListSize = it.size }
                 .mapIndexedNotNull { index, model ->
                     sendRunningNotification(mangaListSize, index, model.title)

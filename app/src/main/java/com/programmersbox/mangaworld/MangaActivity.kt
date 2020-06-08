@@ -12,8 +12,8 @@ import androidx.databinding.BindingAdapter
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModel
 import androidx.palette.graphics.Palette
-import coil.api.load
-import coil.transform.RoundedCornersTransformation
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import com.programmersbox.dragswipe.Direction
@@ -23,7 +23,10 @@ import com.programmersbox.dragswipe.DragSwipeUtils
 import com.programmersbox.flowutils.collectOnUi
 import com.programmersbox.flowutils.invoke
 import com.programmersbox.gsonutils.getObjectExtra
-import com.programmersbox.helpfulutils.*
+import com.programmersbox.helpfulutils.ItemRange
+import com.programmersbox.helpfulutils.animateChildren
+import com.programmersbox.helpfulutils.changeDrawableColor
+import com.programmersbox.helpfulutils.whatIfNotNull
 import com.programmersbox.loggingutils.Loged
 import com.programmersbox.manga_db.MangaDatabase
 import com.programmersbox.manga_sources.mangasources.MangaInfoModel
@@ -107,7 +110,7 @@ class MangaActivity : AppCompatActivity() {
             runOnUiThread {
                 Loged.r(mangaInfoModel)
                 mangaInfoModel?.let { manga ->
-                    range.itemList.addAll(manga.title, *manga.alternativeNames.toTypedArray())
+                    range.itemList.addAll(listOf(manga.title, *manga.alternativeNames.toTypedArray()).filter(String::isNotEmpty))
                     swatch?.rgb?.let { mangaInfoLayout.setBackgroundColor(it) }
                     mangaInfoChapterList.adapter = ChapterListAdapter(
                         dataList = manga.chapters.toMutableList(), context = this@MangaActivity, swatch = swatch,
@@ -199,13 +202,14 @@ class MangaActivity : AppCompatActivity() {
 
 @BindingAdapter("coverImage")
 fun loadImage(view: ImageView, imageUrl: String?) {
-    view.load(imageUrl) {
-        size(360, 480)
-        placeholder(R.mipmap.ic_launcher)
-        error(R.mipmap.ic_launcher)
-        crossfade(true)
-        transformations(RoundedCornersTransformation(30f))
-    }
+    Glide.with(view)
+        .load(imageUrl)
+        .override(360, 480)
+        .placeholder(R.mipmap.ic_launcher)
+        .error(R.mipmap.ic_launcher)
+        .fallback(R.mipmap.ic_launcher)
+        .transform(RoundedCorners(15))
+        .into(view)
 }
 
 @BindingAdapter("otherNames")
