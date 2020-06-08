@@ -103,14 +103,26 @@ class ExampleUnitTest {
 
     @Test
     fun eden() {
-        val q = getApi("https://www.mangaeden.com/api/list/0/")
-        println(q)
         val f = MangaEden.getManga()
         println(f.size)
         val d = f.first().toInfoModel()
         println(d)
         val s = d.chapters.random().getPageInfo()
         println(s)
+    }
+
+    @Test
+    fun park() {
+
+        val park = getApi("https://mangapark.net/latest")
+        println(park)
+
+        /*val f = MangaEden.getManga()
+        println(f.size)
+        val d = f.first().toInfoModel()
+        println(d)
+        val s = d.chapters.random().getPageInfo()
+        println(s)*/
     }
 
 }

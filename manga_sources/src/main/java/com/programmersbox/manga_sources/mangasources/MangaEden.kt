@@ -1,10 +1,74 @@
 package com.programmersbox.manga_sources.mangasources
 
 import com.programmersbox.gsonutils.getJsonApi
+import com.programmersbox.manga_sources.mangasources.utilities.header
+import okhttp3.Request
 import java.text.SimpleDateFormat
 import java.util.*
 
 object MangaEden : MangaSource {
+
+    private const val baseUrl = "http://www.mangaeden.com"
+    private const val imageUrl = "http://cdn.mangaeden.com/mangasimg/"
+
+    override val hasMorePages: Boolean = false
+
+    override fun getManga(pageNumber: Int): List<MangaModel> = getJsonApi<Eden?>("$baseUrl/api/list/0/", header)?.manga
+        ?.sortedByDescending { m -> m.ld?.let { 1000 * it.toDouble() } }
+        ?.mapNotNull {
+            if (it.ld == null || it.t.isNullOrEmpty()) null
+            else MangaModel(
+                title = it.t,
+                description = "Last updated: ${SimpleDateFormat("MM/dd/yyyy hh:mm a", Locale.getDefault()).format(1000 * it.ld.toDouble())}",
+                mangaUrl = "$baseUrl/api/manga/${it.i}/",
+                imageUrl = "$imageUrl${it.im}",
+                source = Sources.MANGA_EDEN
+            )
+        }.orEmpty()
+
+    override fun toInfoModel(model: MangaModel): MangaInfoModel {
+        val details = getJsonApi<MangaDetails>(model.mangaUrl, header)
+        return MangaInfoModel(
+            title = model.title,
+            description = details?.description ?: model.description,
+            mangaUrl = model.mangaUrl,
+            imageUrl = model.imageUrl,
+            chapters = details?.chapters?.mapIndexed { index, list ->
+                ChapterModel(
+                    name = try {
+                        list[2].toString()
+                    } catch (e: NullPointerException) {
+                        "$index"
+                    },
+                    url = "$baseUrl/api/chapter/${list[3]}/",
+                    uploaded = SimpleDateFormat("MM/dd/yyyy hh:mm a", Locale.getDefault()).format(1000 * list[1] as Double),
+                    sources = model.source
+                )
+            } ?: emptyList(),
+            genres = details?.categories ?: emptyList(),
+            alternativeNames = details?.aka ?: emptyList()
+        )
+    }
+
+    override fun getPageInfo(chapterModel: ChapterModel): PageModel = PageModel(
+        pages = getJsonApi<Pages>(chapterModel.url, header)?.images?.map { "$imageUrl${it[1]}" } ?: emptyList()
+    )
+
+    override val headers: List<Pair<String, String>>
+        get() = listOf(
+            "authority" to "www.mangaeden.com",
+            "cache-control" to "max-age=0",
+            "upgrade-insecure-requests" to "1",
+            "user-agent" to "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.61 Safari/537.36",
+            "accept" to "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+            "sec-fetch-site" to "none",
+            "sec-fetch-mode" to "navigate",
+            "sec-fetch-user" to "?1",
+            "sec-fetch-dest" to "document",
+            "accept-language" to "en-US,en;q=0.9"
+        )
+
+    private val header: Request.Builder.() -> Unit = { header(*headers.toTypedArray()) }
 
     private data class Eden(val end: Number?, val manga: List<Manga>?, val page: Number?, val start: Number?, val total: Number?)
 
@@ -49,51 +113,5 @@ object MangaEden : MangaSource {
     )
 
     private data class Pages(val images: List<List<Any>>?)
-
-    private const val baseUrl = "http://www.mangaeden.com"
-    private const val imageUrl = "http://cdn.mangaeden.com/mangasimg/"
-
-    override val hasMorePages: Boolean = false
-
-    override fun getManga(pageNumber: Int): List<MangaModel> = getJsonApi<Eden?>("$baseUrl/api/list/0/")?.manga
-        ?.sortedByDescending { m -> m.ld?.let { 1000 * it.toDouble() } }
-        ?.mapNotNull {
-            if (it.ld == null || it.t.isNullOrEmpty()) null
-            else MangaModel(
-                title = it.t,
-                description = "Last updated: ${SimpleDateFormat("MM/dd/yyyy hh:mm a", Locale.getDefault()).format(1000 * it.ld.toDouble())}",
-                mangaUrl = "$baseUrl/api/manga/${it.i}/",
-                imageUrl = "$imageUrl${it.im}",
-                source = Sources.MANGA_EDEN
-            )
-        }.orEmpty()
-
-    override fun toInfoModel(model: MangaModel): MangaInfoModel {
-        val details = getJsonApi<MangaDetails>(model.mangaUrl)
-        return MangaInfoModel(
-            title = model.title,
-            description = details?.description ?: model.description,
-            mangaUrl = model.mangaUrl,
-            imageUrl = model.imageUrl,
-            chapters = details?.chapters?.mapIndexed { index, list ->
-                ChapterModel(
-                    name = try {
-                        list[2].toString()
-                    } catch (e: NullPointerException) {
-                        "$index"
-                    },
-                    url = "$baseUrl/api/chapter/${list[3]}/",
-                    uploaded = SimpleDateFormat("MM/dd/yyyy hh:mm a", Locale.getDefault()).format(1000 * list[1] as Double),
-                    sources = model.source
-                )
-            } ?: emptyList(),
-            genres = details?.categories ?: emptyList(),
-            alternativeNames = details?.aka ?: emptyList()
-        )
-    }
-
-    override fun getPageInfo(chapterModel: ChapterModel): PageModel = PageModel(
-        pages = getJsonApi<Pages>(chapterModel.url)?.images?.map { "$imageUrl/${it[1]}" } ?: emptyList()
-    )
 
 }

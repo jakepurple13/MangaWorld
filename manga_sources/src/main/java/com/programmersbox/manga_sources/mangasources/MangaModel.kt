@@ -10,6 +10,8 @@ interface MangaSource {
         mangaList.filter { it.title.contains(searchText, true) }
 
     val hasMorePages: Boolean
+
+    val headers: List<Pair<String, String>> get() = emptyList()
 }
 
 data class MangaModel(
