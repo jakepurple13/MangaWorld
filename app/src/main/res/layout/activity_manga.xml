@@ -182,6 +182,19 @@
                 app:layout_constraintTop_toTopOf="@id/favoriteManga"
                 tools:ignore="HardcodedText" />
 
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/markChapters"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginEnd="5dp"
+                android:onClick="@{() -> presenter.markRead(info)}"
+                android:text="Mark As..."
+                app:layout_constraintBottom_toBottomOf="@id/favoriteManga"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@id/favoriteManga"
+                tools:ignore="HardcodedText" />
+
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <androidx.recyclerview.widget.RecyclerView

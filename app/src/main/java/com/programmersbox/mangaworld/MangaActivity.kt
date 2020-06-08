@@ -16,10 +16,8 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
-import com.programmersbox.dragswipe.Direction
-import com.programmersbox.dragswipe.DragSwipeActionBuilder
-import com.programmersbox.dragswipe.DragSwipeAdapter
-import com.programmersbox.dragswipe.DragSwipeUtils
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.programmersbox.dragswipe.*
 import com.programmersbox.flowutils.collectOnUi
 import com.programmersbox.flowutils.invoke
 import com.programmersbox.gsonutils.getObjectExtra
@@ -29,8 +27,10 @@ import com.programmersbox.helpfulutils.changeDrawableColor
 import com.programmersbox.helpfulutils.whatIfNotNull
 import com.programmersbox.loggingutils.Loged
 import com.programmersbox.manga_db.MangaDatabase
+import com.programmersbox.manga_sources.mangasources.ChapterModel
 import com.programmersbox.manga_sources.mangasources.MangaInfoModel
 import com.programmersbox.manga_sources.mangasources.MangaModel
+import com.programmersbox.mangaworld.adapters.ChapterHolder
 import com.programmersbox.mangaworld.adapters.ChapterListAdapter
 import com.programmersbox.mangaworld.databinding.ActivityMangaBinding
 import com.programmersbox.mangaworld.utils.MangaInfoCache
@@ -142,9 +142,24 @@ class MangaActivity : AppCompatActivity() {
 
     }
 
-    fun titles() {
-        range++
-        mangaInfoTitle.text = range.item
+    fun titles() = run { mangaInfoTitle.text = range++.item }
+
+    fun markRead(model: MangaInfoModel?) {
+        GlobalScope.launch {
+            val read = model?.mangaUrl?.let(dao::getReadChaptersByIdNonFlow).orEmpty()
+            val adapter = mangaInfoChapterList.adapter as ChapterListAdapter
+            runOnUiThread {
+                MaterialAlertDialogBuilder(this@MangaActivity)
+                    .setTitle("Mark as Read/Unread")
+                    .setMultiChoiceItems(
+                        adapter.dataList.map(ChapterModel::name).toTypedArray(),
+                        BooleanArray(adapter.itemCount) { i -> read.any { it.url == adapter[i].url } }) { _, index, _ ->
+                        (mangaInfoChapterList.findViewHolderForAdapterPosition(index) as? ChapterHolder)?.readChapter?.performClick()
+                    }
+                    .setPositiveButton("Done") { d, _ -> d.dismiss() }
+                    .show()
+            }
+        }
     }
 
     private fun moreInfoSetup(swatch: Palette.Swatch?) {
@@ -164,6 +179,8 @@ class MangaActivity : AppCompatActivity() {
         moreInfo.setOnClickListener { set++ }
         swatch?.rgb?.let { moreInfo.setBackgroundColor(it) }
         swatch?.titleTextColor?.let { moreInfo.setTextColor(it) }
+        swatch?.rgb?.let { markChapters.setBackgroundColor(it) }
+        swatch?.titleTextColor?.let { markChapters.setTextColor(it) }
     }
 
     private class ConstraintRangeSet(private val rootLayout: ConstraintLayout, vararg items: ConstraintRanges, loop: Boolean = true) :
