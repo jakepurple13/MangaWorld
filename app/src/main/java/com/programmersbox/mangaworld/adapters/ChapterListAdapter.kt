@@ -29,9 +29,10 @@ class ChapterListAdapter(
     dataList: MutableList<ChapterModel>,
     swatch: Palette.Swatch?,
     private val mangaUrl: String,
-    private val chapters: List<MangaReadChapter>?,
     private val dao: MangaDao
 ) : DragSwipeAdapter<ChapterModel, ChapterHolder>(dataList) {
+
+    var chapters: List<MangaReadChapter>? = null
 
     private val info = swatch?.let { SwatchInfo(it.rgb, it.titleTextColor, it.bodyTextColor) }
 

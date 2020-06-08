@@ -36,6 +36,7 @@ import com.programmersbox.mangaworld.databinding.ActivityMangaBinding
 import com.programmersbox.mangaworld.utils.MangaInfoCache
 import com.programmersbox.mangaworld.utils.toMangaDbModel
 import com.programmersbox.mangaworld.utils.usePalette
+import com.programmersbox.mangaworld.views.ReadOrMarkRead
 import com.programmersbox.thirdpartyutils.changeTint
 import com.programmersbox.thirdpartyutils.check
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -54,6 +55,7 @@ class MangaActivity : AppCompatActivity() {
     private val dao by lazy { MangaDatabase.getInstance(this).mangaDao() }
     private var range: ItemRange<String> = ItemRange()
     private val disposable = CompositeDisposable()
+    private var adapter: ChapterListAdapter? = null
 
     @Suppress("EXPERIMENTAL_API_USAGE")
     private var isFavorite = MutableStateFlow(false)
@@ -105,41 +107,57 @@ class MangaActivity : AppCompatActivity() {
     }
 
     private fun mangaSetup(mangaInfoModel: MangaInfoModel?, swatch: Palette.Swatch?) {
-        GlobalScope.launch {
-            val read = mangaInfoModel?.mangaUrl?.let { dao.getReadChaptersByIdNonFlow(it) }
-            runOnUiThread {
-                Loged.r(mangaInfoModel)
-                mangaInfoModel?.let { manga ->
-                    range.itemList.addAll(listOf(manga.title, *manga.alternativeNames.toTypedArray()).filter(String::isNotEmpty))
-                    swatch?.rgb?.let { mangaInfoLayout.setBackgroundColor(it) }
-                    mangaInfoChapterList.adapter = ChapterListAdapter(
-                        dataList = manga.chapters.toMutableList(), context = this@MangaActivity, swatch = swatch,
-                        mangaUrl = mangaInfoModel.mangaUrl, dao = dao, chapters = read
-                    )
+        Loged.r(mangaInfoModel)
+        mangaInfoModel?.let { manga ->
+            range.itemList.addAll(listOf(manga.title, *manga.alternativeNames.toTypedArray()).filter(String::isNotEmpty))
+            swatch?.rgb?.let { mangaInfoLayout.setBackgroundColor(it) }
+            adapter = ChapterListAdapter(
+                dataList = manga.chapters.toMutableList(), context = this@MangaActivity, swatch = swatch,
+                mangaUrl = manga.mangaUrl, dao = dao
+            )
 
-                    DragSwipeUtils.setDragSwipeUp(
-                        mangaInfoChapterList.adapter as ChapterListAdapter,
-                        mangaInfoChapterList,
-                        swipeDirs = listOf(Direction.START, Direction.END),
-                        dragSwipeActions = DragSwipeActionBuilder {
-                            onSwiped { viewHolder, _, adapter ->
-                                adapter.notifyItemChanged(viewHolder.adapterPosition)
-                                viewHolder.itemView.performClick()
-                            }
-                        }
-                    )
+            mangaInfoChapterList.adapter = adapter
 
-                    FastScrollerBuilder(mangaInfoChapterList)
-                        .useMd2Style()
-                        .whatIfNotNull(getDrawable(R.drawable.afs_md2_thumb)) { drawable ->
-                            swatch?.bodyTextColor?.let { drawable.changeDrawableColor(it) }
-                            setThumbDrawable(drawable)
-                        }
-                        .build()
+            dao.getReadChaptersById(manga.mangaUrl)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe {
+                    adapter?.chapters = it
+                    adapter?.notifyDataSetChanged()
                 }
-            }
-        }
+                .addTo(disposable)
 
+            DragSwipeUtils.setDragSwipeUp(
+                mangaInfoChapterList,
+                ReadOrMarkRead(
+                    mangaInfoChapterList.adapter as ChapterListAdapter,
+                    Direction.NOTHING.value,
+                    listOf(Direction.START, Direction.END).let { it.drop(1).fold(it.first().value) { acc, s -> acc + s } },
+                    this@MangaActivity,
+                    swatch
+                ),
+                dragSwipeActions = DragSwipeActionBuilder {
+                    onSwiped { viewHolder, direction, adapter ->
+                        when (direction) {
+                            //read
+                            Direction.START -> viewHolder.itemView.performClick()
+                            //add/remove
+                            Direction.END -> (viewHolder as ChapterHolder).readChapter.let { it.isChecked = !it.isChecked }
+                            else -> Unit
+                        }
+                        adapter.notifyItemChanged(viewHolder.adapterPosition)
+                    }
+                }
+            )
+
+            FastScrollerBuilder(mangaInfoChapterList)
+                .useMd2Style()
+                .whatIfNotNull(getDrawable(R.drawable.afs_md2_thumb)) { drawable ->
+                    swatch?.bodyTextColor?.let { drawable.changeDrawableColor(it) }
+                    setThumbDrawable(drawable)
+                }
+                .build()
+        }
     }
 
     fun titles() = run { mangaInfoTitle.text = range++.item }
