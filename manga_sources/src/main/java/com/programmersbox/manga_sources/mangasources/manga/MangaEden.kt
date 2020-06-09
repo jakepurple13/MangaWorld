@@ -14,10 +14,7 @@ object MangaEden : MangaSource {
 
     override val hasMorePages: Boolean = false
 
-    override fun getManga(pageNumber: Int): List<MangaModel> = getJsonApi<Eden?>(
-        "$baseUrl/api/list/0/",
-        header
-    )?.manga
+    override fun getManga(pageNumber: Int): List<MangaModel> = getJsonApi<Eden?>("$baseUrl/api/list/0/", header)?.manga
         ?.sortedByDescending { m -> m.ld?.let { 1000 * it.toDouble() } }
         ?.mapNotNull {
             if (it.ld == null || it.t.isNullOrEmpty()) null
@@ -31,10 +28,7 @@ object MangaEden : MangaSource {
         }.orEmpty()
 
     override fun toInfoModel(model: MangaModel): MangaInfoModel {
-        val details = getJsonApi<MangaDetails>(
-            model.mangaUrl,
-            header
-        )
+        val details = getJsonApi<MangaDetails>(model.mangaUrl, header)
         return MangaInfoModel(
             title = model.title,
             description = details?.description ?: model.description,
@@ -57,13 +51,9 @@ object MangaEden : MangaSource {
         )
     }
 
-    override fun getPageInfo(chapterModel: ChapterModel): PageModel =
-        PageModel(
-            pages = getJsonApi<Pages>(
-                chapterModel.url,
-                header
-            )?.images?.map { "$imageUrl${it[1]}" } ?: emptyList()
-        )
+    override fun getPageInfo(chapterModel: ChapterModel): PageModel = PageModel(
+        pages = getJsonApi<Pages>(chapterModel.url, header)?.images?.map { "$imageUrl${it[1]}" } ?: emptyList()
+    )
 
     override val headers: List<Pair<String, String>>
         get() = listOf(

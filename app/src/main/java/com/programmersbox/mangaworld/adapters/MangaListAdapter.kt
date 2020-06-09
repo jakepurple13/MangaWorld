@@ -3,6 +3,7 @@ package com.programmersbox.mangaworld.adapters
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
+import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.PopupMenu
 import androidx.constraintlayout.widget.ConstraintSet
@@ -10,10 +11,12 @@ import androidx.palette.graphics.Palette
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.snackbar.Snackbar
 import com.programmersbox.dragswipe.DragSwipeAdapter
 import com.programmersbox.gsonutils.putExtra
 import com.programmersbox.helpfulutils.ConstraintRange
-import com.programmersbox.helpfulutils.ItemRange
+import com.programmersbox.helpfulutils.Range
 import com.programmersbox.helpfulutils.layoutInflater
 import com.programmersbox.manga_db.MangaDatabase
 import com.programmersbox.manga_sources.mangasources.MangaModel
@@ -49,7 +52,7 @@ class MangaListAdapter(context: Context, disposable: CompositeDisposable = Compo
 
     override fun MangaHolder.onBind(item: MangaModel, position: Int) {
 
-        var range: ItemRange<ConstraintSet> = ConstraintRange(
+        var range: Range<ConstraintSet> = ConstraintRange(
             constraintLayout,
             ConstraintSet().apply { clone(constraintLayout) },
             ConstraintSet().apply { clone(context, R.layout.manga_list_item_alt) }
@@ -214,4 +217,98 @@ class GalleryHolder(private val binding: MangaListItemGalleryViewBinding) : Recy
         binding.model = item
         binding.executePendingBindings()
     }
+}
+
+class GalleryListFavoriteAdapter(private val context: Context) : DragSwipeAdapter<Pair<String, List<MangaModel>>, GalleryHolder>() {
+
+    private val dao by lazy { MangaDatabase.getInstance(context).mangaDao() }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GalleryHolder =
+        GalleryHolder(MangaListItemGalleryViewBinding.inflate(context.layoutInflater, parent, false))
+
+    override fun GalleryHolder.onBind(item: Pair<String, List<MangaModel>>, position: Int) {
+
+        val manga = item.second.random()
+
+        var swatch: Palette.Swatch? = null
+
+        itemView.setOnClickListener {
+
+            fun startActivity(mangaModel: MangaModel) {
+                context.startActivity(Intent(context, MangaActivity::class.java).apply {
+                    putExtra("manga", mangaModel)
+                    putExtra("swatch", swatch)
+                })
+            }
+
+            if (item.second.size > 1) {
+                //Alert
+                MaterialAlertDialogBuilder(context)
+                    .setTitle("Select ${item.first} Source")
+                    .setItems(item.second.map { it.source.name }.toTypedArray()) { d, index ->
+                        startActivity(item.second[index])
+                        d.dismiss()
+                    }
+                    .setNegativeButton("Cancel") { d, _ -> d.dismiss() }
+                    .show()
+            } else {
+                startActivity(item.second.first())
+            }
+        }
+
+        itemView.setOnLongClickListener {
+            if (item.second.size > 1) {
+                MaterialAlertDialogBuilder(context)
+                    .setTitle("Remove ${item.first} Source from Favorites")
+                    .setItems(item.second.map { it.source.name }.toTypedArray()) { d, index -> addOrRemoveManga(itemView, item.second[index]) }
+                    .setNegativeButton("Cancel") { d, _ -> d.dismiss() }
+                    .show()
+            } else {
+                PopupMenu(context, itemView)
+                    .apply {
+                        menu.add(1, 1, 1, context.getText(R.string.removeFromFavorites))
+                        setOnMenuItemClickListener {
+                            if (it.itemId == 1) addOrRemoveManga(itemView, item.second.first())
+                            true
+                        }
+                    }.show()
+            }
+            true
+        }
+
+        bind(manga)
+        Glide.with(context)
+            .asBitmap()
+            .load(manga.imageUrl)
+            //.override(360, 480)
+            .fitCenter()
+            .transform(RoundedCorners(15))
+            .fallback(R.mipmap.ic_launcher)
+            .placeholder(R.mipmap.ic_launcher)
+            .error(R.mipmap.ic_launcher)
+            .into<Bitmap> {
+                resourceReady { image, _ ->
+                    cover.setImageBitmap(image)
+                    if (context.usePalette) {
+                        swatch = Palette.from(image).generate().vibrantSwatch
+                    }
+                }
+            }
+    }
+
+    private fun addOrRemoveManga(view: View, item: MangaModel) = dao
+        .deleteManga(item.toMangaDbModel())
+        .subscribeOn(Schedulers.io())
+        .observeOn(Schedulers.io())
+        .subscribe {
+            Snackbar.make(view, context.getString(R.string.removed, item.title), Snackbar.LENGTH_LONG)
+                .setAction(context.getText(R.string.undo)) {
+                    dao
+                        .insertManga(item.toMangaDbModel())
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(Schedulers.io())
+                        .subscribe()
+                }
+                .show()
+        }
 }

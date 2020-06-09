@@ -21,10 +21,7 @@ import com.programmersbox.dragswipe.*
 import com.programmersbox.flowutils.collectOnUi
 import com.programmersbox.flowutils.invoke
 import com.programmersbox.gsonutils.getObjectExtra
-import com.programmersbox.helpfulutils.ItemRange
-import com.programmersbox.helpfulutils.animateChildren
-import com.programmersbox.helpfulutils.changeDrawableColor
-import com.programmersbox.helpfulutils.whatIfNotNull
+import com.programmersbox.helpfulutils.*
 import com.programmersbox.loggingutils.Loged
 import com.programmersbox.manga_db.MangaDatabase
 import com.programmersbox.manga_sources.mangasources.ChapterModel
@@ -53,7 +50,7 @@ import me.zhanghai.android.fastscroll.FastScrollerBuilder
 class MangaActivity : AppCompatActivity() {
 
     private val dao by lazy { MangaDatabase.getInstance(this).mangaDao() }
-    private var range: ItemRange<String> = ItemRange()
+    private var range: MutableItemRange<String> = MutableItemRange()
     private val disposable = CompositeDisposable()
     private var adapter: ChapterListAdapter? = null
 
@@ -160,7 +157,7 @@ class MangaActivity : AppCompatActivity() {
         }
     }
 
-    fun titles() = run { mangaInfoTitle.text = range++.item }
+    fun titles() = run { mangaInfoTitle.text = range.inc().item }
 
     fun markRead(model: MangaInfoModel?) {
         GlobalScope.launch {
@@ -203,8 +200,10 @@ class MangaActivity : AppCompatActivity() {
         }
     }
 
-    private class ConstraintRangeSet(private val rootLayout: ConstraintLayout, vararg items: ConstraintRanges, loop: Boolean = true) :
-        ItemRange<ConstraintRanges>(*items, loop = loop) {
+    private class ConstraintRangeSet(private val rootLayout: ConstraintLayout, vararg items: ConstraintRanges) : Range<ConstraintRanges>() {
+
+        override val itemList: List<ConstraintRanges> = items.toList()
+
         override operator fun inc(): ConstraintRangeSet {
             super.inc()
             rootLayout.animateChildren {
@@ -226,10 +225,14 @@ class MangaActivity : AppCompatActivity() {
             }
             return this
         }
+
+        override fun onChange(current: Int, item: ConstraintRanges) = Unit
     }
 
-    private class ConstraintRanges(val layout: ConstraintLayout, vararg items: ConstraintSet, loop: Boolean = true) :
-        ItemRange<ConstraintSet>(*items, loop = loop)
+    private class ConstraintRanges(val layout: ConstraintLayout, vararg items: ConstraintSet, loop: Boolean = true) : Range<ConstraintSet>() {
+        override val itemList: List<ConstraintSet> = items.toList()
+        override fun onChange(current: Int, item: ConstraintSet) = Unit
+    }
 
     override fun onDestroy() {
         disposable.dispose()

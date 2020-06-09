@@ -16,6 +16,7 @@ var Context.currentSource: Sources by sharedPrefNotNullObjectDelegate(defaultVal
 var Context.useCache: Boolean by sharedPrefNotNullDelegate(true)
 var Context.cacheSize: Int by sharedPrefNotNullDelegate(5)
 var Context.stayOnAdult: Boolean by sharedPrefNotNullDelegate(false)
+var Context.groupManga: Boolean by sharedPrefNotNullDelegate(true)
 
 object MangaInfoCache {
     private lateinit var context: Context

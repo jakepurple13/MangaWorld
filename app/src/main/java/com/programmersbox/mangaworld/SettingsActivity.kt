@@ -4,10 +4,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.programmersbox.mangaworld.utils.cacheSize
-import com.programmersbox.mangaworld.utils.stayOnAdult
-import com.programmersbox.mangaworld.utils.useCache
-import com.programmersbox.mangaworld.utils.usePalette
+import com.programmersbox.mangaworld.utils.*
 import de.Maxr1998.modernpreferences.PreferencesAdapter
 import de.Maxr1998.modernpreferences.helpers.*
 import de.Maxr1998.modernpreferences.preferences.TwoStatePreference
@@ -41,6 +38,19 @@ class SettingsActivity : AppCompatActivity() {
             checkedChangeListener = object : TwoStatePreference.OnCheckedChangeListener {
                 override fun onCheckedChanged(preference: TwoStatePreference, holder: PreferencesAdapter.ViewHolder?, checked: Boolean): Boolean {
                     stayOnAdult = checked
+                    return true
+                }
+            }
+        }
+
+        switch("groupManga") {
+            title = "Group Favorite Manga by Title"
+            summary = "If true, favorites will be grouped together by title"
+            iconRes = android.R.drawable.sym_def_app_icon
+            defaultValue = groupManga
+            checkedChangeListener = object : TwoStatePreference.OnCheckedChangeListener {
+                override fun onCheckedChanged(preference: TwoStatePreference, holder: PreferencesAdapter.ViewHolder?, checked: Boolean): Boolean {
+                    groupManga = checked
                     return true
                 }
             }

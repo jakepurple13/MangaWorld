@@ -19,4 +19,9 @@
         <item quantity="other">There are %d updates</item>
     </plurals>
 
+    <plurals name="numFavorites">
+        <item quantity="one">Search %d Favorite</item>
+        <item quantity="other">Search %d Favorites</item>
+    </plurals>
+
 </resources>
