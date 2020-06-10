@@ -98,6 +98,7 @@ class MainActivity : AppCompatActivity() {
                 adapter.addItems(list)
                 adapter2.addItems(list)
                 refresh.isRefreshing = false
+                search_layout.suffixText = "${mangaList.size}"
             }
         }
     }
@@ -161,6 +162,7 @@ class MainActivity : AppCompatActivity() {
                 adapter.setData(it)
                 adapter2.setData(it)
                 mangaRV.smoothScrollToPosition(0)
+                runOnUiThread { search_layout.suffixText = "${it.size}" }
             }
             .addTo(disposable)
 
