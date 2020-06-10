@@ -3,6 +3,7 @@ package com.programmersbox.mangaworld
 import com.programmersbox.gsonutils.fromJson
 import com.programmersbox.gsonutils.toJson
 import com.programmersbox.gsonutils.toPrettyJson
+import com.programmersbox.helpfulutils.similarity
 import com.programmersbox.helpfulutils.toHexString
 import com.programmersbox.manga_sources.mangasources.MangaModel
 import com.programmersbox.manga_sources.mangasources.MangaSource
@@ -116,5 +117,76 @@ class ExampleUnitTest {
             println(randomColor().toHexString())
         }
     }
+
+    data class Student(val major: String, val firstName: String)
+
+    class Classroom(val studentList: MutableList<Student>) {
+        fun getStudents(): MutableList<Student> {
+            return studentList
+        }
+    }
+
+    @Test
+    fun similarityTest() {
+
+        val list = mutableListOf<Student>(
+            Student("chemistry", "rafael"),
+            Student("physics", "adam"),
+            Student("chemistly", "michael"),
+            Student("math", "jack"),
+            Student("chemistry", "rafael"),
+            Student("biology", "kevin"),
+            Student("chemistly", "rafael")
+        )
+
+        val classroom = Classroom(list)
+        val allStudents = classroom.getStudents()
+
+        val finalList: MutableList<Pair<String, Classroom>> = mutableListOf()
+
+        allStudents.map { it.major }.distinctBy { it }.forEach { major ->
+            finalList.add(major to Classroom(allStudents.filter { s ->
+                s.major.similarity(major).also { println("$s - $it") } >= .8f
+            }.toMutableList()))
+        }
+
+        finalList.forEach {
+            println(it.first + "->")
+            it.second.getStudents().forEach { println("    " + it.major + ", " + it.firstName) }
+        }
+
+        println("-".repeat(50))
+
+        val finalList2: MutableList<Pair<String, Classroom>> = mutableListOf()
+
+        allStudents.forEach { name ->
+            finalList2.add(name.firstName to Classroom(allStudents.filter { s ->
+                s.major.similarity(name.major) >= .8f && s.firstName.similarity(name.firstName) >= .8f
+            }.toMutableList()))
+        }
+
+        finalList2.distinctBy { it.first }.forEach {
+            println(it.first + "->")
+            it.second.getStudents().forEach { println("    " + it.major + ", " + it.firstName) }
+        }
+
+        val list3 = allStudents.groupBySimilarity({ it.firstName }) { s, name ->
+            s.major.similarity(name.major) >= .8f && s.firstName.similarity(name.firstName) >= .8f
+        }
+
+        println("-".repeat(50))
+
+
+        list3.forEach {
+            println(it.first + "->")
+            it.second.forEach { println("    " + it.major + ", " + it.firstName) }
+        }
+
+    }
+
+    private fun <T, R> List<T>.groupBySimilarity(
+        key: (T) -> R,
+        predicate: (key: T, check: T) -> Boolean
+    ): List<Pair<R, List<T>>> = map { name -> key(name) to filter { s -> predicate(name, s) } }.distinctBy { it.first }
 
 }

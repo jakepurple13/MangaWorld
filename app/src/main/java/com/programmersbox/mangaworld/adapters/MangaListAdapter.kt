@@ -226,6 +226,8 @@ class GalleryListFavoriteAdapter(private val context: Context) : DragSwipeAdapte
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GalleryHolder =
         GalleryHolder(MangaListItemGalleryViewBinding.inflate(context.layoutInflater, parent, false))
 
+    private val listToArray: (List<MangaModel>) -> Array<out String> = { list -> list.map { "${it.source.name} - ${it.title}" }.toTypedArray() }
+
     override fun GalleryHolder.onBind(item: Pair<String, List<MangaModel>>, position: Int) {
 
         val manga = item.second.random()
@@ -242,10 +244,9 @@ class GalleryListFavoriteAdapter(private val context: Context) : DragSwipeAdapte
             }
 
             if (item.second.size > 1) {
-                //Alert
                 MaterialAlertDialogBuilder(context)
                     .setTitle("Select ${item.first} Source")
-                    .setItems(item.second.map { it.source.name }.toTypedArray()) { d, index ->
+                    .setItems(listToArray(item.second)) { d, index ->
                         startActivity(item.second[index])
                         d.dismiss()
                     }
@@ -259,8 +260,11 @@ class GalleryListFavoriteAdapter(private val context: Context) : DragSwipeAdapte
         itemView.setOnLongClickListener {
             if (item.second.size > 1) {
                 MaterialAlertDialogBuilder(context)
-                    .setTitle("Remove ${item.first} Source from Favorites")
-                    .setItems(item.second.map { it.source.name }.toTypedArray()) { d, index -> addOrRemoveManga(itemView, item.second[index]) }
+                    .setTitle("Remove Source from Favorites")
+                    .setItems(listToArray(item.second)) { d, index ->
+                        addOrRemoveManga(itemView, item.second[index])
+                        d.dismiss()
+                    }
                     .setNegativeButton("Cancel") { d, _ -> d.dismiss() }
                     .show()
             } else {

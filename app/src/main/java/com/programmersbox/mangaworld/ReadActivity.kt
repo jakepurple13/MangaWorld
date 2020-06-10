@@ -5,6 +5,11 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
+import com.bumptech.glide.integration.recyclerview.RecyclerViewPreloader
+import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade
+import com.bumptech.glide.util.ViewPreloadSizeProvider
 import com.programmersbox.gsonutils.getObjectExtra
 import com.programmersbox.helpfulutils.defaultSharedPref
 import com.programmersbox.helpfulutils.gone
@@ -17,15 +22,35 @@ import io.reactivex.rxkotlin.addTo
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_read.*
 
+
 class ReadActivity : AppCompatActivity() {
 
     private val disposable = CompositeDisposable()
     private var model: ChapterModel? = null
-    private val adapter = PageAdapter(this, mutableListOf())
+    private val loader by lazy { Glide.with(this) }
+    private val adapter by lazy {
+        loader.let {
+            PageAdapter(
+                fullRequest = it
+                    .asDrawable()
+                    .centerCrop(),
+                thumbRequest = it
+                    .asDrawable()
+                    .diskCacheStrategy(DiskCacheStrategy.DATA)
+                    .transition(withCrossFade()),
+                context = this@ReadActivity,
+                dataList = mutableListOf()
+            )
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_read)
+
+        val preloader: RecyclerViewPreloader<String> = RecyclerViewPreloader(loader, adapter, ViewPreloadSizeProvider(), 10)
+        readView.addOnScrollListener(preloader)
+        readView.setItemViewCacheSize(0)
 
         /*var range = ConstraintRange(
             readLayout,

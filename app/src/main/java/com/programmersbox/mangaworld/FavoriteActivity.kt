@@ -9,6 +9,8 @@ import com.google.android.material.snackbar.Snackbar
 import com.jakewharton.rxbinding2.widget.textChanges
 import com.programmersbox.dragswipe.DragSwipeAdapter
 import com.programmersbox.dragswipe.DragSwipeDiffUtil
+import com.programmersbox.helpfulutils.groupByCondition
+import com.programmersbox.helpfulutils.similarity
 import com.programmersbox.manga_db.MangaDatabase
 import com.programmersbox.manga_db.MangaDbModel
 import com.programmersbox.manga_sources.mangasources.MangaModel
@@ -108,7 +110,7 @@ class FavoriteActivity : AppCompatActivity() {
         pair.first
             .sortedBy(MangaModel::title)
             .filter { it.source in pair.second && it.title.contains(pair.third, true) }
-            .groupBy { it.title }
+            .groupByCondition(MangaModel::title) { s, name -> s.title.similarity(name.title) >= .8f }
             .toList()
     }
 
