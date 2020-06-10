@@ -45,7 +45,7 @@ class UpdateCheckService : IntentService("UpdateCheckIntentService") {
             val mangaListSize: Int
             dao.getAllMangaSync()
                 .let {
-                    it.intersect(Sources.values().filterNot(Sources::isAdult)
+                    it.intersect(Sources.values().filterNot(Sources::isAdult).filterNot(Sources::filterOutOfUpdate)
                         .filter { s -> it.any { m -> m.source == s } }
                         .flatMap { m -> m.getManga() }) { o, n -> o.mangaUrl == n.mangaUrl }
                 }

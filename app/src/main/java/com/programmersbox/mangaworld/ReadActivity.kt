@@ -70,7 +70,7 @@ class ReadActivity : AppCompatActivity() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
                 val l = recyclerView.layoutManager as LinearLayoutManager
-                val image = l.findLastCompletelyVisibleItemPosition()
+                val image = l.findLastVisibleItemPosition()
                 if (image > -1) {
                     val total = l.itemCount
                     pageCount.text = String.format("%d/%d", image + 1, total)

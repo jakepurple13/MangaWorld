@@ -2,15 +2,16 @@ package com.programmersbox.manga_sources.mangasources
 
 import com.programmersbox.manga_sources.mangasources.manga.*
 
-enum class Sources(val isAdult: Boolean = false) : MangaSource {
-    MANGA_EDEN,
+enum class Sources(val isAdult: Boolean = false, val filterOutOfUpdate: Boolean = false) : MangaSource {
+    MANGA_EDEN(filterOutOfUpdate = true),
     MANGANELO,
     MANGA_HERE,
     INKR,
     MANGA_4_LIFE,
+    NINE_ANIME,
 
     //MANGA_DOG,
-    TSUMINO(true);
+    TSUMINO(isAdult = true);
 
     override val hasMorePages: Boolean get() = source().hasMorePages
     override fun getManga(pageNumber: Int): List<MangaModel> = source().getManga(pageNumber)
@@ -26,6 +27,7 @@ enum class Sources(val isAdult: Boolean = false) : MangaSource {
         MANGA_HERE -> MangaHere
         INKR -> com.programmersbox.manga_sources.mangasources.manga.INKR
         MANGA_4_LIFE -> MangaFourLife
+        NINE_ANIME -> NineAnime
         //MANGA_DOG -> MangaDog
         TSUMINO -> Tsumino
     }

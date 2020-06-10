@@ -1,9 +1,9 @@
 package com.programmersbox.manga_sources
 
 import com.programmersbox.gsonutils.getApi
+import com.programmersbox.manga_sources.mangasources.Sources
 import com.programmersbox.manga_sources.mangasources.manga.*
 import org.jsoup.Jsoup
-import org.junit.Assert.assertEquals
 import org.junit.Test
 
 /**
@@ -14,7 +14,8 @@ import org.junit.Test
 class ExampleUnitTest {
     @Test
     fun addition_isCorrect() {
-        assertEquals(4, 2 + 2)
+        val f = Sources.values().filterNot(Sources::filterOutOfUpdate)
+        println(f)
     }
 
     @Test
@@ -95,6 +96,17 @@ class ExampleUnitTest {
     fun nelo() {
         val f = Manganelo.getManga()
         println(f.size)
+        val d = f.first().toInfoModel()
+        println(d)
+        val s = d.chapters.random().getPageInfo()
+        println(s)
+    }
+
+    @Test
+    fun nineAnime() {
+        val f = NineAnime.getManga()
+        println(f.size)
+        //println(f.joinToString("\n"))
         val d = f.first().toInfoModel()
         println(d)
         val s = d.chapters.random().getPageInfo()
