@@ -16,7 +16,7 @@ object NineAnime : MangaSource {
                 MangaModel(
                     title = it.select("p.title a").text(),
                     description = "",
-                    mangaUrl = getUrlWithoutDomain(it.select("p.title a").attr("href")),
+                    mangaUrl = it.select("p.title a").attr("href"),
                     imageUrl = it.select("img").attr("abs:src"),
                     source = Sources.NINE_ANIME
                 )
@@ -30,14 +30,14 @@ object NineAnime : MangaSource {
             MangaModel(
                 title = it.select("p.title a").text(),
                 description = "",
-                mangaUrl = getUrlWithoutDomain(it.select("p.title a").attr("href")),
+                mangaUrl = it.select("p.title a").attr("href"),
                 imageUrl = it.select("img").attr("abs:src"),
                 source = Sources.NINE_ANIME
             )
         }
 
     override fun toInfoModel(model: MangaModel): MangaInfoModel {
-        val doc = Jsoup.connect("$url${model.mangaUrl}?waring=1").get()
+        val doc = Jsoup.connect("${model.mangaUrl}?waring=1").get()
         val genreAndDescription = doc.select("div.manga-detailmiddle")
         return MangaInfoModel(
             title = model.title,
@@ -53,7 +53,8 @@ object NineAnime : MangaSource {
                 )
             },
             genres = genreAndDescription.select("p:has(span:contains(Genre)) a").map { it.text() },
-            alternativeNames = emptyList()
+            alternativeNames = doc.select("div.detail-info").select("p:has(span:contains(Alternative))").text()
+                .removePrefix("Alternative(s):").split(";")
         )
     }
 
