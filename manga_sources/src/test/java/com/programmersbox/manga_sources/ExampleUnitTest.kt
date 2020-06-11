@@ -124,6 +124,18 @@ class ExampleUnitTest {
     }
 
     @Test
+    fun alot() {
+        val f = Mangakakalot.getManga()
+        println(f.size)
+        val d = f.random().toInfoModel()
+        println(d)
+        val s = d.chapters.random().getPageInfo()
+        println(s)
+        val dragon = Mangakakalot.searchManga("Dragon", 1, f)
+        println(dragon.joinToString("\n"))
+    }
+
+    @Test
     fun park() {
 
         val park = getApi("https://mangapark.net/latest")

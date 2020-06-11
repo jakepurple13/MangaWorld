@@ -7,6 +7,13 @@ object MangaFox : MangaSource {
 
     private const val url = "http://mangafox.me"
 
+    override fun searchManga(searchText: CharSequence, pageNumber: Int, mangaList: List<MangaModel>): List<MangaModel> = try {
+        if (searchText.isBlank()) throw Exception("No search necessary")
+        emptyList()
+    } catch (e: Exception) {
+        super.searchManga(searchText, pageNumber, mangaList)
+    }
+
     override fun getManga(pageNumber: Int): List<MangaModel> {
         val doc = Jsoup.connect("$url/manga/").get()
         println(doc)

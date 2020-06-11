@@ -9,6 +9,7 @@ enum class Sources(val isAdult: Boolean = false, val filterOutOfUpdate: Boolean 
     INKR,
     MANGA_4_LIFE,
     NINE_ANIME,
+    MANGAKAKALOT,
 
     //MANGA_DOG,
     TSUMINO(isAdult = true);
@@ -28,6 +29,7 @@ enum class Sources(val isAdult: Boolean = false, val filterOutOfUpdate: Boolean 
         INKR -> com.programmersbox.manga_sources.mangasources.manga.INKR
         MANGA_4_LIFE -> MangaFourLife
         NINE_ANIME -> NineAnime
+        MANGAKAKALOT -> Mangakakalot
         //MANGA_DOG -> MangaDog
         TSUMINO -> Tsumino
     }
