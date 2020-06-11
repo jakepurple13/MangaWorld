@@ -20,20 +20,27 @@ var Context.cacheSize: Int by sharedPrefNotNullDelegate(5)
 var Context.stayOnAdult: Boolean by sharedPrefNotNullDelegate(false)
 var Context.groupManga: Boolean by sharedPrefNotNullDelegate(true)
 var Context.chapterHistory: List<ChapterHistory> by sharedPrefNotNullObjectDelegate(emptyList())
+var Context.chapterHistorySize: Int by sharedPrefNotNullDelegate(50)
+
+fun Context.changeChapterHistorySize(size: Int) {
+    chapterHistorySize = size
+    val history = chapterHistory.toMutableList()
+    if (history.size > size) chapterHistory = history.take(size)
+}
 
 data class ChapterHistory(val mangaUrl: String, val imageUrl: String, val title: String, val chapterModel: ChapterModel) : ViewModel() {
     fun toChapterString() = "${chapterModel.name}\n${chapterModel.uploaded}"
 }
 
-fun <T> MutableList<T>.addMax(item: T) {
+fun <T> MutableList<T>.addMax(item: T, maxSize: Int) {
     add(0, item)
-    if (size > 50) removeAt(lastIndex)
+    if (size > maxSize) removeAt(lastIndex)
 }
 
 fun Context.addToHistory(ch: ChapterHistory) {
     val history = chapterHistory.toMutableList()
     if (!history.any { it.chapterModel.url == ch.chapterModel.url })
-        history.addMax(ch)
+        history.addMax(ch, chapterHistorySize)
     chapterHistory = history
 }
 

@@ -5,14 +5,21 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.programmersbox.mangaworld.utils.*
+import com.programmersbox.rxutils.invoke
 import de.Maxr1998.modernpreferences.PreferencesAdapter
 import de.Maxr1998.modernpreferences.helpers.*
+import de.Maxr1998.modernpreferences.preferences.SeekBarPreference
 import de.Maxr1998.modernpreferences.preferences.TwoStatePreference
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.addTo
+import io.reactivex.subjects.PublishSubject
+import java.util.concurrent.TimeUnit
 
 class SettingsActivity : AppCompatActivity() {
 
     private lateinit var preferenceView: RecyclerView
     private val preferencesAdapter = PreferencesAdapter()
+    private val disposable = CompositeDisposable()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -67,6 +74,29 @@ class SettingsActivity : AppCompatActivity() {
                 }
             }
         }
+
+        val publisher = PublishSubject.create<Int>()
+
+        publisher
+            .debounce(1000L, TimeUnit.MILLISECONDS)
+            .subscribe(this@SettingsActivity::changeChapterHistorySize)
+            .addTo(disposable)
+
+        seekBar("chapterHistorySize") {
+            title = "Set how many chapters should be saved in history"
+            iconRes = android.R.drawable.sym_def_app_icon
+            default = chapterHistorySize
+            max = 100
+            min = 0
+            step = 1
+            seekListener = object : SeekBarPreference.OnSeekListener {
+                override fun onSeek(preference: SeekBarPreference, holder: PreferencesAdapter.ViewHolder?, value: Int): Boolean {
+                    publisher(value)
+                    return true
+                }
+            }
+        }
+
         switch("useCache") {
             title = "Use Cache"
             defaultValue = useCache
@@ -97,5 +127,10 @@ class SettingsActivity : AppCompatActivity() {
         super.onSaveInstanceState(outState)
         // Save the adapter state as a parcelable into the Android-managed instance state
         outState.putParcelable("adapter", preferencesAdapter.getSavedState())
+    }
+
+    override fun onDestroy() {
+        disposable.dispose()
+        super.onDestroy()
     }
 }
