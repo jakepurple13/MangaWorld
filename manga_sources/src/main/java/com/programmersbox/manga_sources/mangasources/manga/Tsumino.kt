@@ -27,7 +27,7 @@ object Tsumino : MangaSource {
         return MangaInfoModel(
             title = model.title,
             description = getDesc(doc),
-            mangaUrl = model.mangaUrl,
+            mangaUrl = "$baseUrl/entry/${model.mangaUrl}",
             imageUrl = model.imageUrl,
             chapters = listOf(
                 ChapterModel(
@@ -39,6 +39,17 @@ object Tsumino : MangaSource {
             ),
             genres = doc.select("#Tag a").eachText(),
             alternativeNames = emptyList()
+        )
+    }
+
+    override fun getMangaModelByUrl(url: String): MangaModel {
+        val doc = Jsoup.connect(url).get()
+        return MangaModel(
+            title = doc.select("div.book-title").text(),
+            description = getDesc(doc),
+            mangaUrl = url,
+            imageUrl = doc.select("div.book-page-cover > img").select("img").attr("abs:src"),
+            source = Sources.TSUMINO
         )
     }
 

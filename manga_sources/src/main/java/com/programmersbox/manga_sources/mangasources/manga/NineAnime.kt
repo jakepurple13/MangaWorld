@@ -58,6 +58,18 @@ object NineAnime : MangaSource {
         )
     }
 
+    override fun getMangaModelByUrl(url: String): MangaModel {
+        val doc = Jsoup.connect(url).get()
+        val genreAndDescription = doc.select("div.manga-detailmiddle")
+        return MangaModel(
+            title = doc.select("div.manga-detail > h1").select("h1").text(),
+            description = genreAndDescription.select("p.mobile-none").text(),
+            mangaUrl = url,
+            imageUrl = doc.select("img.detail-cover").attr("abs:src"),
+            source = Sources.NINE_ANIME
+        )
+    }
+
     override fun getPageInfo(chapterModel: ChapterModel): PageModel {
         val doc = Jsoup.connect(chapterModel.url).header("Referer", "$url/manga.").get()
         val script = doc.select("script:containsData(all_imgs_url)").firstOrNull()?.data() ?: return PageModel(emptyList())

@@ -100,6 +100,16 @@ object INKR : MangaSource {
         )
     }
 
+    override fun getMangaModelByUrl(url: String): MangaModel = getJsonApi<InkrInfoBase>(url)?.data.let {
+        MangaModel(
+            title = it?.name.orEmpty(),
+            description = it?.description.orEmpty(),
+            mangaUrl = url,
+            imageUrl = it?.thumbnail.orEmpty(),
+            source = Sources.INKR
+        )
+    }
+
     private val client: OkHttpClient = OkHttpClient.Builder().addInterceptor(fun(chain): Response {
         val url = chain.request().url.toString()
         val response = chain.proceed(chain.request())

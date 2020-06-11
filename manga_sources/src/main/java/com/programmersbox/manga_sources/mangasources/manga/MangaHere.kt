@@ -84,6 +84,17 @@ object MangaHere : MangaSource {
         )
     }
 
+    override fun getMangaModelByUrl(url: String): MangaModel {
+        val doc = Jsoup.connect(url).get()
+        return MangaModel(
+            title = doc.select("span.detail-info-right-title-font").text(),
+            description = doc.select("p.fullcontent").text(),
+            mangaUrl = url,
+            imageUrl = doc.select("img.detail-info-cover-img").select("img[src^=http]").attr("abs:src"),
+            source = Sources.MANGA_HERE
+        )
+    }
+
     override fun getPageInfo(chapterModel: ChapterModel): PageModel =
         pageListParse(Jsoup.connect(chapterModel.url).get())
 

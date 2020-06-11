@@ -67,6 +67,23 @@ object MangaFourLife : MangaSource {
         )
     }
 
+    override fun getMangaModelByUrl(url: String): MangaModel {
+        val doc = Jsoup.connect(url).get()
+        val title = doc.select("li.list-group-item, li.d-none, li.d-sm-block").select("h1").text()
+        val description = doc.select("div.BoxBody > div.row").select("div.Content").text()
+        val genres = "\"genre\":[^:]+(?=,|\$)".toRegex().find(doc.html())
+            ?.groupValues?.get(0)?.removePrefix("\"genre\": ")?.fromJson<List<String>>().orEmpty()
+        val altNames = "\"alternateName\":[^:]+(?=,|\$)".toRegex().find(doc.html())
+            ?.groupValues?.get(0)?.removePrefix("\"alternateName\": ")?.fromJson<List<String>>().orEmpty()
+        return MangaModel(
+            title = title,
+            description = description,
+            mangaUrl = url,
+            imageUrl = doc.select("img.img-fluid, img.bottom-5").attr("abs:src"),
+            source = Sources.MANGA_4_LIFE
+        )
+    }
+
     private fun chapterURLEncode(e: String): String {
         var index = ""
         val t = e.substring(0, 1).toInt()

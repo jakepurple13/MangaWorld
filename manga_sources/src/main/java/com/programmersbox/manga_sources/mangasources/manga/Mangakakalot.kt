@@ -49,11 +49,22 @@ object Mangakakalot : MangaSource {
                     name = it.select("span").select("a").attr("title"),
                     url = it.select("span").select("a").attr("abs:href"),
                     uploaded = it.select("span").last().text(),
-                    sources = Sources.MANGAKAKALOT
+                    sources = model.source
                 )
             },
             genres = doc.select("li:contains(Genre)").select("a").eachText().map { it.removeSuffix(",") },
             alternativeNames = doc.select("h2.story-alternatives").text().removePrefix("Alternative :").split(";")
+        )
+    }
+
+    override fun getMangaModelByUrl(url: String): MangaModel {
+        val doc = Jsoup.connect(url).get()
+        return MangaModel(
+            title = doc.select("ul.manga-info-text > li > h1").text(),
+            description = doc.select("div#noidungm").text(),
+            mangaUrl = url,
+            imageUrl = doc.select("div.manga-info-pic").select("img").attr("abs:src"),
+            source = Sources.MANGAKAKALOT
         )
     }
 

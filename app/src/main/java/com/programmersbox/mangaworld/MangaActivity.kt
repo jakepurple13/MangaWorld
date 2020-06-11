@@ -1,5 +1,6 @@
 package com.programmersbox.mangaworld
 
+import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
@@ -177,6 +178,14 @@ class MangaActivity : AppCompatActivity() {
         }
     }
 
+    fun shareManga(manga: MangaInfoModel?) {
+        startActivity(Intent.createChooser(Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(Intent.EXTRA_TEXT, manga?.mangaUrl)
+            putExtra(Intent.EXTRA_TITLE, manga?.title)
+        }, "Share ${manga?.title}"))
+    }
+
     private fun moreInfoSetup(swatch: Palette.Swatch?) {
         var set = ConstraintRangeSet(
             mangaInfoFullLayout,
@@ -197,6 +206,10 @@ class MangaActivity : AppCompatActivity() {
         swatch?.rgb?.let {
             markChapters.strokeColor = ColorStateList.valueOf(it)
             markChapters.setTextColor(it)
+        }
+        swatch?.rgb?.let {
+            shareButton.strokeColor = ColorStateList.valueOf(it)
+            shareButton.iconTint = ColorStateList.valueOf(it)
         }
     }
 

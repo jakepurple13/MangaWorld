@@ -65,6 +65,7 @@ class ExampleUnitTest {
         println(d)
         val s = d.chapters.random().getPageInfo()
         println(s)*/
+        println(MangaFourLife.getMangaInfoModelByUrl("https://manga4life.com/manga/Shouwa-Genroku-Rakugo-Shinjuu"))
     }
 
     @Test
@@ -100,6 +101,8 @@ class ExampleUnitTest {
         println(d)
         val s = d.chapters.random().getPageInfo()
         println(s)
+
+        println(Manganelo.getMangaInfoModelByUrl("https://manganelo.com/manga/ev922898"))
     }
 
     @Test
@@ -111,6 +114,8 @@ class ExampleUnitTest {
         println(d)
         val s = d.chapters.random().getPageInfo()
         println(s)
+
+        println(NineAnime.getMangaInfoModelByUrl("https://www.nineanime.com/manga/MUSUKO_GA_KAWAIKUTE_SHIKATAGANAI_MAZOKU_NO_HAHAOYA.html?waring=1"))
     }
 
     @Test
@@ -131,8 +136,9 @@ class ExampleUnitTest {
         println(d)
         val s = d.chapters.random().getPageInfo()
         println(s)
-        val dragon = Mangakakalot.searchManga("Dragon", 1, f)
-        println(dragon.joinToString("\n"))
+        //val dragon = Mangakakalot.searchManga("Dragon", 1, f)
+        //println(dragon.joinToString("\n"))
+        println(Mangakakalot.getMangaInfoModelByUrl("https://mangakakalot.com/read-lu6ua158504852918"))
     }
 
     @Test

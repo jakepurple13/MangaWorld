@@ -172,11 +172,12 @@
             <TextView
                 android:id="@+id/favoriteInfo"
                 style="@style/TextAppearance.MaterialComponents.Headline6"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_marginStart="5dp"
                 android:onClick="@{() -> favoriteManga.performClick()}"
                 android:text="Add To Favorites"
+                app:layout_constraintEnd_toStartOf="@id/markChapters"
                 app:layout_constraintBottom_toBottomOf="@id/favoriteManga"
                 app:layout_constraintStart_toEndOf="@id/favoriteManga"
                 app:layout_constraintTop_toTopOf="@id/favoriteManga"
@@ -191,6 +192,22 @@
                 android:onClick="@{() -> presenter.markRead(info)}"
                 android:text="Mark As..."
                 android:textColor="#ffffff"
+                app:strokeColor="#ffffff"
+                app:layout_constraintBottom_toBottomOf="@id/favoriteManga"
+                app:layout_constraintEnd_toStartOf="@id/shareButton"
+                app:layout_constraintTop_toTopOf="@id/favoriteManga"
+                tools:ignore="HardcodedText" />
+
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/shareButton"
+                style="@style/Widget.App.Button.OutlinedButton.IconOnly"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginEnd="5dp"
+                android:textColor="#ffffff"
+                android:onClick="@{() -> presenter.shareManga(info)}"
+                app:icon="@android:drawable/ic_menu_share"
                 app:strokeColor="#ffffff"
                 app:layout_constraintBottom_toBottomOf="@id/favoriteManga"
                 app:layout_constraintEnd_toEndOf="parent"

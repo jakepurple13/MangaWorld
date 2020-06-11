@@ -50,6 +50,18 @@ object Manganelo : MangaSource {
         )
     }
 
+    override fun getMangaModelByUrl(url: String): MangaModel {
+        val doc = Jsoup.connect(url).get()
+
+        return MangaModel(
+            title = doc.select("div.story-info-right").select("h1").text(),
+            description = doc.select("div.panel-story-info-description").text().removePrefix("Description :").trim(),
+            mangaUrl = url,
+            imageUrl = doc.select("div.story-info-left").select("span.info-image").select("img").attr("abs:src"),
+            source = Sources.MANGANELO
+        )
+    }
+
     override fun getPageInfo(chapterModel: ChapterModel): PageModel =
         PageModel(
             Jsoup.connect(chapterModel.url).get()

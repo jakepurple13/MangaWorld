@@ -51,6 +51,17 @@ object MangaEden : MangaSource {
         )
     }
 
+    override fun getMangaModelByUrl(url: String): MangaModel {
+        val details = getJsonApi<MangaDetails>(url, header)
+        return MangaModel(
+            title = details?.title.orEmpty(),
+            description = details?.description.orEmpty(),
+            mangaUrl = url,
+            imageUrl = details?.imageURL.orEmpty(),
+            source = Sources.MANGA_EDEN
+        )
+    }
+
     override fun getPageInfo(chapterModel: ChapterModel): PageModel = PageModel(
         pages = getJsonApi<Pages>(chapterModel.url, header)?.images?.map { "$imageUrl${it[1]}" } ?: emptyList()
     )

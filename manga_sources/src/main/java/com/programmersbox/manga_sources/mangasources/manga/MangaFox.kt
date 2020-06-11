@@ -32,6 +32,8 @@ object MangaFox : MangaSource {
         )
     }
 
+    override fun getMangaModelByUrl(url: String): MangaModel = throw Exception("Nope")
+
     override fun getPageInfo(chapterModel: ChapterModel): PageModel {
         return PageModel(emptyList())
     }

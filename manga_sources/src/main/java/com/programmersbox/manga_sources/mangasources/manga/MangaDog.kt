@@ -57,6 +57,8 @@ object MangaDog : MangaSource {
         )
     }
 
+    override fun getMangaModelByUrl(url: String): MangaModel = throw Exception("This doesn't work. I'll do this later")
+
     override fun getPageInfo(chapterModel: ChapterModel): PageModel =
         PageModel(
             pages = Jsoup.connect(chapterModel.url).get().body().select("img[data-src]").map { it.select("img").attr("data-src") }
