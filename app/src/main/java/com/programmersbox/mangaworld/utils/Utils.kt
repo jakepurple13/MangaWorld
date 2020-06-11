@@ -1,12 +1,14 @@
 package com.programmersbox.mangaworld.utils
 
 import android.content.Context
+import androidx.lifecycle.ViewModel
 import com.programmersbox.gsonutils.getObject
 import com.programmersbox.gsonutils.putObject
 import com.programmersbox.gsonutils.sharedPrefNotNullObjectDelegate
 import com.programmersbox.helpfulutils.defaultSharedPref
 import com.programmersbox.helpfulutils.sharedPrefNotNullDelegate
 import com.programmersbox.manga_db.MangaDbModel
+import com.programmersbox.manga_sources.mangasources.ChapterModel
 import com.programmersbox.manga_sources.mangasources.MangaInfoModel
 import com.programmersbox.manga_sources.mangasources.MangaModel
 import com.programmersbox.manga_sources.mangasources.Sources
@@ -17,6 +19,23 @@ var Context.useCache: Boolean by sharedPrefNotNullDelegate(true)
 var Context.cacheSize: Int by sharedPrefNotNullDelegate(5)
 var Context.stayOnAdult: Boolean by sharedPrefNotNullDelegate(false)
 var Context.groupManga: Boolean by sharedPrefNotNullDelegate(true)
+var Context.chapterHistory: List<ChapterHistory> by sharedPrefNotNullObjectDelegate(emptyList())
+
+data class ChapterHistory(val mangaUrl: String, val imageUrl: String, val title: String, val chapterModel: ChapterModel) : ViewModel() {
+    fun toChapterString() = "${chapterModel.name}\n${chapterModel.uploaded}"
+}
+
+fun <T> MutableList<T>.addMax(item: T) {
+    add(0, item)
+    if (size > 50) removeAt(lastIndex)
+}
+
+fun Context.addToHistory(ch: ChapterHistory) {
+    val history = chapterHistory.toMutableList()
+    if (!history.any { it.chapterModel.url == ch.chapterModel.url })
+        history.addMax(ch)
+    chapterHistory = history
+}
 
 object MangaInfoCache {
     private lateinit var context: Context

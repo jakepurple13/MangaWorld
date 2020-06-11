@@ -46,7 +46,7 @@ class MangaWorldApp : Application() {
         alarmManager.setInexactRepeating(
             AlarmManager.RTC_WAKEUP,
             System.currentTimeMillis() + 30L.toDuration(TimeUnit.MINUTES).inMilliseconds.roundToLong(),
-            AlarmManager.INTERVAL_HOUR,
+            AlarmManager.INTERVAL_HALF_HOUR,
             pendingIntent
         )
     }

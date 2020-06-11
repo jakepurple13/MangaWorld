@@ -21,6 +21,8 @@ import com.programmersbox.mangaworld.R
 import com.programmersbox.mangaworld.ReadActivity
 import com.programmersbox.mangaworld.SwatchInfo
 import com.programmersbox.mangaworld.databinding.ChapterListItemBinding
+import com.programmersbox.mangaworld.utils.ChapterHistory
+import com.programmersbox.mangaworld.utils.addToHistory
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.chapter_list_item.view.*
 
@@ -29,7 +31,8 @@ class ChapterListAdapter(
     dataList: MutableList<ChapterModel>,
     swatch: Palette.Swatch?,
     private val mangaUrl: String,
-    private val dao: MangaDao
+    private val dao: MangaDao,
+    private val toChapterHistory: (ChapterModel) -> ChapterHistory
 ) : DragSwipeAdapter<ChapterModel, ChapterHolder>(dataList) {
 
     var chapters: List<MangaReadChapter>? = null
@@ -42,6 +45,7 @@ class ChapterListAdapter(
     override fun ChapterHolder.onBind(item: ChapterModel, position: Int) {
         bind(item, info)
         itemView.setOnClickListener {
+            context.addToHistory(toChapterHistory(item))
             context.startActivity(
                 Intent(context, ReadActivity::class.java).apply {
                     //putExtra("chapter", position)
@@ -81,6 +85,7 @@ class ChapterListAdapter(
 class ChapterHolder(private val binding: ChapterListItemBinding) : RecyclerView.ViewHolder(binding.root) {
     val readChapter = itemView.readChapter!!
     val startReading = itemView.startReading!!
+
     //val chapterName = itemView.chapterName!!
     fun bind(item: ChapterModel, swatchInfo: SwatchInfo?) {
         binding.chapter = item

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="model"
+            type="com.programmersbox.mangaworld.utils.ChapterHistory" />
+    </data>
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/historyLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="5dp"
+        tools:background="@sample/sample_colors">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="5dp">
+
+            <ImageView
+                android:id="@+id/historyListCover"
+                android:layout_width="360px"
+                android:layout_height="480px"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:ignore="ContentDescription,PxUsage"
+                tools:src="@tools:sample/avatars" />
+
+            <TextView
+                android:id="@+id/historyListTitle"
+                style="@style/TextAppearance.MaterialComponents.Headline5"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="5dp"
+                android:gravity="center"
+                android:maxLines="3"
+                android:text="@{model.title}"
+                app:layout_constraintBottom_toTopOf="@id/historyListDescription"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/historyListCover"
+                app:layout_constraintTop_toTopOf="@id/historyListCover"
+                tools:text="@tools:sample/full_names"
+                tools:textColor="@sample/sample_colors" />
+
+            <TextView
+                android:id="@+id/historyListDescription"
+                style="@style/TextAppearance.MaterialComponents.Body2"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_marginStart="5dp"
+                android:gravity="center"
+                android:text="@{model.toChapterString()}"
+                app:layout_constraintBottom_toBottomOf="@id/historyListCover"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/historyListCover"
+                app:layout_constraintTop_toBottomOf="@id/historyListTitle"
+                tools:text="@tools:sample/lorem/random"
+                tools:textColor="@sample/sample_colors" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+</layout>

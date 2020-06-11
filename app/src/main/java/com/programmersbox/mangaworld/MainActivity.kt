@@ -67,6 +67,11 @@ class MainActivity : AppCompatActivity() {
                     menuOptions.close() // To close the Speed Dial with animation
                     return@setOnActionSelectedListener true // false will close it without animation
                 }
+                R.id.viewHistoryMenu -> {
+                    startActivity(Intent(this, HistoryActivity::class.java))
+                    menuOptions.close() // To close the Speed Dial with animation
+                    return@setOnActionSelectedListener true // false will close it without animation
+                }
                 R.id.changeSourcesMenu -> {
                     MaterialAlertDialogBuilder(this)
                         .setTitle(getText(R.string.chooseASource))

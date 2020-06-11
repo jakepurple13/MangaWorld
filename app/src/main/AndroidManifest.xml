@@ -13,6 +13,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
+        <activity android:name=".HistoryActivity"></activity>
         <activity android:name=".DeepLinkActivity">
             <intent-filter android:label="View Manga">
                 <action android:name="android.intent.action.VIEW" />
@@ -31,7 +32,7 @@
                 <data android:host="www.nineanime.com" />
                 <data android:host="www.tsumino.com" />
                 <data android:host="api.mangarockhd.com" />
-                <!-- note that the leading "/" is required for pathPrefix-->
+                <!-- note that the leading "/" is required for pathPrefix -->
             </intent-filter>
         </activity>
 

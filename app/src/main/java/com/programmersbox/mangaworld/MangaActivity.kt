@@ -31,6 +31,7 @@ import com.programmersbox.manga_sources.mangasources.MangaModel
 import com.programmersbox.mangaworld.adapters.ChapterHolder
 import com.programmersbox.mangaworld.adapters.ChapterListAdapter
 import com.programmersbox.mangaworld.databinding.ActivityMangaBinding
+import com.programmersbox.mangaworld.utils.ChapterHistory
 import com.programmersbox.mangaworld.utils.MangaInfoCache
 import com.programmersbox.mangaworld.utils.toMangaDbModel
 import com.programmersbox.mangaworld.utils.usePalette
@@ -112,7 +113,7 @@ class MangaActivity : AppCompatActivity() {
             adapter = ChapterListAdapter(
                 dataList = manga.chapters.toMutableList(), context = this@MangaActivity, swatch = swatch,
                 mangaUrl = manga.mangaUrl, dao = dao
-            )
+            ) { ChapterHistory(mangaUrl = manga.mangaUrl, imageUrl = manga.imageUrl, title = manga.title, chapterModel = it) }
 
             mangaInfoChapterList.adapter = adapter
 
