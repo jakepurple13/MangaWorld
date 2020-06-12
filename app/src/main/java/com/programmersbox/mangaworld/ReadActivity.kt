@@ -17,6 +17,8 @@ import com.mikepenz.iconics.IconicsDrawable
 import com.mikepenz.iconics.typeface.library.googlematerial.GoogleMaterial
 import com.mikepenz.iconics.utils.colorInt
 import com.mikepenz.iconics.utils.sizePx
+import com.programmersbox.flowutils.collectOnUi
+import com.programmersbox.flowutils.invoke
 import com.programmersbox.gsonutils.getObjectExtra
 import com.programmersbox.helpfulutils.*
 import com.programmersbox.manga_sources.mangasources.ChapterModel
@@ -27,6 +29,9 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_read.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.roundToInt
@@ -55,6 +60,8 @@ class ReadActivity : AppCompatActivity() {
     private var batteryInfo: BroadcastReceiver? = null
     private var timeTicker: BroadcastReceiver? = null
 
+    private val batteryLevelAlert = MutableStateFlow(100f)
+
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -69,8 +76,21 @@ class ReadActivity : AppCompatActivity() {
             sizePx = batteryInformation.textSize.roundToInt()
         }
 
-        batteryInfo = battery { batteryInformation.text = "${it.percent.toInt()}%" }
+        batteryLevelAlert
+            .map { it < 20f }
+            .distinctUntilChanged { old, new -> old != new }
+            .map { if (it) Color.RED else Color.WHITE }
+            .collectOnUi {
+                batteryInformation.setTextColor(it)
+                batteryInformation.startDrawable?.setTint(it)
+            }
+
+        batteryInfo = battery {
+            batteryInformation.text = "${it.percent.toInt()}%"
+            batteryLevelAlert(it.percent)
+        }
         timeTicker = timeTick { _, _ -> currentTime.text = SimpleDateFormat("HH:mm a", Locale.getDefault()).format(System.currentTimeMillis()) }
+        currentTime.text = SimpleDateFormat("HH:mm a", Locale.getDefault()).format(System.currentTimeMillis())
 
         /*var range = ConstraintRange(
             readLayout,
