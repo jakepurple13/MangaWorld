@@ -76,6 +76,8 @@ dependencies {
         // Excludes the support library because it's already included by Glide.
         transitive = false
     }
+    implementation "com.mikepenz:iconics-core:5.0.3"
+    implementation 'com.mikepenz:google-material-typeface:3.0.1.4.original-kotlin@aar'
 
     implementation project(':manga_db')
     implementation project(':manga_sources')

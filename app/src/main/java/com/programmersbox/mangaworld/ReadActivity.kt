@@ -1,5 +1,8 @@
 package com.programmersbox.mangaworld
 
+import android.annotation.SuppressLint
+import android.content.BroadcastReceiver
+import android.graphics.Color
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -10,9 +13,12 @@ import com.bumptech.glide.integration.recyclerview.RecyclerViewPreloader
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade
 import com.bumptech.glide.util.ViewPreloadSizeProvider
+import com.mikepenz.iconics.IconicsDrawable
+import com.mikepenz.iconics.typeface.library.googlematerial.GoogleMaterial
+import com.mikepenz.iconics.utils.colorInt
+import com.mikepenz.iconics.utils.sizePx
 import com.programmersbox.gsonutils.getObjectExtra
-import com.programmersbox.helpfulutils.defaultSharedPref
-import com.programmersbox.helpfulutils.gone
+import com.programmersbox.helpfulutils.*
 import com.programmersbox.manga_sources.mangasources.ChapterModel
 import com.programmersbox.mangaworld.adapters.PageAdapter
 import io.reactivex.Single
@@ -21,7 +27,9 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_read.*
-
+import java.text.SimpleDateFormat
+import java.util.*
+import kotlin.math.roundToInt
 
 class ReadActivity : AppCompatActivity() {
 
@@ -44,6 +52,10 @@ class ReadActivity : AppCompatActivity() {
         }
     }
 
+    private var batteryInfo: BroadcastReceiver? = null
+    private var timeTicker: BroadcastReceiver? = null
+
+    @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_read)
@@ -51,6 +63,14 @@ class ReadActivity : AppCompatActivity() {
         val preloader: RecyclerViewPreloader<String> = RecyclerViewPreloader(loader, adapter, ViewPreloadSizeProvider(), 10)
         readView.addOnScrollListener(preloader)
         readView.setItemViewCacheSize(0)
+
+        batteryInformation.startDrawable = IconicsDrawable(this, GoogleMaterial.Icon.gmd_battery_std).apply {
+            colorInt = Color.WHITE
+            sizePx = batteryInformation.textSize.roundToInt()
+        }
+
+        batteryInfo = battery { batteryInformation.text = "${it.percent.toInt()}%" }
+        timeTicker = timeTick { _, _ -> currentTime.text = SimpleDateFormat("HH:mm a", Locale.getDefault()).format(System.currentTimeMillis()) }
 
         /*var range = ConstraintRange(
             readLayout,
@@ -118,6 +138,8 @@ class ReadActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
+        unregisterReceiver(batteryInfo)
+        unregisterReceiver(timeTicker)
         saveCurrentChapterSpot()
         disposable.dispose()
         super.onDestroy()

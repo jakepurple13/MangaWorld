@@ -13,7 +13,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name=".HistoryActivity"></activity>
+        <activity android:name=".HistoryActivity" />
         <activity android:name=".DeepLinkActivity">
             <intent-filter android:label="View Manga">
                 <action android:name="android.intent.action.VIEW" />
@@ -23,13 +23,21 @@
                 <!-- Accepts URIs that begin with "http://www.example.com/gizmos” -->
                 <data android:scheme="http" />
                 <data android:scheme="https" />
-                <data android:host="manganelo.com" />
-                <data android:host="m.manganelo.com" />
+                <data
+                    android:host="manganelo.com"
+                    android:pathPrefix="/manga" />
+                <data
+                    android:host="m.manganelo.com"
+                    android:pathPrefix="/manga" />
                 <data android:host="www.mangaeden.com" />
-                <data android:host="manga4life.com" />
+                <data
+                    android:host="manga4life.com"
+                    android:pathPrefix="/manga" />
                 <data android:host="www.mangahere.cc" />
                 <data android:host="mangakakalot.com" />
-                <data android:host="www.nineanime.com" />
+                <data
+                    android:host="www.nineanime.com"
+                    android:pathPrefix="/manga" />
                 <data android:host="www.tsumino.com" />
                 <data android:host="api.mangarockhd.com" />
                 <!-- note that the leading "/" is required for pathPrefix -->
