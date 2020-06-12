@@ -1,9 +1,14 @@
 package com.programmersbox.mangaworld
 
+import android.graphics.Color
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.mikepenz.iconics.IconicsDrawable
+import com.mikepenz.iconics.typeface.library.googlematerial.GoogleMaterial
+import com.mikepenz.iconics.utils.colorInt
+import com.mikepenz.iconics.utils.sizeDp
 import com.programmersbox.mangaworld.utils.*
 import com.programmersbox.rxutils.invoke
 import de.Maxr1998.modernpreferences.PreferencesAdapter
@@ -14,6 +19,7 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.subjects.PublishSubject
 import java.util.concurrent.TimeUnit
+import kotlin.math.roundToInt
 
 class SettingsActivity : AppCompatActivity() {
 
@@ -83,7 +89,8 @@ class SettingsActivity : AppCompatActivity() {
             .addTo(disposable)
 
         seekBar("chapterHistorySize") {
-            title = "Set how many chapters should be saved in history"
+            title = "Chapter History Cache"
+            summary = "Set how many chapters should be saved in history"
             iconRes = android.R.drawable.sym_def_app_icon
             default = chapterHistorySize
             max = 100
@@ -92,6 +99,25 @@ class SettingsActivity : AppCompatActivity() {
             seekListener = object : SeekBarPreference.OnSeekListener {
                 override fun onSeek(preference: SeekBarPreference, holder: PreferencesAdapter.ViewHolder?, value: Int): Boolean {
                     publisher(value)
+                    return true
+                }
+            }
+        }
+
+        seekBar("batteryAlertPercent") {
+            title = "Battery Alert Percent"
+            summary = "Set when you want the battery icon too turn red while reading"
+            icon = IconicsDrawable(this@SettingsActivity, GoogleMaterial.Icon.gmd_battery_alert).apply {
+                colorInt = Color.RED
+                sizeDp = 24
+            }
+            default = batteryAlertPercent.roundToInt()
+            max = 100
+            min = 1
+            step = 1
+            seekListener = object : SeekBarPreference.OnSeekListener {
+                override fun onSeek(preference: SeekBarPreference, holder: PreferencesAdapter.ViewHolder?, value: Int): Boolean {
+                    batteryAlertPercent = value.toFloat()
                     return true
                 }
             }

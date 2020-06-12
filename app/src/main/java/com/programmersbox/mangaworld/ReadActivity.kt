@@ -17,21 +17,21 @@ import com.mikepenz.iconics.IconicsDrawable
 import com.mikepenz.iconics.typeface.library.googlematerial.GoogleMaterial
 import com.mikepenz.iconics.utils.colorInt
 import com.mikepenz.iconics.utils.sizePx
-import com.programmersbox.flowutils.collectOnUi
-import com.programmersbox.flowutils.invoke
 import com.programmersbox.gsonutils.getObjectExtra
 import com.programmersbox.helpfulutils.*
 import com.programmersbox.manga_sources.mangasources.ChapterModel
 import com.programmersbox.mangaworld.adapters.PageAdapter
+import com.programmersbox.mangaworld.utils.batteryAlertPercent
+import com.programmersbox.rxutils.invoke
+import com.programmersbox.rxutils.toLatestFlowable
 import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.Flowables
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.schedulers.Schedulers
+import io.reactivex.subjects.PublishSubject
 import kotlinx.android.synthetic.main.activity_read.*
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.map
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.roundToInt
@@ -60,7 +60,16 @@ class ReadActivity : AppCompatActivity() {
     private var batteryInfo: BroadcastReceiver? = null
     private var timeTicker: BroadcastReceiver? = null
 
-    private val batteryLevelAlert = MutableStateFlow(100f)
+    private val batteryLevelAlert = PublishSubject.create<Float>()
+    private val batteryInfoItem = PublishSubject.create<Battery>()
+
+    enum class BatteryViewType(val icon: GoogleMaterial.Icon) {
+        CHARGING_FULL(GoogleMaterial.Icon.gmd_battery_charging_full),
+        DEFAULT(GoogleMaterial.Icon.gmd_battery_std),
+        FULL(GoogleMaterial.Icon.gmd_battery_full),
+        ALERT(GoogleMaterial.Icon.gmd_battery_alert),
+        UNKNOWN(GoogleMaterial.Icon.gmd_battery_unknown)
+    }
 
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -76,18 +85,39 @@ class ReadActivity : AppCompatActivity() {
             sizePx = batteryInformation.textSize.roundToInt()
         }
 
-        batteryLevelAlert
-            .map { it < 20f }
-            .distinctUntilChanged { old, new -> old != new }
-            .map { if (it) Color.RED else Color.WHITE }
-            .collectOnUi {
-                batteryInformation.setTextColor(it)
-                batteryInformation.startDrawable?.setTint(it)
+        Flowables.combineLatest(
+            batteryLevelAlert
+                .map { it <= batteryAlertPercent }
+                .map { if (it) Color.RED else Color.WHITE }
+                .toLatestFlowable(),
+            batteryInfoItem
+                .map {
+                    when {
+                        it.isCharging -> BatteryViewType.CHARGING_FULL
+                        it.percent <= batteryAlertPercent -> BatteryViewType.ALERT
+                        it.percent >= 95 -> BatteryViewType.FULL
+                        it.health == BatteryHealth.UNKNOWN -> BatteryViewType.UNKNOWN
+                        else -> BatteryViewType.DEFAULT
+                    }
+                }
+                .distinctUntilChanged { t1, t2 -> t1 != t2 }
+                .map { IconicsDrawable(this, it.icon).apply { sizePx = batteryInformation.textSize.roundToInt() } }
+                .toLatestFlowable()
+        )
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe {
+                it.second.colorInt = it.first
+                batteryInformation.startDrawable = it.second
+                batteryInformation.setTextColor(it.first)
+                batteryInformation.startDrawable?.setTint(it.first)
             }
+            .addTo(disposable)
 
         batteryInfo = battery {
             batteryInformation.text = "${it.percent.toInt()}%"
             batteryLevelAlert(it.percent)
+            batteryInfoItem(it)
         }
         timeTicker = timeTick { _, _ -> currentTime.text = SimpleDateFormat("HH:mm a", Locale.getDefault()).format(System.currentTimeMillis()) }
         currentTime.text = SimpleDateFormat("HH:mm a", Locale.getDefault()).format(System.currentTimeMillis())
