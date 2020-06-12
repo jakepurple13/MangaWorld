@@ -8,6 +8,8 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.ListPreloader
 import com.bumptech.glide.RequestBuilder
+import com.github.piasy.biv.indicator.progresspie.ProgressPieIndicator
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.programmersbox.helpfulutils.layoutInflater
 import com.programmersbox.mangaworld.R
 import com.programmersbox.thirdpartyutils.DragSwipeGlideAdapter
@@ -17,7 +19,8 @@ class PageAdapter(
     override val fullRequest: RequestBuilder<Drawable>,
     override val thumbRequest: RequestBuilder<Drawable>,
     private val context: Context,
-    dataList: MutableList<String>
+    dataList: MutableList<String>,
+    private val canDownload: (String) -> Unit = { }
 ) : DragSwipeGlideAdapter<String, PageHolder, String>(dataList), ListPreloader.PreloadModelProvider<String> {
 
     override val itemToModel: (String) -> String = { it }
@@ -25,13 +28,22 @@ class PageAdapter(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PageHolder =
         PageHolder(context.layoutInflater.inflate(R.layout.page_item, parent, false))
 
-    override fun PageHolder.onBind(item: String, position: Int) = render(item)
+    override fun PageHolder.onBind(item: String, position: Int) = render(item, canDownload)
 }
 
 class PageHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     private val image = itemView.chapterPage!!
 
-    fun render(item: String?) {
+    fun render(item: String?, canDownload: (String) -> Unit) {
+        image.setProgressIndicator(ProgressPieIndicator())
         image.showImage(Uri.parse(item))
+        image.setOnLongClickListener {
+            MaterialAlertDialogBuilder(itemView.context)
+                .setTitle("Download page?")
+                .setPositiveButton("Yes") { d, _ -> canDownload(item!!);d.dismiss() }
+                .setNegativeButton("No") { d, _ -> d.dismiss() }
+                .show()
+            true
+        }
     }
 }

@@ -112,7 +112,7 @@ class MangaActivity : AppCompatActivity() {
             swatch?.rgb?.let { mangaInfoLayout.setBackgroundColor(it) }
             adapter = ChapterListAdapter(
                 dataList = manga.chapters.toMutableList(), context = this@MangaActivity, swatch = swatch,
-                mangaUrl = manga.mangaUrl, dao = dao
+                mangaTitle = manga.title, mangaUrl = manga.mangaUrl, dao = dao
             ) { ChapterHistory(mangaUrl = manga.mangaUrl, imageUrl = manga.imageUrl, title = manga.title, chapterModel = it) }
 
             mangaInfoChapterList.adapter = adapter

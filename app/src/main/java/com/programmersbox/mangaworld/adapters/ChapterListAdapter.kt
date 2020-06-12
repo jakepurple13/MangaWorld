@@ -30,6 +30,7 @@ class ChapterListAdapter(
     private val context: Context,
     dataList: MutableList<ChapterModel>,
     swatch: Palette.Swatch?,
+    private val mangaTitle: String,
     private val mangaUrl: String,
     private val dao: MangaDao,
     private val toChapterHistory: (ChapterModel) -> ChapterHistory
@@ -50,6 +51,7 @@ class ChapterListAdapter(
                 Intent(context, ReadActivity::class.java).apply {
                     //putExtra("chapter", position)
                     //putExtra("nextChapter", dataList)
+                    putExtra("mangaTitle", mangaTitle)
                     putExtra("currentChapter", item)
                 }
             )

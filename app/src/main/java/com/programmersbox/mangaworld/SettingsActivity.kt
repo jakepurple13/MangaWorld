@@ -91,7 +91,7 @@ class SettingsActivity : AppCompatActivity() {
         seekBar("chapterHistorySize") {
             title = "Chapter History Cache"
             summary = "Set how many chapters should be saved in history"
-            iconRes = android.R.drawable.sym_def_app_icon
+            iconRes = android.R.drawable.ic_menu_recent_history
             default = chapterHistorySize
             max = 100
             min = 0

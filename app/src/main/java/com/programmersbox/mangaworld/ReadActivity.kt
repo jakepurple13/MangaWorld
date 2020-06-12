@@ -1,11 +1,16 @@
 package com.programmersbox.mangaworld
 
+import android.Manifest
 import android.annotation.SuppressLint
+import android.app.DownloadManager
 import android.content.BroadcastReceiver
 import android.graphics.Color
+import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.net.toUri
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -32,6 +37,7 @@ import io.reactivex.rxkotlin.addTo
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
 import kotlinx.android.synthetic.main.activity_read.*
+import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 import kotlin.math.roundToInt
@@ -40,6 +46,7 @@ class ReadActivity : AppCompatActivity() {
 
     private val disposable = CompositeDisposable()
     private var model: ChapterModel? = null
+    private var mangaTitle: String? = null
     private val loader by lazy { Glide.with(this) }
     private val adapter by lazy {
         loader.let {
@@ -53,7 +60,11 @@ class ReadActivity : AppCompatActivity() {
                     .transition(withCrossFade()),
                 context = this@ReadActivity,
                 dataList = mutableListOf()
-            )
+            ) { image ->
+                requestPermissions(Manifest.permission.WRITE_EXTERNAL_STORAGE) { p ->
+                    if (p.isGranted) saveImage("${mangaTitle}_${model?.name}_${image.toUri().lastPathSegment}", image)
+                }
+            }
         }
     }
 
@@ -148,6 +159,7 @@ class ReadActivity : AppCompatActivity() {
             }
         })
 
+        mangaTitle = intent.getStringExtra("mangaTitle")
         model = intent.getObjectExtra<ChapterModel>("currentChapter")
 
         Single.create<List<String>> { emitter ->
@@ -180,6 +192,26 @@ class ReadActivity : AppCompatActivity() {
                 else putInt(it.url, currentItem)
             }.apply()
         }
+    }
+
+    private fun saveImage(filename: String, downloadUrlOfImage: String) {
+        val direct = File(getExternalFilesDir(Environment.DIRECTORY_PICTURES)!!.absolutePath + "/" + "MangaWorld" + "/")
+
+        if (!direct.exists()) {
+            direct.mkdir()
+        }
+
+        val dm: DownloadManager = downloadManager
+        val downloadUri: Uri = Uri.parse(downloadUrlOfImage)
+        val request: DownloadManager.Request = DownloadManager.Request(downloadUri)
+        request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE)
+            .setAllowedOverRoaming(false)
+            .setTitle(mangaTitle ?: filename)
+            .setMimeType("image/jpeg")
+            .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE)
+            .setDestinationInExternalPublicDir(Environment.DIRECTORY_PICTURES, File.separator + "MangaWorld" + File.separator.toString() + filename)
+
+        dm.enqueue(request)
     }
 
     override fun onPause() {

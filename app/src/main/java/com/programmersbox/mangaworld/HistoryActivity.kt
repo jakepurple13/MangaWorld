@@ -47,7 +47,11 @@ class HistoryActivity : AppCompatActivity() {
             binding.model = item
             binding.executePendingBindings()
             itemView.setOnClickListener {
-                it.context.startActivity(Intent(it.context, ReadActivity::class.java).apply { putExtra("currentChapter", item.chapterModel) })
+                it.context.startActivity(Intent(it.context, ReadActivity::class.java).apply {
+                    putExtra("mangaTitle", item.title)
+                    putExtra("currentChapter", item.chapterModel)
+                }
+                )
             }
             Glide.with(cover)
                 .asBitmap()

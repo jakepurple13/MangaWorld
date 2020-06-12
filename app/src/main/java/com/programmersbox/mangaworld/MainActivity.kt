@@ -38,7 +38,7 @@ class MainActivity : AppCompatActivity() {
     private val adapter = MangaListAdapter(this, disposable)
     private val adapter2 = GalleryListAdapter(this, disposable)
     private var pageNumber = 1
-    private var mangaViewType: MangaListView by sharedPrefNotNullObjectDelegate(MangaListView.LINEAR)
+    private var mangaViewType: MangaListView by sharedPrefNotNullObjectDelegate(MangaListView.values().random())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
