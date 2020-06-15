@@ -2,12 +2,12 @@ package com.programmersbox.mangaworld
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.app.DownloadManager
 import android.content.BroadcastReceiver
 import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.net.toUri
@@ -53,6 +53,7 @@ class ReadActivity : AppCompatActivity() {
             PageAdapter(
                 fullRequest = it
                     .asDrawable()
+                    .skipMemoryCache(true)
                     .centerCrop(),
                 thumbRequest = it
                     .asDrawable()
@@ -86,6 +87,8 @@ class ReadActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_read)
+
+        hideSystemUI()
 
         val preloader: RecyclerViewPreloader<String> = RecyclerViewPreloader(loader, adapter, ViewPreloadSizeProvider(), 10)
         readView.addOnScrollListener(preloader)
@@ -201,17 +204,29 @@ class ReadActivity : AppCompatActivity() {
             direct.mkdir()
         }
 
-        val dm: DownloadManager = downloadManager
-        val downloadUri: Uri = Uri.parse(downloadUrlOfImage)
-        val request: DownloadManager.Request = DownloadManager.Request(downloadUri)
-        request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE)
-            .setAllowedOverRoaming(false)
-            .setTitle(mangaTitle ?: filename)
-            .setMimeType("image/jpeg")
-            .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE)
-            .setDestinationInExternalPublicDir(Environment.DIRECTORY_PICTURES, File.separator + "MangaWorld" + File.separator.toString() + filename)
+        val request = DownloadDslManager(this) {
+            downloadUri = Uri.parse(downloadUrlOfImage)
+            allowOverRoaming = true
+            networkType = DownloadDslManager.NetworkType.WIFI_MOBILE
+            title = mangaTitle ?: filename
+            mimeType = "image/jpeg"
+            visibility = DownloadDslManager.NotificationVisibility.VISIBLE
+            destinationInExternalPublicDir(Environment.DIRECTORY_PICTURES, File.separator + "MangaWorld" + File.separator.toString() + filename)
+        }
 
-        dm.enqueue(request)
+        downloadManager.enqueue(request)
+    }
+
+    private fun hideSystemUI() {
+        // Set the IMMERSIVE flag.
+        // Set the content to appear under the system bars so that the content
+        // doesn't resize when the system bars hide and show.
+        val decorView = window.decorView
+        decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                or View.SYSTEM_UI_FLAG_LOW_PROFILE
+                or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION // hide nav bar
+                or View.SYSTEM_UI_FLAG_FULLSCREEN // hide status bar
+                or View.SYSTEM_UI_FLAG_IMMERSIVE)
     }
 
     override fun onPause() {

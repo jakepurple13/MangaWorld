@@ -17,8 +17,7 @@ import com.programmersbox.manga_db.MangaDatabase
 import com.programmersbox.manga_sources.mangasources.Sources
 import com.programmersbox.mangaworld.utils.toMangaModel
 import io.reactivex.disposables.CompositeDisposable
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
@@ -45,7 +44,7 @@ class UpdateCheckService : IntentService("UpdateCheckIntentService") {
             val mangaListSize: Int
             dao.getAllMangaSync()
                 .let {
-                    it.intersect(Sources.values().filterNot(Sources::isAdult).filterNot(Sources::filterOutOfUpdate)
+                    it.intersect(Sources.getUpdateSearches()
                         .filter { s -> it.any { m -> m.source == s } }
                         .flatMap { m -> m.getManga() }) { o, n -> o.mangaUrl == n.mangaUrl }
                 }
@@ -53,7 +52,9 @@ class UpdateCheckService : IntentService("UpdateCheckIntentService") {
                 .mapIndexedNotNull { index, model ->
                     sendRunningNotification(mangaListSize, index, model.title)
                     try {
-                        Triple(model.numChapters, model.toMangaModel().toInfoModel(), model)
+                        withContext(Dispatchers.Default) {
+                            withTimeoutOrNull(10000L) { Triple(model.numChapters, model.toMangaModel().toInfoModel(), model) }
+                        }
                     } catch (e: Exception) {
                         null
                     }

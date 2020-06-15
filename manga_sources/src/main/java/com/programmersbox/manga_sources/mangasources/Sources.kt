@@ -47,5 +47,7 @@ enum class Sources(val isAdult: Boolean = false, val filterOutOfUpdate: Boolean 
             url.contains("mangahere") -> MANGA_HERE
             else -> null
         }
+
+        fun getUpdateSearches() = values().filterNot(Sources::isAdult).filterNot(Sources::filterOutOfUpdate)
     }
 }

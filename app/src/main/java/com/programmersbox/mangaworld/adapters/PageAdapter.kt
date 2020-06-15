@@ -38,11 +38,14 @@ class PageHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         image.setProgressIndicator(ProgressPieIndicator())
         image.showImage(Uri.parse(item))
         image.setOnLongClickListener {
-            MaterialAlertDialogBuilder(itemView.context)
-                .setTitle("Download page?")
-                .setPositiveButton("Yes") { d, _ -> canDownload(item!!);d.dismiss() }
-                .setNegativeButton("No") { d, _ -> d.dismiss() }
-                .show()
+            try {
+                MaterialAlertDialogBuilder(itemView.context)
+                    .setTitle("Download page?")
+                    .setPositiveButton("Yes") { d, _ -> canDownload(item!!);d.dismiss() }
+                    .setNegativeButton("No") { d, _ -> d.dismiss() }
+                    .show()
+            } catch (e: Exception) {
+            }
             true
         }
     }
