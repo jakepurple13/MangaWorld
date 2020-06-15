@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "481639709624",
+    "firebase_url": "https://mangaworld-e1973.firebaseio.com",
+    "project_id": "mangaworld-e1973",
+    "storage_bucket": "mangaworld-e1973.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:481639709624:android:7517bedc9d0e6db7be2d4d",
+        "android_client_info": {
+          "package_name": "com.programmersbox.mangaworld"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "481639709624-qcmkgu6mg5pt0qv0g7o90gh1nfr55que.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBf8JIEwMU_wJ9N1jnf8bFvrwPaKsWB6KQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "481639709624-qcmkgu6mg5pt0qv0g7o90gh1nfr55que.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
