@@ -26,4 +26,9 @@
         android:icon="@mipmap/ic_launcher"
         android:title="Check For Updates" />
 
+    <!--<item
+        android:id="@+id/signIn"
+        android:icon="@drawable/common_google_signin_btn_icon_dark"
+        android:title="Sign in" />-->
+
 </menu>

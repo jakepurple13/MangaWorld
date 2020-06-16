@@ -31,10 +31,7 @@ import com.programmersbox.manga_sources.mangasources.MangaModel
 import com.programmersbox.mangaworld.adapters.ChapterHolder
 import com.programmersbox.mangaworld.adapters.ChapterListAdapter
 import com.programmersbox.mangaworld.databinding.ActivityMangaBinding
-import com.programmersbox.mangaworld.utils.ChapterHistory
-import com.programmersbox.mangaworld.utils.MangaInfoCache
-import com.programmersbox.mangaworld.utils.toMangaDbModel
-import com.programmersbox.mangaworld.utils.usePalette
+import com.programmersbox.mangaworld.utils.*
 import com.programmersbox.mangaworld.views.ReadOrMarkRead
 import com.programmersbox.thirdpartyutils.changeTint
 import com.programmersbox.thirdpartyutils.check
@@ -89,7 +86,9 @@ class MangaActivity : AppCompatActivity() {
 
     private fun dbLoad(manga: MangaModel?) {
         favoriteManga.setOnClickListener {
-            manga?.toMangaDbModel((mangaInfoChapterList.adapter as? DragSwipeAdapter<*, *>)?.itemCount ?: 0)
+            manga
+                ?.also { GlobalScope.launch { if (isFavorite()) FirebaseDb.removeManga(it) else if (!isFavorite()) FirebaseDb.addManga(it) } }
+                ?.toMangaDbModel((mangaInfoChapterList.adapter as? DragSwipeAdapter<*, *>)?.itemCount ?: 0)
                 ?.let { it1 -> if (isFavorite()) dao.deleteManga(it1) else if (!isFavorite()) dao.insertManga(it1) else null }
                 ?.subscribeOn(Schedulers.io())
                 ?.observeOn(AndroidSchedulers.mainThread())
@@ -101,6 +100,12 @@ class MangaActivity : AppCompatActivity() {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(onSuccess = { isFavorite(true) }, onError = { isFavorite(false) })
+                .addTo(disposable)
+
+            FirebaseDb.findMangaByUrl(it)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe { b -> isFavorite(b) }
                 .addTo(disposable)
         }
     }
@@ -117,7 +122,8 @@ class MangaActivity : AppCompatActivity() {
 
             mangaInfoChapterList.adapter = adapter
 
-            dao.getReadChaptersById(manga.mangaUrl)
+            dbAndFireChapter(manga.mangaUrl)
+                // dao.getReadChaptersById(manga.mangaUrl)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe {

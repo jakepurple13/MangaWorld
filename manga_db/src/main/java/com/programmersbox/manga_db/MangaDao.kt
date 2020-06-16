@@ -41,4 +41,7 @@ interface MangaDao {
     @Query("SELECT * FROM ChaptersRead WHERE mangaUrl = :url")
     fun getReadChaptersByIdNonFlow(url: String): List<MangaReadChapter>
 
+    @Query("SELECT * FROM ChaptersRead")
+    fun getAllChapters(): List<MangaReadChapter>
+
 }
