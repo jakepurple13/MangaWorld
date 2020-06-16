@@ -90,6 +90,16 @@ class ReadActivity : AppCompatActivity() {
 
         hideSystemUI()
 
+        /*window.decorView.setOnSystemUiVisibilityChangeListener { visibility ->
+            if (visibility and View.SYSTEM_UI_FLAG_FULLSCREEN == 0) {
+                println("Visible")
+                titleManga.animate().alpha(1f).withStartAction { titleManga.visible() }.start()
+            } else {
+                println("Invisible")
+                titleManga.animate().alpha(0f).withEndAction { titleManga.invisible() }.start()
+            }
+        }*/
+
         val preloader: RecyclerViewPreloader<String> = RecyclerViewPreloader(loader, adapter, ViewPreloadSizeProvider(), 10)
         readView.addOnScrollListener(preloader)
         readView.setItemViewCacheSize(0)
@@ -136,18 +146,6 @@ class ReadActivity : AppCompatActivity() {
         timeTicker = timeTick { _, _ -> currentTime.text = SimpleDateFormat("HH:mm a", Locale.getDefault()).format(System.currentTimeMillis()) }
         currentTime.text = SimpleDateFormat("HH:mm a", Locale.getDefault()).format(System.currentTimeMillis())
 
-        /*var range = ConstraintRange(
-            readLayout,
-            ConstraintSet().apply { clone(readLayout) },
-            ConstraintSet().apply { clone(this@ReadActivity, R.layout.actvity_read_alt) }
-        )
-
-        GlobalScope.launch {
-            runOnUiThread { range.current = 0 }
-            delay(5000)
-            runOnUiThread { range.current = 1 }
-        }*/
-
         readView.adapter = adapter
 
         readView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
@@ -164,6 +162,8 @@ class ReadActivity : AppCompatActivity() {
 
         mangaTitle = intent.getStringExtra("mangaTitle")
         model = intent.getObjectExtra<ChapterModel>("currentChapter")
+
+        //titleManga.text = mangaTitle
 
         Single.create<List<String>> { emitter ->
             try {
@@ -211,10 +211,18 @@ class ReadActivity : AppCompatActivity() {
             title = mangaTitle ?: filename
             mimeType = "image/jpeg"
             visibility = DownloadDslManager.NotificationVisibility.VISIBLE
-            destinationInExternalPublicDir(Environment.DIRECTORY_PICTURES, File.separator + "MangaWorld" + File.separator.toString() + filename)
+            destinationInExternalPublicDir(Environment.DIRECTORY_PICTURES, File.separator + "MangaWorld" + File.separator + filename)
         }
 
         downloadManager.enqueue(request)
+
+        /*val id = downloadManager.enqueue(request)
+
+        DownloadManagerListener(this) {
+            addId(id)
+            updateInterval = 1000L
+            listener { println(it) }
+        }*/
     }
 
     private fun hideSystemUI() {

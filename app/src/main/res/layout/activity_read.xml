@@ -12,6 +12,20 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
+    <!--<TextView
+        android:id="@+id/titleManga"
+        style="@style/TextAppearance.MaterialComponents.Headline6"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#000000"
+        android:textColor="#ffffff"
+        android:gravity="center"
+        android:translationZ="1dp"
+        android:visibility="invisible"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="@tools:sample/full_names"
+        tools:visibility="visible" />-->
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/readView"
         android:layout_width="match_parent"
