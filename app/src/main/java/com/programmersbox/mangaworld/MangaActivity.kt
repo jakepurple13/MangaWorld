@@ -96,17 +96,44 @@ class MangaActivity : AppCompatActivity() {
         }
 
         manga?.mangaUrl?.let {
+
+
+            /*Observable.mergeDelayError(
+                dao.getMangaById(it)
+                    .toObservable(),
+                FirebaseDb.findMangaByUrlSingle(it)
+                    .toObservable()
+            )
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeBy(onNext = { isFavorite(true) }, onError = { isFavorite(false) })
+                .addTo(disposable)*/
+
             dao.getMangaById(it)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(onSuccess = { isFavorite(true) }, onError = { isFavorite(false) })
                 .addTo(disposable)
 
-            /*FirebaseDb.findMangaByUrlSingle(it)
+            FirebaseDb.findMangaByUrlSingle(it)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                //.subscribe { b -> isFavorite(b) }
-                .subscribeBy(onSuccess = { isFavorite(true) }, onError = { isFavorite(false) })
+                .subscribeBy(onSuccess = isFavorite::invoke, onError = { isFavorite(false) })
+                .addTo(disposable)
+
+            /*Flowables.combineLatest(
+                FirebaseDb.findMangaByUrl(it),
+                dao.getMangaByIdFlow(it)
+            )
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe { p -> isFavorite(p.first || p.second.mangaUrl == it) }
+                .addTo(disposable)*/
+
+            /*FirebaseDb.findMangaByUrl(it)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe { isFavorite(it) }
                 .addTo(disposable)*/
         }
     }
@@ -122,6 +149,7 @@ class MangaActivity : AppCompatActivity() {
             ) { ChapterHistory(mangaUrl = manga.mangaUrl, imageUrl = manga.imageUrl, title = manga.title, chapterModel = it) }
 
             mangaInfoChapterList.adapter = adapter
+            mangaInfoChapterList.setItemViewCacheSize(10)
 
             dbAndFireChapter(manga.mangaUrl)
                 // dao.getReadChaptersById(manga.mangaUrl)
@@ -250,7 +278,7 @@ class MangaActivity : AppCompatActivity() {
         override fun onChange(current: Int, item: ConstraintRanges) = Unit
     }
 
-    private class ConstraintRanges(val layout: ConstraintLayout, vararg items: ConstraintSet, loop: Boolean = true) : Range<ConstraintSet>() {
+    private class ConstraintRanges(val layout: ConstraintLayout, vararg items: ConstraintSet) : Range<ConstraintSet>() {
         override val itemList: List<ConstraintSet> = items.toList()
         override fun onChange(current: Int, item: ConstraintSet) = Unit
     }

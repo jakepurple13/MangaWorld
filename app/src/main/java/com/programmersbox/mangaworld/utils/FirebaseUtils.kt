@@ -29,6 +29,7 @@ import com.programmersbox.manga_sources.mangasources.Sources
 import com.programmersbox.mangaworld.R
 import com.programmersbox.rxutils.toLatestFlowable
 import io.reactivex.Flowable
+import io.reactivex.Maybe
 import io.reactivex.Single
 import io.reactivex.rxkotlin.Flowables
 import io.reactivex.schedulers.Schedulers
@@ -241,21 +242,44 @@ object FirebaseDb {
                 ?.second
                 ?.map { it.toMangaModel() }
                 ?.find { it.mangaUrl == url }
+                .also { println(it) }
                 .let { emitter.onNext(it != null) }
         }
     }.toLatestFlowable()
 
     fun findMangaByUrlSingle(url: String): Single<Boolean> = Single.create<Boolean> { emitter ->
-        mangaDoc?.addSnapshotListener { documentSnapshot, _ ->
+        mangaDoc
+            ?.get(Source.DEFAULT)
+            ?.await()
+            ?.toObject(FirebaseAllManga::class.java)
+            ?.second
+            ?.map { it.toMangaModel() }
+            ?.find { it.mangaUrl == url }
+            ?.let { emitter.onSuccess(true) } ?: emitter.onSuccess(false)
+    }
+
+    fun findMangaByUrlMaybe(url: String): Maybe<Boolean> = Maybe.create<Boolean> { emitter ->
+        mangaDoc
+            ?.get(Source.DEFAULT)
+            ?.await()
+            ?.toObject(FirebaseAllManga::class.java)
+            ?.second
+            ?.map { it.toMangaModel() }
+            ?.find { it.mangaUrl == url }
+            .let { emitter.onSuccess(it != null) }
+        emitter.onComplete()
+
+        /*addSnapshotListener { documentSnapshot, _ ->
             documentSnapshot?.toObject(FirebaseAllManga::class.java)
                 ?.second
                 ?.map { it.toMangaModel() }
                 ?.find { it.mangaUrl == url }
                 .let {
-                    if (it != null) emitter.onSuccess(it != null)
-                    else emitter.onError(Throwable("Don't have it"))
+                    emitter.onSuccess(it != null)
+                    *//*if (it != null) emitter.onSuccess(it != null)
+                    else emitter.onError(Throwable("Don't have it"))*//*
                 }
-        }
+        }*/
     }
 
     fun getAllMangaFlowable(): Flowable<List<MangaModel>> = PublishSubject.create<List<MangaModel>> { emitter ->
