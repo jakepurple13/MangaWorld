@@ -71,9 +71,15 @@ class MainActivity : AppCompatActivity() {
     private fun menuSetup() {
         val signDial = SpeedDialActionItem.Builder(R.id.signInId, R.drawable.common_google_signin_btn_icon_dark)
             .setLabel(if (FirebaseAuthentication.currentUser != null) "Sign out" else "Sign in")
-            .create()
+
         menuOptions.inflate(R.menu.main_menu_items)
-        menuOptions.addActionItem(signDial)
+        menuOptions.addActionItem(signDial.create())
+        firebaseAuthentication.auth.addAuthStateListener {
+            menuOptions.replaceActionItem(
+                signDial.create(),
+                signDial.setLabel(if (FirebaseAuthentication.currentUser != null) "Sign out" else "Sign in").create()
+            )
+        }
         menuOptions.setOnActionSelectedListener {
             when (it.id) {
                 R.id.signInId -> {

@@ -15,6 +15,7 @@ import com.programmersbox.loggingutils.Loged
 import com.programmersbox.loggingutils.f
 import com.programmersbox.manga_db.MangaDatabase
 import com.programmersbox.manga_sources.mangasources.Sources
+import com.programmersbox.mangaworld.utils.dbAndFireMangaSync
 import com.programmersbox.mangaworld.utils.toMangaModel
 import io.reactivex.disposables.CompositeDisposable
 import kotlinx.coroutines.*
@@ -42,7 +43,8 @@ class UpdateCheckService : IntentService("UpdateCheckIntentService") {
         val dao = MangaDatabase.getInstance(this@UpdateCheckService).mangaDao()
         GlobalScope.launch {
             val mangaListSize: Int
-            dao.getAllMangaSync()
+            //dao.getAllMangaSync()
+            dbAndFireMangaSync(dao)
                 .let {
                     it.intersect(Sources.getUpdateSearches()
                         .filter { s -> it.any { m -> m.source == s } }

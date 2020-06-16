@@ -26,8 +26,6 @@ import com.programmersbox.mangaworld.utils.FirebaseDb
 import com.programmersbox.mangaworld.utils.addToHistory
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.chapter_list_item.view.*
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 
 class ChapterListAdapter(
     private val context: Context,
@@ -68,7 +66,7 @@ class ChapterListAdapter(
         readChapter.isChecked = chapters?.any { it.url == item.url } ?: false
         readChapter.setOnCheckedChangeListener { _, isChecked ->
             MangaReadChapter(item.url, item.name, mangaUrl)
-                .also { GlobalScope.launch { if (isChecked) FirebaseDb.addChapter(it) else FirebaseDb.removeChapter(it) } }
+                .also { if (isChecked) FirebaseDb.addChapter(it) else FirebaseDb.removeChapter(it) }
                 .let { if (isChecked) dao.insertChapter(it) else dao.deleteChapter(it) }
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.io())

@@ -87,7 +87,7 @@ class MangaActivity : AppCompatActivity() {
     private fun dbLoad(manga: MangaModel?) {
         favoriteManga.setOnClickListener {
             manga
-                ?.also { GlobalScope.launch { if (isFavorite()) FirebaseDb.removeManga(it) else if (!isFavorite()) FirebaseDb.addManga(it) } }
+                ?.also { if (isFavorite()) FirebaseDb.removeManga(it) else if (!isFavorite()) FirebaseDb.addManga(it) }
                 ?.toMangaDbModel((mangaInfoChapterList.adapter as? DragSwipeAdapter<*, *>)?.itemCount ?: 0)
                 ?.let { it1 -> if (isFavorite()) dao.deleteManga(it1) else if (!isFavorite()) dao.insertManga(it1) else null }
                 ?.subscribeOn(Schedulers.io())
@@ -102,11 +102,12 @@ class MangaActivity : AppCompatActivity() {
                 .subscribeBy(onSuccess = { isFavorite(true) }, onError = { isFavorite(false) })
                 .addTo(disposable)
 
-            FirebaseDb.findMangaByUrl(it)
+            /*FirebaseDb.findMangaByUrlSingle(it)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe { b -> isFavorite(b) }
-                .addTo(disposable)
+                //.subscribe { b -> isFavorite(b) }
+                .subscribeBy(onSuccess = { isFavorite(true) }, onError = { isFavorite(false) })
+                .addTo(disposable)*/
         }
     }
 

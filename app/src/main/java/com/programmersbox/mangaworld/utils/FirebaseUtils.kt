@@ -29,6 +29,7 @@ import com.programmersbox.manga_sources.mangasources.Sources
 import com.programmersbox.mangaworld.R
 import com.programmersbox.rxutils.toLatestFlowable
 import io.reactivex.Flowable
+import io.reactivex.Single
 import io.reactivex.rxkotlin.Flowables
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
@@ -39,7 +40,7 @@ class FirebaseAuthentication(private val context: Context, private val activity:
 
     private var gso: GoogleSignInOptions? = null
 
-    private val auth: FirebaseAuth = FirebaseAuth.getInstance()
+    val auth: FirebaseAuth = FirebaseAuth.getInstance()
 
     private var googleSignInClient: GoogleSignInClient? = null
 
@@ -145,76 +146,63 @@ object FirebaseDb {
     private val db = FirebaseFirestore.getInstance().apply {
         firestoreSettings = FirebaseFirestoreSettings.Builder()
             .setPersistenceEnabled(true)
-            .setCacheSizeBytes(FirebaseFirestoreSettings.CACHE_SIZE_UNLIMITED)
+            //.setCacheSizeBytes(FirebaseFirestoreSettings.CACHE_SIZE_UNLIMITED)
+            //.setCacheSizeBytes()
             .build()
     }
+
+    private val mangaDoc get() = FirebaseAuthentication.currentUser?.let { db.collection(it.uid).document(DOCUMENT_ID) }
+    private val chapterDoc get() = FirebaseAuthentication.currentUser?.let { db.collection(it.uid).document(CHAPTERS_ID) }
 
     private fun <TResult> Task<TResult>.await(): TResult = Tasks.await(this)
 
     suspend fun uploadAllItems(dao: MangaDao) {
-        val manga = dao.getAllMangaSync().map { it.toMangaModel() }
+        mangaDoc?.set(DOCUMENT_ID to dao.getAllMangaSync().map { it.toMangaModel().toFirebaseManga() })
+            ?.addOnSuccessListener {
+                Loged.d("Success!")
+            }?.addOnFailureListener {
+                Loged.wtf("Failure!")
+            }?.addOnCompleteListener {
+                Loged.d("All done!")
+            }
 
-        val chapters = dao.getAllChapters()
-
-        val store = FirebaseAuthentication.currentUser?.let {
-            db.collection(it.uid)
-                .document(DOCUMENT_ID)
-                .set(DOCUMENT_ID to manga)
-        }
-
-        store?.addOnSuccessListener {
-            Loged.d("Success!")
-        }?.addOnFailureListener {
-            Loged.wtf("Failure!")
-        }?.addOnCompleteListener {
-            Loged.d("All done!")
-        }
-
-        val store1 = FirebaseAuthentication.currentUser?.let {
-            db.collection(it.uid)
-                .document(CHAPTERS_ID)
-                .set(CHAPTERS_ID to chapters)
-        }
-
-        store1?.addOnSuccessListener {
-            Loged.d("Success!")
-        }?.addOnFailureListener {
-            Loged.wtf("Failure!")
-        }?.addOnCompleteListener {
-            Loged.d("All done!")
-        }
+        chapterDoc
+            ?.set(CHAPTERS_ID to dao.getAllChapters().map { it.toFirebaseChapter() })
+            ?.addOnSuccessListener {
+                Loged.d("Success!")
+            }?.addOnFailureListener {
+                Loged.wtf("Failure!")
+            }?.addOnCompleteListener {
+                Loged.d("All done!")
+            }
     }
 
-    suspend fun addManga(mangaModel: MangaModel) {
-        val store = FirebaseAuthentication.currentUser?.let {
-            db.collection(it.uid)
-                .document(DOCUMENT_ID)
-                .update("second", FieldValue.arrayUnion(mangaModel.toFirebaseManga()))
-        }
-
-        store?.addOnSuccessListener {
-            Loged.d("Success!")
-        }?.addOnFailureListener {
-            Loged.wtf("Failure!")
-        }?.addOnCompleteListener {
-            Loged.d("All done!")
-        }
+    fun addManga(mangaModel: MangaModel) {// = Completable.create { emitter ->
+        mangaDoc
+            ?.update("second", FieldValue.arrayUnion(mangaModel.toFirebaseManga()))
+            ?.addOnSuccessListener {
+                Loged.d("Success!")
+                //emitter.onComplete()
+            }?.addOnFailureListener {
+                Loged.wtf("Failure!")
+                //emitter.onError(it)
+            }?.addOnCompleteListener {
+                Loged.d("All done!")
+            }
     }
 
-    suspend fun removeManga(mangaModel: MangaModel) {
-        val store = FirebaseAuthentication.currentUser?.let {
-            db.collection(it.uid)
-                .document(DOCUMENT_ID)
-                .update("second", FieldValue.arrayRemove(mangaModel.toFirebaseManga()))
-        }
-
-        store?.addOnSuccessListener {
-            Loged.d("Success!")
-        }?.addOnFailureListener {
-            Loged.wtf("Failure!")
-        }?.addOnCompleteListener {
-            Loged.d("All done!")
-        }
+    fun removeManga(mangaModel: MangaModel) {// = Completable.create { emitter ->
+        mangaDoc
+            ?.update("second", FieldValue.arrayRemove(mangaModel.toFirebaseManga()))
+            ?.addOnSuccessListener {
+                Loged.d("Success!")
+                //emitter.onComplete()
+            }?.addOnFailureListener {
+                Loged.wtf("Failure!")
+                //emitter.onError(it)
+            }?.addOnCompleteListener {
+                Loged.d("All done!")
+            }
     }
 
     private fun MangaModel.toFirebaseManga() = FirebaseManga(title, description, mangaUrl, imageUrl, source)
@@ -230,48 +218,50 @@ object FirebaseDb {
 
     private data class FirebaseAllManga(val first: String = DOCUMENT_ID, val second: List<FirebaseManga> = emptyList())
 
-    suspend fun getAllManga() = db
-        .collection(FirebaseAuthentication.currentUser?.uid!!)
-        .document(DOCUMENT_ID)
-        .get(Source.DEFAULT)
-        .await()
-        .toObject(FirebaseAllManga::class.java)
+    fun getAllManga() = mangaDoc
+        ?.get(Source.DEFAULT)
+        ?.await()
+        ?.toObject(FirebaseAllManga::class.java)
         ?.second
         ?.map { it.toMangaModel() }
 
     fun getMangaByUrl(url: String): Flowable<MangaDbModel> = PublishSubject.create<MangaDbModel> { emitter ->
-        db
-            .collection(FirebaseAuthentication.currentUser?.uid!!)
-            .document(DOCUMENT_ID)
-            .addSnapshotListener { documentSnapshot, _ ->
-                documentSnapshot?.toObject(FirebaseAllManga::class.java)
-                    ?.second
-                    ?.map { it.toMangaModel() }
-                    ?.find { it.mangaUrl == url }
-                    .let { it?.let { emitter.onNext(it.toMangaDbModel()) } ?: emitter.onError(Throwable("Not in here")) }
-            }
+        mangaDoc?.addSnapshotListener { documentSnapshot, _ ->
+            documentSnapshot?.toObject(FirebaseAllManga::class.java)
+                ?.second
+                ?.map { it.toMangaModel() }
+                ?.find { it.mangaUrl == url }
+                .let { it?.let { emitter.onNext(it.toMangaDbModel()) } ?: emitter.onError(Throwable("Not in here")) }
+        }
     }.toLatestFlowable().subscribeOn(Schedulers.io())
 
     fun findMangaByUrl(url: String): Flowable<Boolean> = PublishSubject.create<Boolean> { emitter ->
-        db
-            .collection(FirebaseAuthentication.currentUser?.uid!!)
-            .document(DOCUMENT_ID)
-            .addSnapshotListener { documentSnapshot, _ ->
-                documentSnapshot?.toObject(FirebaseAllManga::class.java)
-                    ?.second
-                    ?.map { it.toMangaModel() }
-                    ?.find { it.mangaUrl == url }
-                    .let { emitter.onNext(it != null) }
-            }
-    }.toLatestFlowable().subscribeOn(Schedulers.io())
+        mangaDoc?.addSnapshotListener { documentSnapshot, _ ->
+            documentSnapshot?.toObject(FirebaseAllManga::class.java)
+                ?.second
+                ?.map { it.toMangaModel() }
+                ?.find { it.mangaUrl == url }
+                .let { emitter.onNext(it != null) }
+        }
+    }.toLatestFlowable()
+
+    fun findMangaByUrlSingle(url: String): Single<Boolean> = Single.create<Boolean> { emitter ->
+        mangaDoc?.addSnapshotListener { documentSnapshot, _ ->
+            documentSnapshot?.toObject(FirebaseAllManga::class.java)
+                ?.second
+                ?.map { it.toMangaModel() }
+                ?.find { it.mangaUrl == url }
+                .let {
+                    if (it != null) emitter.onSuccess(it != null)
+                    else emitter.onError(Throwable("Don't have it"))
+                }
+        }
+    }
 
     fun getAllMangaFlowable(): Flowable<List<MangaModel>> = PublishSubject.create<List<MangaModel>> { emitter ->
-        db
-            .collection(FirebaseAuthentication.currentUser?.uid!!)
-            .document(DOCUMENT_ID)
-            .addSnapshotListener { documentSnapshot, _ ->
-                documentSnapshot?.toObject(FirebaseAllManga::class.java)?.second?.map { it.toMangaModel() }?.let { emitter.onNext(it) }
-            }
+        mangaDoc?.addSnapshotListener { documentSnapshot, _ ->
+            documentSnapshot?.toObject(FirebaseAllManga::class.java)?.second?.map { it.toMangaModel() }?.let { emitter.onNext(it) }
+        }
     }.toLatestFlowable().subscribeOn(Schedulers.io())
 
     private data class FirebaseChapter(
@@ -285,56 +275,43 @@ object FirebaseDb {
     private fun MangaReadChapter.toFirebaseChapter() = FirebaseChapter(url, name, mangaUrl)
     private fun FirebaseChapter.toMangaChapter() = MangaReadChapter(url!!, name!!, mangaUrl!!)
 
-    suspend fun getAllChapters() = db
-        .collection(FirebaseAuthentication.currentUser?.uid!!)
-        .document(CHAPTERS_ID)
-        .get(Source.DEFAULT)
-        .await()
-        .toObject(FirebaseAllChapter::class.java)
+    fun getAllChapters() = chapterDoc
+        ?.get(Source.DEFAULT)
+        ?.await()
+        ?.toObject(FirebaseAllChapter::class.java)
         ?.second
         ?.map { it.toMangaChapter() }
 
     fun getAllChapterFlowable(): Flowable<List<MangaReadChapter>> = PublishSubject.create<List<MangaReadChapter>> { emitter ->
-        db
-            .collection(FirebaseAuthentication.currentUser?.uid!!)
-            .document(CHAPTERS_ID)
-            .addSnapshotListener { documentSnapshot, _ ->
-                documentSnapshot?.toObject(FirebaseAllChapter::class.java)
-                    ?.second
-                    ?.map { it.toMangaChapter() }?.let { emitter.onNext(it) }
-            }
+        chapterDoc?.addSnapshotListener { documentSnapshot, _ ->
+            documentSnapshot?.toObject(FirebaseAllChapter::class.java)
+                ?.second
+                ?.map { it.toMangaChapter() }?.let { emitter.onNext(it) }
+        }
     }.toLatestFlowable().subscribeOn(Schedulers.io())
 
-    suspend fun addChapter(mangaModel: MangaReadChapter) {
-        val store = FirebaseAuthentication.currentUser?.let {
-            db.collection(it.uid)
-                .document(CHAPTERS_ID)
-                .update("second", FieldValue.arrayUnion(mangaModel.toFirebaseChapter()))
-        }
-
-        store?.addOnSuccessListener {
-            Loged.d("Success!")
-        }?.addOnFailureListener {
-            Loged.wtf("Failure!")
-        }?.addOnCompleteListener {
-            Loged.d("All done!")
-        }
+    fun addChapter(mangaModel: MangaReadChapter) {
+        chapterDoc
+            ?.update("second", FieldValue.arrayUnion(mangaModel.toFirebaseChapter()))
+            ?.addOnSuccessListener {
+                Loged.d("Success!")
+            }?.addOnFailureListener {
+                Loged.wtf("Failure!")
+            }?.addOnCompleteListener {
+                Loged.d("All done!")
+            }
     }
 
-    suspend fun removeChapter(mangaModel: MangaReadChapter) {
-        val store = FirebaseAuthentication.currentUser?.let {
-            db.collection(it.uid)
-                .document(CHAPTERS_ID)
-                .update("second", FieldValue.arrayRemove(mangaModel.toFirebaseChapter()))
-        }
-
-        store?.addOnSuccessListener {
-            Loged.d("Success!")
-        }?.addOnFailureListener {
-            Loged.wtf("Failure!")
-        }?.addOnCompleteListener {
-            Loged.d("All done!")
-        }
+    fun removeChapter(mangaModel: MangaReadChapter) {
+        chapterDoc
+            ?.update("second", FieldValue.arrayRemove(mangaModel.toFirebaseChapter()))
+            ?.addOnSuccessListener {
+                Loged.d("Success!")
+            }?.addOnFailureListener {
+                Loged.wtf("Failure!")
+            }?.addOnCompleteListener {
+                Loged.d("All done!")
+            }
     }
 
 }
@@ -343,6 +320,11 @@ fun Context.dbAndFireManga(dao: MangaDao = MangaDatabase.getInstance(this).manga
     dao.getAllManga(),
     FirebaseDb.getAllMangaFlowable()
 ) { db, fire -> (db.map { it.toMangaModel() } + (fire)).distinctBy { it.mangaUrl } }
+
+fun Context.dbAndFireMangaSync(dao: MangaDao = MangaDatabase.getInstance(this).mangaDao()) = listOf(
+    dao.getAllMangaSync(),
+    FirebaseDb.getAllManga()?.requireNoNulls()?.map { it.toMangaDbModel() }.orEmpty()
+).flatten().distinctBy { it.mangaUrl }
 
 fun Context.dbAndFireChapter(
     url: String,
