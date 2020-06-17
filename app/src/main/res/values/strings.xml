@@ -12,8 +12,8 @@
     <string name="startingUpdateCheck">Starting Manga Update Checks</string>
     <string name="checkingUpdate">Checking for Manga Updates</string>
     <string name="finishedChecking">Finished Checking for Manga Updates</string>
-    <string name="addChapter">Added %s</string>
-    <string name="removeChapter">Removed %s</string>
+    <string name="addChapter">Marked %s as read</string>
+    <string name="removeChapter">Removed %s from read</string>
     <plurals name="updateAmount">
         <item quantity="one">There is %d update</item>
         <item quantity="other">There are %d updates</item>

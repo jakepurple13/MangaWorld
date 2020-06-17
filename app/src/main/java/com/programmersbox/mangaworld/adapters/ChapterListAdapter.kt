@@ -47,6 +47,7 @@ class ChapterListAdapter(
     override fun ChapterHolder.onBind(item: ChapterModel, position: Int) {
         bind(item, info)
         itemView.setOnClickListener {
+            readChapter.performClick()
             context.addToHistory(toChapterHistory(item))
             context.startActivity(
                 Intent(context, ReadActivity::class.java).apply {

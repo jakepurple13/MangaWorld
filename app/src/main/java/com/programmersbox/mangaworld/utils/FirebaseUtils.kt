@@ -247,7 +247,7 @@ object FirebaseDb {
         }
     }.toLatestFlowable()
 
-    fun findMangaByUrlSingle(url: String): Single<Boolean> = Single.create<Boolean> { emitter ->
+    fun findMangaByUrlSingle(url: String): Single<Boolean> = Single.create { emitter ->
         mangaDoc
             ?.get(Source.DEFAULT)
             ?.await()
@@ -258,7 +258,7 @@ object FirebaseDb {
             ?.let { emitter.onSuccess(true) } ?: emitter.onSuccess(false)
     }
 
-    fun findMangaByUrlMaybe(url: String): Maybe<Boolean> = Maybe.create<Boolean> { emitter ->
+    fun findMangaByUrlMaybe(url: String): Maybe<Boolean> = Maybe.create { emitter ->
         mangaDoc
             ?.get(Source.DEFAULT)
             ?.await()
