@@ -24,6 +24,8 @@ import com.programmersbox.mangaworld.MangaActivity
 import com.programmersbox.mangaworld.R
 import com.programmersbox.mangaworld.databinding.MangaListItemBinding
 import com.programmersbox.mangaworld.databinding.MangaListItemGalleryViewBinding
+import com.programmersbox.mangaworld.utils.FirebaseDb
+import com.programmersbox.mangaworld.utils.dbAndFireManga
 import com.programmersbox.mangaworld.utils.toMangaDbModel
 import com.programmersbox.mangaworld.utils.usePalette
 import com.programmersbox.thirdpartyutils.changeTint
@@ -71,7 +73,8 @@ class MangaListAdapter(context: Context, disposable: CompositeDisposable = Compo
             true
         }
 
-        dao.getAllManga()
+        context.dbAndFireManga(dao)
+            /*dao.getAllManga()*/
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .map { it.any { model -> model.mangaUrl == item.mangaUrl } }
@@ -79,7 +82,9 @@ class MangaListAdapter(context: Context, disposable: CompositeDisposable = Compo
             .addTo(disposable)
 
         favorite.setOnClickListener {
-            item.toMangaDbModel()
+            item
+                .also { if (favorite.progress > 0.9f) FirebaseDb.removeManga(it) else if (!favorite.checked) FirebaseDb.addManga(it) }
+                .toMangaDbModel()
                 .let { it1 -> if (favorite.progress > 0.9f) dao.deleteManga(it1) else if (!favorite.checked) dao.insertManga(it1) else null }
                 ?.subscribeOn(Schedulers.io())
                 ?.observeOn(AndroidSchedulers.mainThread())
@@ -153,6 +158,11 @@ class GalleryListAdapter(context: Context, disposable: CompositeDisposable = Com
                 .apply {
                     setOnMenuItemClickListener {
                         when (it.itemId) {
+                            1 -> FirebaseDb.addManga(item)
+                            2 -> FirebaseDb.removeManga(item)
+                        }
+
+                        when (it.itemId) {
                             1 -> dao.insertManga(item.toMangaDbModel())
                             2 -> dao.deleteManga(item.toMangaDbModel())
                             else -> null
@@ -171,6 +181,7 @@ class GalleryListAdapter(context: Context, disposable: CompositeDisposable = Com
             }
 
             dao.getAllManga()
+                //context.dbAndFireManga(dao)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .map { it.any { model -> model.mangaUrl == item.mangaUrl } }
@@ -301,12 +312,14 @@ class GalleryListFavoriteAdapter(private val context: Context) : DragSwipeAdapte
     }
 
     private fun addOrRemoveManga(view: View, item: MangaModel) = dao
+        .also { FirebaseDb.removeManga(item) }
         .deleteManga(item.toMangaDbModel())
         .subscribeOn(Schedulers.io())
         .observeOn(Schedulers.io())
         .subscribe {
             Snackbar.make(view, context.getString(R.string.removed, item.title), Snackbar.LENGTH_LONG)
                 .setAction(context.getText(R.string.undo)) {
+                    FirebaseDb.addManga(item)
                     dao
                         .insertManga(item.toMangaDbModel())
                         .subscribeOn(Schedulers.io())

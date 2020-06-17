@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.jakewharton.rxbinding2.widget.textChanges
+import com.leinardi.android.speeddial.SpeedDialActionItem
 import com.programmersbox.gsonutils.sharedPrefNotNullObjectDelegate
 import com.programmersbox.helpfulutils.requestPermissions
 import com.programmersbox.helpfulutils.setEnumSingleChoiceItems
@@ -17,6 +18,7 @@ import com.programmersbox.manga_sources.mangasources.MangaModel
 import com.programmersbox.manga_sources.mangasources.Sources
 import com.programmersbox.mangaworld.adapters.GalleryListAdapter
 import com.programmersbox.mangaworld.adapters.MangaListAdapter
+import com.programmersbox.mangaworld.utils.FirebaseAuthentication
 import com.programmersbox.mangaworld.utils.MangaListView
 import com.programmersbox.mangaworld.utils.currentSource
 import com.programmersbox.mangaworld.utils.stayOnAdult
@@ -39,10 +41,23 @@ class MainActivity : AppCompatActivity() {
     private val adapter2 = GalleryListAdapter(this, disposable)
     private var pageNumber = 1
     private var mangaViewType: MangaListView by sharedPrefNotNullObjectDelegate(MangaListView.values().random())
+    private val firebaseAuthentication = FirebaseAuthentication(this, this)
+
+    override fun onStart() {
+        super.onStart()
+        firebaseAuthentication.onStart()
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        firebaseAuthentication.onActivityResult(requestCode, resultCode, data)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        firebaseAuthentication.authenticate()
 
         requestPermissions(Manifest.permission.INTERNET) {
             if (!it.isGranted) Toast.makeText(this, "Need ${it.deniedPermissions} to work", Toast.LENGTH_SHORT).show()
@@ -54,9 +69,26 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun menuSetup() {
+        val signDial = SpeedDialActionItem.Builder(R.id.signInId, R.drawable.common_google_signin_btn_icon_dark)
+            .setLabel(if (FirebaseAuthentication.currentUser != null) "Sign out" else "Sign in")
+
         menuOptions.inflate(R.menu.main_menu_items)
+        menuOptions.addActionItem(signDial.create())
+        firebaseAuthentication.auth.addAuthStateListener {
+            menuOptions.replaceActionItem(
+                signDial.create(),
+                signDial.setLabel(if (FirebaseAuthentication.currentUser != null) "Sign out" else "Sign in").create()
+            )
+        }
         menuOptions.setOnActionSelectedListener {
             when (it.id) {
+                R.id.signInId -> {
+                    if (FirebaseAuthentication.currentUser != null) firebaseAuthentication.signOut()
+                    else firebaseAuthentication.signIn()
+                    //menuOptions.replaceActionItem(signDial, signDial)
+                    menuOptions.close() // To close the Speed Dial with animation
+                    return@setOnActionSelectedListener true // false will close it without animation
+                }
                 R.id.viewFavoritesMenu -> {
                     startActivity(Intent(this, FavoriteActivity::class.java))
                     menuOptions.close() // To close the Speed Dial with animation

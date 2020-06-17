@@ -9,6 +9,7 @@ import com.mikepenz.iconics.IconicsDrawable
 import com.mikepenz.iconics.typeface.library.googlematerial.GoogleMaterial
 import com.mikepenz.iconics.utils.colorInt
 import com.mikepenz.iconics.utils.sizeDp
+import com.programmersbox.manga_db.MangaDatabase
 import com.programmersbox.mangaworld.utils.*
 import com.programmersbox.rxutils.invoke
 import de.Maxr1998.modernpreferences.PreferencesAdapter
@@ -18,6 +19,8 @@ import de.Maxr1998.modernpreferences.preferences.TwoStatePreference
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.subjects.PublishSubject
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
 import kotlin.math.roundToInt
 
@@ -143,6 +146,14 @@ class SettingsActivity : AppCompatActivity() {
             default = cacheSize
             onSeek { _, _, i ->
                 cacheSize = i
+                true
+            }
+        }
+
+        checkBox("sync") {
+            title = "Sync"
+            onClicked {
+                GlobalScope.launch { FirebaseDb.uploadAllItems(MangaDatabase.getInstance(this@SettingsActivity).mangaDao()) }
                 true
             }
         }

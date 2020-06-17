@@ -108,6 +108,14 @@
     </com.google.android.material.appbar.AppBarLayout>
 
     <!--FABs go here-->
+
+    <com.leinardi.android.speeddial.SpeedDialOverlayLayout
+        android:id="@+id/overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:clickable_overlay="true"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+
     <com.leinardi.android.speeddial.SpeedDialView
         android:id="@+id/menuOptions"
         android:layout_width="wrap_content"
@@ -115,6 +123,7 @@
         android:layout_gravity="bottom|end"
         app:layout_behavior="@string/speeddial_scrolling_view_snackbar_behavior"
         app:sdExpansionMode="top"
+        app:sdOverlayLayout="@id/overlay"
         app:sdMainFabClosedBackgroundColor="@color/colorPrimary"
         app:sdMainFabClosedSrc="@drawable/baseline_menu_black_18dp"
         app:sdMainFabOpenedBackgroundColor="@color/colorPrimary"

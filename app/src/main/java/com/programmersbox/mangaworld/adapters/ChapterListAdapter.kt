@@ -22,6 +22,7 @@ import com.programmersbox.mangaworld.ReadActivity
 import com.programmersbox.mangaworld.SwatchInfo
 import com.programmersbox.mangaworld.databinding.ChapterListItemBinding
 import com.programmersbox.mangaworld.utils.ChapterHistory
+import com.programmersbox.mangaworld.utils.FirebaseDb
 import com.programmersbox.mangaworld.utils.addToHistory
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.chapter_list_item.view.*
@@ -46,6 +47,7 @@ class ChapterListAdapter(
     override fun ChapterHolder.onBind(item: ChapterModel, position: Int) {
         bind(item, info)
         itemView.setOnClickListener {
+            readChapter.performClick()
             context.addToHistory(toChapterHistory(item))
             context.startActivity(
                 Intent(context, ReadActivity::class.java).apply {
@@ -65,6 +67,7 @@ class ChapterListAdapter(
         readChapter.isChecked = chapters?.any { it.url == item.url } ?: false
         readChapter.setOnCheckedChangeListener { _, isChecked ->
             MangaReadChapter(item.url, item.name, mangaUrl)
+                .also { if (isChecked) FirebaseDb.addChapter(it) else FirebaseDb.removeChapter(it) }
                 .let { if (isChecked) dao.insertChapter(it) else dao.deleteChapter(it) }
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.io())

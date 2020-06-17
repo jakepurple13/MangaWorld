@@ -3,6 +3,7 @@ package com.programmersbox.manga_db
 import androidx.room.*
 import io.reactivex.Completable
 import io.reactivex.Flowable
+import io.reactivex.Maybe
 import io.reactivex.Single
 
 /**
@@ -13,6 +14,12 @@ interface MangaDao {
 
     @Query("SELECT * FROM FavoriteManga WHERE mangaUrl = :url")
     fun getMangaById(url: String): Single<MangaDbModel>
+
+    @Query("SELECT * FROM FavoriteManga WHERE mangaUrl = :url")
+    fun getMangaByIdFlow(url: String): Flowable<MangaDbModel>
+
+    @Query("SELECT * FROM FavoriteManga WHERE mangaUrl = :url")
+    fun getMangaByIdMaybe(url: String): Maybe<MangaDbModel>
 
     @Update
     fun updateMangaById(model: MangaDbModel): Completable
@@ -40,5 +47,8 @@ interface MangaDao {
 
     @Query("SELECT * FROM ChaptersRead WHERE mangaUrl = :url")
     fun getReadChaptersByIdNonFlow(url: String): List<MangaReadChapter>
+
+    @Query("SELECT * FROM ChaptersRead")
+    fun getAllChapters(): List<MangaReadChapter>
 
 }

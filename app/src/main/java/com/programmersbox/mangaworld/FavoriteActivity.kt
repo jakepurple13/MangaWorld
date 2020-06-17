@@ -17,11 +17,10 @@ import com.programmersbox.manga_sources.mangasources.MangaModel
 import com.programmersbox.manga_sources.mangasources.Sources
 import com.programmersbox.mangaworld.adapters.GalleryListAdapter
 import com.programmersbox.mangaworld.adapters.GalleryListFavoriteAdapter
+import com.programmersbox.mangaworld.utils.dbAndFireManga
 import com.programmersbox.mangaworld.utils.groupManga
-import com.programmersbox.mangaworld.utils.toMangaModel
 import com.programmersbox.mangaworld.views.AutoFitGridLayoutManager
 import com.programmersbox.rxutils.behaviorDelegate
-import com.programmersbox.rxutils.listMap
 import com.programmersbox.rxutils.toLatestFlowable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
@@ -49,10 +48,9 @@ class FavoriteActivity : AppCompatActivity() {
         uiSetup()
 
         Flowables.combineLatest(
-            source1 = dao.getAllManga()
+            source1 = dbAndFireManga(dao)
                 .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .listMap(MangaDbModel::toMangaModel),
+                .observeOn(AndroidSchedulers.mainThread()),
             source2 = sourcePublisher.toLatestFlowable(),
             source3 = favorite_search_info
                 .textChanges()
