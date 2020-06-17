@@ -27,7 +27,9 @@ import com.programmersbox.manga_db.MangaReadChapter
 import com.programmersbox.manga_sources.mangasources.MangaModel
 import com.programmersbox.manga_sources.mangasources.Sources
 import com.programmersbox.mangaworld.R
+import com.programmersbox.rxutils.invoke
 import com.programmersbox.rxutils.toLatestFlowable
+import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Maybe
 import io.reactivex.Single
@@ -178,29 +180,29 @@ object FirebaseDb {
             }
     }
 
-    fun addManga(mangaModel: MangaModel) {// = Completable.create { emitter ->
+    fun addManga(mangaModel: MangaModel) = Completable.create { emitter ->
         mangaDoc
             ?.update("second", FieldValue.arrayUnion(mangaModel.toFirebaseManga()))
             ?.addOnSuccessListener {
                 Loged.d("Success!")
-                //emitter.onComplete()
+                emitter()
             }?.addOnFailureListener {
                 Loged.wtf("Failure!")
-                //emitter.onError(it)
+                emitter(it)
             }?.addOnCompleteListener {
                 Loged.d("All done!")
             }
     }
 
-    fun removeManga(mangaModel: MangaModel) {// = Completable.create { emitter ->
+    fun removeManga(mangaModel: MangaModel) = Completable.create { emitter ->
         mangaDoc
             ?.update("second", FieldValue.arrayRemove(mangaModel.toFirebaseManga()))
             ?.addOnSuccessListener {
                 Loged.d("Success!")
-                //emitter.onComplete()
+                emitter()
             }?.addOnFailureListener {
                 Loged.wtf("Failure!")
-                //emitter.onError(it)
+                emitter(it)
             }?.addOnCompleteListener {
                 Loged.d("All done!")
             }
@@ -232,7 +234,7 @@ object FirebaseDb {
                 ?.second
                 ?.map { it.toMangaModel() }
                 ?.find { it.mangaUrl == url }
-                .let { it?.let { emitter.onNext(it.toMangaDbModel()) } ?: emitter.onError(Throwable("Not in here")) }
+                .let { it?.let { emitter(it.toMangaDbModel()) } ?: emitter(Throwable("Not in here")) }
         }
     }.toLatestFlowable().subscribeOn(Schedulers.io())
 
@@ -243,7 +245,7 @@ object FirebaseDb {
                 ?.map { it.toMangaModel() }
                 ?.find { it.mangaUrl == url }
                 .also { println(it) }
-                .let { emitter.onNext(it != null) }
+                .let { emitter(it != null) }
         }
     }.toLatestFlowable()
 
@@ -255,7 +257,7 @@ object FirebaseDb {
             ?.second
             ?.map { it.toMangaModel() }
             ?.find { it.mangaUrl == url }
-            ?.let { emitter.onSuccess(true) } ?: emitter.onSuccess(false)
+            ?.let { emitter(true) } ?: emitter(false)
     }
 
     fun findMangaByUrlMaybe(url: String): Maybe<Boolean> = Maybe.create { emitter ->
@@ -266,8 +268,8 @@ object FirebaseDb {
             ?.second
             ?.map { it.toMangaModel() }
             ?.find { it.mangaUrl == url }
-            .let { emitter.onSuccess(it != null) }
-        emitter.onComplete()
+            .let { emitter(it != null) }
+        emitter()
 
         /*addSnapshotListener { documentSnapshot, _ ->
             documentSnapshot?.toObject(FirebaseAllManga::class.java)
@@ -284,7 +286,7 @@ object FirebaseDb {
 
     fun getAllMangaFlowable(): Flowable<List<MangaModel>> = PublishSubject.create<List<MangaModel>> { emitter ->
         mangaDoc?.addSnapshotListener { documentSnapshot, _ ->
-            documentSnapshot?.toObject(FirebaseAllManga::class.java)?.second?.map { it.toMangaModel() }?.let { emitter.onNext(it) }
+            documentSnapshot?.toObject(FirebaseAllManga::class.java)?.second?.map { it.toMangaModel() }?.let { emitter(it) }
         }
     }.toLatestFlowable().subscribeOn(Schedulers.io())
 
@@ -310,29 +312,33 @@ object FirebaseDb {
         chapterDoc?.addSnapshotListener { documentSnapshot, _ ->
             documentSnapshot?.toObject(FirebaseAllChapter::class.java)
                 ?.second
-                ?.map { it.toMangaChapter() }?.let { emitter.onNext(it) }
+                ?.map { it.toMangaChapter() }?.let { emitter(it) }
         }
     }.toLatestFlowable().subscribeOn(Schedulers.io())
 
-    fun addChapter(mangaModel: MangaReadChapter) {
+    fun addChapter(mangaModel: MangaReadChapter) = Completable.create { emitter ->
         chapterDoc
             ?.update("second", FieldValue.arrayUnion(mangaModel.toFirebaseChapter()))
             ?.addOnSuccessListener {
+                emitter()
                 Loged.d("Success!")
             }?.addOnFailureListener {
                 Loged.wtf("Failure!")
+                emitter(it)
             }?.addOnCompleteListener {
                 Loged.d("All done!")
             }
     }
 
-    fun removeChapter(mangaModel: MangaReadChapter) {
+    fun removeChapter(mangaModel: MangaReadChapter) = Completable.create { emitter ->
         chapterDoc
             ?.update("second", FieldValue.arrayRemove(mangaModel.toFirebaseChapter()))
             ?.addOnSuccessListener {
+                emitter()
                 Loged.d("Success!")
             }?.addOnFailureListener {
                 Loged.wtf("Failure!")
+                emitter(it)
             }?.addOnCompleteListener {
                 Loged.d("All done!")
             }

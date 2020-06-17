@@ -175,13 +175,15 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_marginStart="5dp"
+                android:gravity="center_vertical"
+                android:minLines="2"
                 android:onClick="@{() -> favoriteManga.performClick()}"
-                android:text="Add To Favorites"
-                app:layout_constraintEnd_toStartOf="@id/markChapters"
                 app:layout_constraintBottom_toBottomOf="@id/favoriteManga"
+                app:layout_constraintEnd_toStartOf="@id/markChapters"
                 app:layout_constraintStart_toEndOf="@id/favoriteManga"
                 app:layout_constraintTop_toTopOf="@id/favoriteManga"
-                tools:ignore="HardcodedText" />
+                tools:ignore="HardcodedText"
+                tools:text="@string/addToFavorites" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/markChapters"
@@ -192,10 +194,10 @@
                 android:onClick="@{() -> presenter.markRead(info)}"
                 android:text="Mark As..."
                 android:textColor="#ffffff"
-                app:strokeColor="#ffffff"
                 app:layout_constraintBottom_toBottomOf="@id/favoriteManga"
                 app:layout_constraintEnd_toStartOf="@id/shareButton"
                 app:layout_constraintTop_toTopOf="@id/favoriteManga"
+                app:strokeColor="#ffffff"
                 tools:ignore="HardcodedText" />
 
 
@@ -205,14 +207,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_marginEnd="5dp"
-                android:textColor="#ffffff"
                 android:onClick="@{() -> presenter.shareManga(info)}"
+                android:textColor="#ffffff"
                 app:icon="@android:drawable/ic_menu_share"
                 app:iconTint="#ffffff"
-                app:strokeColor="#ffffff"
                 app:layout_constraintBottom_toBottomOf="@id/favoriteManga"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="@id/favoriteManga"
+                app:strokeColor="#ffffff"
                 tools:ignore="HardcodedText" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>

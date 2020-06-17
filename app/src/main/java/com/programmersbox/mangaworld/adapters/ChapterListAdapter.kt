@@ -24,6 +24,7 @@ import com.programmersbox.mangaworld.databinding.ChapterListItemBinding
 import com.programmersbox.mangaworld.utils.ChapterHistory
 import com.programmersbox.mangaworld.utils.FirebaseDb
 import com.programmersbox.mangaworld.utils.addToHistory
+import io.reactivex.Completable
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.chapter_list_item.view.*
 
@@ -66,9 +67,16 @@ class ChapterListAdapter(
 
         readChapter.isChecked = chapters?.any { it.url == item.url } ?: false
         readChapter.setOnCheckedChangeListener { _, isChecked ->
-            MangaReadChapter(item.url, item.name, mangaUrl)
+            /*MangaReadChapter(item.url, item.name, mangaUrl)
                 .also { if (isChecked) FirebaseDb.addChapter(it) else FirebaseDb.removeChapter(it) }
-                .let { if (isChecked) dao.insertChapter(it) else dao.deleteChapter(it) }
+                .let { if (isChecked) dao.insertChapter(it) else dao.deleteChapter(it) }*/
+            MangaReadChapter(item.url, item.name, mangaUrl)
+                .let {
+                    Completable.mergeArray(
+                        if (isChecked) FirebaseDb.addChapter(it) else FirebaseDb.removeChapter(it),
+                        if (isChecked) dao.insertChapter(it) else dao.deleteChapter(it)
+                    )
+                }
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.io())
                 .subscribe {

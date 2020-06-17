@@ -32,6 +32,7 @@ import com.programmersbox.thirdpartyutils.changeTint
 import com.programmersbox.thirdpartyutils.check
 import com.programmersbox.thirdpartyutils.checked
 import com.programmersbox.thirdpartyutils.into
+import io.reactivex.Completable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
@@ -82,14 +83,15 @@ class MangaListAdapter(context: Context, disposable: CompositeDisposable = Compo
             .addTo(disposable)
 
         favorite.setOnClickListener {
-            item
-                .also { if (favorite.progress > 0.9f) FirebaseDb.removeManga(it) else if (!favorite.checked) FirebaseDb.addManga(it) }
-                .toMangaDbModel()
-                .let { it1 -> if (favorite.progress > 0.9f) dao.deleteManga(it1) else if (!favorite.checked) dao.insertManga(it1) else null }
-                ?.subscribeOn(Schedulers.io())
-                ?.observeOn(AndroidSchedulers.mainThread())
-                ?.subscribe()
-                ?.addTo(disposable)
+            Completable.mergeArray(
+                if (favorite.progress > 0.9f) FirebaseDb.removeManga(item) else if (!favorite.checked) FirebaseDb.addManga(item) else null,
+                item.toMangaDbModel()
+                    .let { it1 -> if (favorite.progress > 0.9f) dao.deleteManga(it1) else if (!favorite.checked) dao.insertManga(it1) else null }
+            )
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe()
+                .addTo(disposable)
         }
 
         bind(item)
@@ -157,20 +159,23 @@ class GalleryListAdapter(context: Context, disposable: CompositeDisposable = Com
             val menu = PopupMenu(context, itemView)
                 .apply {
                     setOnMenuItemClickListener {
-                        when (it.itemId) {
-                            1 -> FirebaseDb.addManga(item)
-                            2 -> FirebaseDb.removeManga(item)
-                        }
 
-                        when (it.itemId) {
-                            1 -> dao.insertManga(item.toMangaDbModel())
-                            2 -> dao.deleteManga(item.toMangaDbModel())
-                            else -> null
-                        }
-                            ?.subscribeOn(Schedulers.io())
-                            ?.observeOn(AndroidSchedulers.mainThread())
-                            ?.subscribe()
-                            ?.addTo(disposable)
+                        Completable.mergeArray(
+                            when (it.itemId) {
+                                1 -> FirebaseDb.addManga(item)
+                                2 -> FirebaseDb.removeManga(item)
+                                else -> null
+                            },
+                            when (it.itemId) {
+                                1 -> dao.insertManga(item.toMangaDbModel())
+                                2 -> dao.deleteManga(item.toMangaDbModel())
+                                else -> null
+                            }
+                        )
+                            .subscribeOn(Schedulers.io())
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe()
+                            .addTo(disposable)
                         true
                     }
                 }
@@ -311,17 +316,19 @@ class GalleryListFavoriteAdapter(private val context: Context) : DragSwipeAdapte
             }
     }
 
-    private fun addOrRemoveManga(view: View, item: MangaModel) = dao
-        .also { FirebaseDb.removeManga(item) }
-        .deleteManga(item.toMangaDbModel())
+    private fun addOrRemoveManga(view: View, item: MangaModel) = Completable.mergeArray(
+        FirebaseDb.removeManga(item),
+        dao.deleteManga(item.toMangaDbModel())
+    )
         .subscribeOn(Schedulers.io())
         .observeOn(Schedulers.io())
         .subscribe {
             Snackbar.make(view, context.getString(R.string.removed, item.title), Snackbar.LENGTH_LONG)
                 .setAction(context.getText(R.string.undo)) {
-                    FirebaseDb.addManga(item)
-                    dao
-                        .insertManga(item.toMangaDbModel())
+                    Completable.mergeArray(
+                        FirebaseDb.addManga(item),
+                        dao.insertManga(item.toMangaDbModel())
+                    )
                         .subscribeOn(Schedulers.io())
                         .observeOn(Schedulers.io())
                         .subscribe()
