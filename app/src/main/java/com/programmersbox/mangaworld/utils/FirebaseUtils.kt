@@ -191,7 +191,7 @@ object FirebaseDb {
                 emitter(it)
             }?.addOnCompleteListener {
                 Loged.d("All done!")
-            }
+            } ?: emitter()
     }
 
     fun removeManga(mangaModel: MangaModel) = Completable.create { emitter ->
@@ -205,7 +205,7 @@ object FirebaseDb {
                 emitter(it)
             }?.addOnCompleteListener {
                 Loged.d("All done!")
-            }
+            } ?: emitter()
     }
 
     private fun MangaModel.toFirebaseManga() = FirebaseManga(title, description, mangaUrl, imageUrl, source)
@@ -287,7 +287,7 @@ object FirebaseDb {
     fun getAllMangaFlowable(): Flowable<List<MangaModel>> = PublishSubject.create<List<MangaModel>> { emitter ->
         mangaDoc?.addSnapshotListener { documentSnapshot, _ ->
             documentSnapshot?.toObject(FirebaseAllManga::class.java)?.second?.map { it.toMangaModel() }?.let { emitter(it) }
-        }
+        } ?: emitter()
     }.toLatestFlowable().subscribeOn(Schedulers.io())
 
     private data class FirebaseChapter(
@@ -313,7 +313,7 @@ object FirebaseDb {
             documentSnapshot?.toObject(FirebaseAllChapter::class.java)
                 ?.second
                 ?.map { it.toMangaChapter() }?.let { emitter(it) }
-        }
+        } ?: emitter()
     }.toLatestFlowable().subscribeOn(Schedulers.io())
 
     fun addChapter(mangaModel: MangaReadChapter) = Completable.create { emitter ->
@@ -327,7 +327,7 @@ object FirebaseDb {
                 emitter(it)
             }?.addOnCompleteListener {
                 Loged.d("All done!")
-            }
+            } ?: emitter()
     }
 
     fun removeChapter(mangaModel: MangaReadChapter) = Completable.create { emitter ->
@@ -341,7 +341,7 @@ object FirebaseDb {
                 emitter(it)
             }?.addOnCompleteListener {
                 Loged.d("All done!")
-            }
+            } ?: emitter()
     }
 
 }
