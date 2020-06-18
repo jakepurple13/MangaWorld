@@ -7,26 +7,21 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import androidx.core.app.TaskStackBuilder
 import com.programmersbox.gsonutils.putExtra
-import com.programmersbox.helpfulutils.GroupBehavior
-import com.programmersbox.helpfulutils.NotificationDslBuilder
-import com.programmersbox.helpfulutils.intersect
-import com.programmersbox.helpfulutils.notificationManager
+import com.programmersbox.helpfulutils.*
 import com.programmersbox.loggingutils.Loged
 import com.programmersbox.loggingutils.f
 import com.programmersbox.manga_db.MangaDatabase
 import com.programmersbox.manga_sources.mangasources.Sources
 import com.programmersbox.mangaworld.utils.dbAndFireMangaSync
 import com.programmersbox.mangaworld.utils.toMangaModel
-import io.reactivex.disposables.CompositeDisposable
 import kotlinx.coroutines.*
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
 
-
 class UpdateCheckService : IntentService("UpdateCheckIntentService") {
 
-    private val disposable = CompositeDisposable()
+    /*private val disposable = CompositeDisposable()
 
     override fun onUnbind(intent: Intent?): Boolean {
         disposable.dispose()
@@ -36,9 +31,14 @@ class UpdateCheckService : IntentService("UpdateCheckIntentService") {
     override fun onDestroy() {
         disposable.dispose()
         super.onDestroy()
-    }
+    }*/
 
     override fun onHandleIntent(intent: Intent?) {
+        val checker = GlobalScope.launch {
+            delay(300000L)
+            if (isMyServiceRunning(UpdateCheckService::class.java)) stopSelf()
+        }
+
         sendRunningNotification(100, 0, getText(R.string.startingUpdateCheck))
         val dao = MangaDatabase.getInstance(this@UpdateCheckService).mangaDao()
         GlobalScope.launch {
@@ -46,8 +46,9 @@ class UpdateCheckService : IntentService("UpdateCheckIntentService") {
             //dao.getAllMangaSync()
             dbAndFireMangaSync(dao)
                 .let {
-                    it.intersect(Sources.getUpdateSearches()
-                        .filter { s -> it.any { m -> m.source == s } }
+                    it.intersect(
+                        Sources.getUpdateSearches()
+                            .filter { s -> it.any { m -> m.source == s } }
                         .flatMap { m -> m.getManga() }) { o, n -> o.mangaUrl == n.mangaUrl }
                 }
                 .also { mangaListSize = it.size }
@@ -79,8 +80,7 @@ class UpdateCheckService : IntentService("UpdateCheckIntentService") {
                                 pictureStyle {
                                     bigPicture = it
                                     largeIcon = it
-                                    summaryText =
-                                        getString(R.string.hadAnUpdate, pair.second.title, pair.second.chapters.firstOrNull()?.name.orEmpty())
+                                    summaryText = getString(R.string.hadAnUpdate, pair.second.title, pair.second.chapters.firstOrNull()?.name ?: "")
                                 }
                             } ?: bigTextStyle {
                                 bigText = getString(R.string.hadAnUpdate, pair.second.title, pair.second.chapters.firstOrNull()?.name.orEmpty())
@@ -110,6 +110,8 @@ class UpdateCheckService : IntentService("UpdateCheckIntentService") {
                     )
                     //maybe add bubble?
                     sendFinishedNotification()
+                    checker.cancel()
+                    stopSelf()
                 }
         }
     }
@@ -148,6 +150,16 @@ class UpdateCheckService : IntentService("UpdateCheckIntentService") {
             timeoutAfter = 750L
         }
         notificationManager.notify(13, notification)
+    }
+
+    private fun isMyServiceRunning(serviceClass: Class<*>): Boolean {
+        val manager = activityManager
+        for (service in manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.name == service.service.className) {
+                return true
+            }
+        }
+        return false
     }
 
 }
