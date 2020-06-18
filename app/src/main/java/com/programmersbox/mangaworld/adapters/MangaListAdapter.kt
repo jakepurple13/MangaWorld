@@ -159,7 +159,6 @@ class GalleryListAdapter(context: Context, disposable: CompositeDisposable = Com
             val menu = PopupMenu(context, itemView)
                 .apply {
                     setOnMenuItemClickListener {
-
                         Completable.mergeArray(
                             when (it.itemId) {
                                 1 -> FirebaseDb.addManga(item)

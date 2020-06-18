@@ -91,7 +91,7 @@ class MangaActivity : AppCompatActivity() {
                 Completable.mergeArray(
                     if (isFavorite()) FirebaseDb.removeManga(it) else if (!isFavorite()) FirebaseDb.addManga(it) else null,
                     it.toMangaDbModel((mangaInfoChapterList.adapter as? DragSwipeAdapter<*, *>)?.itemCount ?: 0)
-                        .let { if (isFavorite()) dao.deleteManga(it) else if (!isFavorite()) dao.insertManga(it) else null }
+                        .let { it1 -> if (isFavorite()) dao.deleteManga(it1) else if (!isFavorite()) dao.insertManga(it1) else null }
                 )
             }
                 ?.subscribeOn(Schedulers.io())
