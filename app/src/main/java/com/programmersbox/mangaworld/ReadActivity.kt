@@ -18,6 +18,7 @@ import com.bumptech.glide.integration.recyclerview.RecyclerViewPreloader
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade
 import com.bumptech.glide.util.ViewPreloadSizeProvider
+import com.github.piasy.biv.BigImageViewer
 import com.mikepenz.iconics.IconicsDrawable
 import com.mikepenz.iconics.typeface.library.googlematerial.GoogleMaterial
 import com.mikepenz.iconics.utils.colorInt
@@ -26,6 +27,7 @@ import com.programmersbox.gsonutils.getObjectExtra
 import com.programmersbox.helpfulutils.*
 import com.programmersbox.manga_sources.mangasources.ChapterModel
 import com.programmersbox.mangaworld.adapters.PageAdapter
+import com.programmersbox.mangaworld.adapters.PageHolder
 import com.programmersbox.mangaworld.utils.batteryAlertPercent
 import com.programmersbox.rxutils.invoke
 import com.programmersbox.rxutils.toLatestFlowable
@@ -54,6 +56,7 @@ class ReadActivity : AppCompatActivity() {
                 fullRequest = it
                     .asDrawable()
                     .skipMemoryCache(true)
+                    .diskCacheStrategy(DiskCacheStrategy.NONE)
                     .centerCrop(),
                 thumbRequest = it
                     .asDrawable()
@@ -83,7 +86,6 @@ class ReadActivity : AppCompatActivity() {
         UNKNOWN(GoogleMaterial.Icon.gmd_battery_unknown)
     }
 
-    @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_read)
@@ -100,10 +102,69 @@ class ReadActivity : AppCompatActivity() {
             }
         }*/
 
+        infoSetup()
+        readerSetup()
+    }
+
+    private fun readerSetup() {
         val preloader: RecyclerViewPreloader<String> = RecyclerViewPreloader(loader, adapter, ViewPreloadSizeProvider(), 10)
         readView.addOnScrollListener(preloader)
         readView.setItemViewCacheSize(0)
 
+        readView.adapter = adapter
+
+        readView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+                val l = recyclerView.layoutManager as LinearLayoutManager
+                val image = l.findLastVisibleItemPosition()
+                if (image > -1) {
+                    val total = l.itemCount
+                    pageCount.text = String.format("%d/%d", image + 1, total)
+                }
+            }
+        })
+
+        readView.setRecyclerListener { (it as? PageHolder)?.image?.ssiv?.recycle() }
+
+        mangaTitle = intent.getStringExtra("mangaTitle")
+        model = intent.getObjectExtra<ChapterModel>("currentChapter")
+
+        //titleManga.text = mangaTitle
+
+        Single.create<List<String>> { emitter ->
+            try {
+                emitter.onSuccess(model?.getPageInfo()?.pages.orEmpty())
+            } catch (e: Exception) {
+                emitter.onError(Throwable("Something went wrong. Please try again"))
+            }
+        }
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .doOnError { Toast.makeText(this, it.localizedMessage, Toast.LENGTH_SHORT).show() }
+            .subscribe { pages: List<String> ->
+                println(pages)
+                BigImageViewer.prefetch(*pages.map { Uri.parse(it) }.toTypedArray())
+                readLoading
+                    .animate()
+                    .alpha(0f)
+                    .withEndAction { readLoading.gone() }
+                    .start()
+                adapter.addItems(pages)
+                readView.layoutManager!!.scrollToPosition(model?.url?.let { defaultSharedPref.getInt(it, 0) } ?: 0)
+            }
+            .addTo(disposable)
+    }
+
+    private fun infoSetup() {
+        batterySetup()
+
+        timeTicker = timeTick { _, _ -> currentTime.text = SimpleDateFormat("HH:mm a", Locale.getDefault()).format(System.currentTimeMillis()) }
+        currentTime.text = SimpleDateFormat("HH:mm a", Locale.getDefault()).format(System.currentTimeMillis())
+    }
+
+    @SuppressLint("SetTextI18n")
+    private fun batterySetup() {
         batteryInformation.startDrawable = IconicsDrawable(this, GoogleMaterial.Icon.gmd_battery_std).apply {
             colorInt = Color.WHITE
             sizePx = batteryInformation.textSize.roundToInt()
@@ -143,48 +204,6 @@ class ReadActivity : AppCompatActivity() {
             batteryLevelAlert(it.percent)
             batteryInfoItem(it)
         }
-        timeTicker = timeTick { _, _ -> currentTime.text = SimpleDateFormat("HH:mm a", Locale.getDefault()).format(System.currentTimeMillis()) }
-        currentTime.text = SimpleDateFormat("HH:mm a", Locale.getDefault()).format(System.currentTimeMillis())
-
-        readView.adapter = adapter
-
-        readView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                super.onScrolled(recyclerView, dx, dy)
-                val l = recyclerView.layoutManager as LinearLayoutManager
-                val image = l.findLastVisibleItemPosition()
-                if (image > -1) {
-                    val total = l.itemCount
-                    pageCount.text = String.format("%d/%d", image + 1, total)
-                }
-            }
-        })
-
-        mangaTitle = intent.getStringExtra("mangaTitle")
-        model = intent.getObjectExtra<ChapterModel>("currentChapter")
-
-        //titleManga.text = mangaTitle
-
-        Single.create<List<String>> { emitter ->
-            try {
-                emitter.onSuccess(model?.getPageInfo()?.pages.orEmpty())
-            } catch (e: Exception) {
-                emitter.onError(Throwable("Something went wrong. Please try again"))
-            }
-        }
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .doOnError { Toast.makeText(this, it.localizedMessage, Toast.LENGTH_SHORT).show() }
-            .subscribe { pages: List<String> ->
-                readLoading
-                    .animate()
-                    .alpha(0f)
-                    .withEndAction { readLoading.gone() }
-                    .start()
-                adapter.addItems(pages)
-                readView.layoutManager!!.scrollToPosition(model?.url?.let { defaultSharedPref.getInt(it, 0) } ?: 0)
-            }
-            .addTo(disposable)
     }
 
     private fun saveCurrentChapterSpot() {
@@ -210,19 +229,11 @@ class ReadActivity : AppCompatActivity() {
             networkType = DownloadDslManager.NetworkType.WIFI_MOBILE
             title = mangaTitle ?: filename
             mimeType = "image/jpeg"
-            visibility = DownloadDslManager.NotificationVisibility.VISIBLE
+            visibility = DownloadDslManager.NotificationVisibility.COMPLETED
             destinationInExternalPublicDir(Environment.DIRECTORY_PICTURES, File.separator + "MangaWorld" + File.separator + filename)
         }
 
         downloadManager.enqueue(request)
-
-        /*val id = downloadManager.enqueue(request)
-
-        DownloadManagerListener(this) {
-            addId(id)
-            updateInterval = 1000L
-            listener { println(it) }
-        }*/
     }
 
     private fun hideSystemUI() {

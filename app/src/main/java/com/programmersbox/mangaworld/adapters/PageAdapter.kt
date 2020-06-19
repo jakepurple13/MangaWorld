@@ -14,6 +14,7 @@ import com.programmersbox.helpfulutils.layoutInflater
 import com.programmersbox.mangaworld.R
 import com.programmersbox.thirdpartyutils.DragSwipeGlideAdapter
 import kotlinx.android.synthetic.main.page_item.view.*
+import java.util.*
 
 class PageAdapter(
     override val fullRequest: RequestBuilder<Drawable>,
@@ -29,14 +30,16 @@ class PageAdapter(
         PageHolder(context.layoutInflater.inflate(R.layout.page_item, parent, false))
 
     override fun PageHolder.onBind(item: String, position: Int) = render(item, canDownload)
+
+    override fun getPreloadItems(position: Int): List<String> = Collections.singletonList(dataList[position].let(itemToModel))
 }
 
 class PageHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-    private val image = itemView.chapterPage!!
+    val image = itemView.chapterPage!!
 
     fun render(item: String?, canDownload: (String) -> Unit) {
         image.setProgressIndicator(ProgressPieIndicator())
-        image.showImage(Uri.parse(item))
+        image.showImage(Uri.parse(item), Uri.parse(item))
         image.setOnLongClickListener {
             try {
                 MaterialAlertDialogBuilder(itemView.context)

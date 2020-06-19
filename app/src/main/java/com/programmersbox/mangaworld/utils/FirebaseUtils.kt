@@ -363,3 +363,11 @@ fun Context.dbAndFireChapter(
     dao.getReadChaptersById(url),
     FirebaseDb.getAllChapterFlowable()
 ) { db, fire -> (db + fire).distinctBy { it.url } }
+
+fun Context.dbAndFireChapterNonFlow(
+    url: String,
+    dao: MangaDao = MangaDatabase.getInstance(this).mangaDao()
+) = listOfNotNull(
+    dao.getReadChaptersByIdNonFlow(url),
+    FirebaseDb.getAllChapters()
+).flatten().distinctBy { it.url }

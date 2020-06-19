@@ -174,7 +174,7 @@ class MangaActivity : AppCompatActivity() {
 
     fun markRead(model: MangaInfoModel?) {
         GlobalScope.launch {
-            val read = model?.mangaUrl?.let(dao::getReadChaptersByIdNonFlow).orEmpty()
+            val read = model?.mangaUrl?.let { dbAndFireChapterNonFlow(it, dao) }.orEmpty()//let(dao::getReadChaptersByIdNonFlow).orEmpty()
             val adapter = mangaInfoChapterList.adapter as ChapterListAdapter
             runOnUiThread {
                 MaterialAlertDialogBuilder(this@MangaActivity)
@@ -213,6 +213,10 @@ class MangaActivity : AppCompatActivity() {
             )
         )
         moreInfo.setOnClickListener { set++ }
+        colorSetup(swatch)
+    }
+
+    private fun colorSetup(swatch: Palette.Swatch?) {
         swatch?.rgb?.let { moreInfo.setBackgroundColor(it) }
         swatch?.titleTextColor?.let { moreInfo.setTextColor(it) }
         swatch?.rgb?.let {
