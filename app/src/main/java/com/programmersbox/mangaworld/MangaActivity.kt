@@ -79,7 +79,6 @@ class MangaActivity : AppCompatActivity() {
                 binding.swatch = swatch?.let { SwatchInfo(it.rgb, it.titleTextColor, it.bodyTextColor) }
                 binding.presenter = this@MangaActivity
                 mangaSetup(model, swatch)
-                favoriteManga.changeTint(swatch?.rgb ?: Color.WHITE)
                 dbLoad(manga)
             }
         }
@@ -227,6 +226,7 @@ class MangaActivity : AppCompatActivity() {
             shareButton.strokeColor = ColorStateList.valueOf(it)
             shareButton.iconTint = ColorStateList.valueOf(it)
         }
+        favoriteManga.changeTint(swatch?.rgb ?: Color.WHITE)
     }
 
     private class ConstraintRangeSet(private val rootLayout: ConstraintLayout, vararg items: ConstraintRanges) : Range<ConstraintRanges>() {
