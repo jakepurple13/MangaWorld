@@ -36,7 +36,12 @@ data class MangaInfoModel(
     val alternativeNames: List<String>
 ) : ViewModel()
 
-data class ChapterModel(val name: String, val url: String, val uploaded: String, private val sources: Sources) : ViewModel() {
+data class ChapterModel(
+    val name: String,
+    val url: String,
+    val uploaded: String,
+    private val sources: Sources
+) : ViewModel() {
     fun getPageInfo() = sources.getPageInfo(this)
 }
 

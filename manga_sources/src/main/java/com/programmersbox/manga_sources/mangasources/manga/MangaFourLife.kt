@@ -71,10 +71,6 @@ object MangaFourLife : MangaSource {
         val doc = Jsoup.connect(url).get()
         val title = doc.select("li.list-group-item, li.d-none, li.d-sm-block").select("h1").text()
         val description = doc.select("div.BoxBody > div.row").select("div.Content").text()
-        val genres = "\"genre\":[^:]+(?=,|\$)".toRegex().find(doc.html())
-            ?.groupValues?.get(0)?.removePrefix("\"genre\": ")?.fromJson<List<String>>().orEmpty()
-        val altNames = "\"alternateName\":[^:]+(?=,|\$)".toRegex().find(doc.html())
-            ?.groupValues?.get(0)?.removePrefix("\"alternateName\": ")?.fromJson<List<String>>().orEmpty()
         return MangaModel(
             title = title,
             description = description,
