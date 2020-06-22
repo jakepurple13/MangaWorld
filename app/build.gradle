@@ -70,7 +70,7 @@ dependencies {
     implementation 'com.jakewharton.rxbinding2:rxbinding:2.2.0'
     implementation 'com.jakewharton.rxbinding2:rxbinding-kotlin:2.2.0'
     implementation 'me.zhanghai.android.fastscroll:library:1.1.4'
-    implementation 'de.Maxr1998.android:modernpreferences:0.5.6'
+    implementation 'de.Maxr1998.android:modernpreferences:0.5.8'
     implementation "com.leinardi.android:speed-dial:3.1.1"
     implementation 'com.github.pwittchen:reactivenetwork-rx2:3.0.8'
     implementation 'com.facebook.stetho:stetho:1.5.1'
