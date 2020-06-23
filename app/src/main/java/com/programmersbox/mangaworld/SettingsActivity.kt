@@ -1,6 +1,9 @@
 package com.programmersbox.mangaworld
 
+import android.app.PendingIntent
+import android.content.Intent
 import android.graphics.Color
+import android.graphics.drawable.Icon
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -9,6 +12,10 @@ import com.mikepenz.iconics.IconicsDrawable
 import com.mikepenz.iconics.typeface.library.googlematerial.GoogleMaterial
 import com.mikepenz.iconics.utils.colorInt
 import com.mikepenz.iconics.utils.sizeDp
+import com.programmersbox.gsonutils.putExtra
+import com.programmersbox.helpfulutils.NotificationDslBuilder
+import com.programmersbox.helpfulutils.notificationManager
+import com.programmersbox.helpfulutils.sizedListOf
 import com.programmersbox.manga_db.MangaDatabase
 import com.programmersbox.mangaworld.utils.*
 import com.programmersbox.rxutils.invoke
@@ -126,6 +133,56 @@ class SettingsActivity : AppCompatActivity() {
             }
         }
 
+        pref("show10Random") {
+            title = "Show 10 Random Favorites"
+            onClicked {
+                GlobalScope.launch {
+                    val mangaList = dbAndFireMangaSync().map { it.toMangaModel() }
+                    val manga = sizedListOf(10) {
+                        try {
+                            mangaList.random()
+                        } catch (e: Exception) {
+                            null
+                        }
+                    }.requireNoNulls()
+                    notificationManager.notify(
+                        12,
+                        NotificationDslBuilder.builder(this@SettingsActivity, "mangaChannel", R.mipmap.ic_launcher) {
+                            title = getText(R.string.app_name)
+                            subText = "Here are ${manga.size} random manga"
+                            if (canBubble) {
+                                addBubble {
+                                    bubbleIntent(
+                                        PendingIntent.getActivity(
+                                            this@SettingsActivity, 12,
+                                            Intent(this@SettingsActivity, BubbleActivity::class.java).apply { putExtra("mangaList", manga) },
+                                            0
+                                        )
+                                    )
+                                    desiredHeight = 600
+                                    icon = Icon.createWithResource(this@SettingsActivity, R.mipmap.ic_launcher)
+                                }
+                                messageStyle {
+                                    setMainPerson {
+                                        name = "MangaBot"
+                                        isBot = true
+                                    }
+                                    message {
+                                        message = "Here are ${manga.size} random manga"
+                                        setPerson {
+                                            name = "MangaBot"
+                                            isBot = true
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    )
+                }
+                true
+            }
+        }
+
         switch("canBubble") {
             title = "Can Bubble"
             defaultValue = canBubble
@@ -161,7 +218,7 @@ class SettingsActivity : AppCompatActivity() {
             }
         }
 
-        checkBox("sync") {
+        pref("sync") {
             title = "Sync"
             onClicked {
                 GlobalScope.launch { FirebaseDb.uploadAllItems(MangaDatabase.getInstance(this@SettingsActivity).mangaDao()) }

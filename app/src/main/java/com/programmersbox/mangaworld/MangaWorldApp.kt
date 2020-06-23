@@ -38,7 +38,10 @@ class MangaWorldApp : Application() {
 
         RxJavaPlugins.setErrorHandler {
             it.printStackTrace()
-            runOnUIThread { Toast.makeText(this, it.cause?.localizedMessage, Toast.LENGTH_SHORT).show() }
+            try {
+                runOnUIThread { Toast.makeText(this, it.cause?.localizedMessage, Toast.LENGTH_SHORT).show() }
+            } catch (e: Exception) {
+            }
         }
 
         val updateCheckIntent = Intent(this, UpdateCheckService::class.java)
