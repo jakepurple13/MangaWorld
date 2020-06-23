@@ -87,9 +87,10 @@ class MangaActivity : AppCompatActivity() {
     private fun dbLoad(manga: MangaModel?) {
         favoriteManga.setOnClickListener {
             manga?.let {
+                val count = (mangaInfoChapterList.adapter as? DragSwipeAdapter<*, *>)?.itemCount ?: 0
                 Completable.mergeArray(
                     if (isFavorite()) FirebaseDb.removeManga(it) else if (!isFavorite()) FirebaseDb.addManga(it) else null,
-                    it.toMangaDbModel((mangaInfoChapterList.adapter as? DragSwipeAdapter<*, *>)?.itemCount ?: 0)
+                    it.toMangaDbModel(count)
                         .let { it1 -> if (isFavorite()) dao.deleteManga(it1) else if (!isFavorite()) dao.insertManga(it1) else null }
                 )
             }

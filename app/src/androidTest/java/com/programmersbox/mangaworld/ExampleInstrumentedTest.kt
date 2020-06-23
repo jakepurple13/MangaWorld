@@ -1,12 +1,11 @@
 package com.programmersbox.mangaworld
 
-import androidx.test.platform.app.InstrumentationRegistry
+import androidx.core.app.TaskStackBuilder
 import androidx.test.ext.junit.runners.AndroidJUnit4
-
+import androidx.test.platform.app.InstrumentationRegistry
+import com.programmersbox.gsonutils.toJson
 import org.junit.Test
 import org.junit.runner.RunWith
-
-import org.junit.Assert.*
 
 /**
  * Instrumented test, which will execute on an Android device.
@@ -19,6 +18,10 @@ class ExampleInstrumentedTest {
     fun useAppContext() {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
-        assertEquals("com.programmersbox.mangaworld", appContext.packageName)
+        //assertEquals("com.programmersbox.mangaworld", appContext.packageName)
+        val f = TaskStackBuilder.create(appContext)
+            .addParentStack(SettingsActivity::class.java)
+            .toJson()
+        println(f)
     }
 }

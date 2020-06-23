@@ -5,6 +5,7 @@ import android.app.PendingIntent
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.drawable.Icon
 import androidx.core.app.TaskStackBuilder
 import com.programmersbox.gsonutils.putExtra
 import com.programmersbox.helpfulutils.*
@@ -12,6 +13,8 @@ import com.programmersbox.loggingutils.Loged
 import com.programmersbox.loggingutils.f
 import com.programmersbox.manga_db.MangaDatabase
 import com.programmersbox.manga_sources.mangasources.Sources
+import com.programmersbox.mangaworld.utils.FirebaseDb
+import com.programmersbox.mangaworld.utils.canBubble
 import com.programmersbox.mangaworld.utils.dbAndFireMangaSync
 import com.programmersbox.mangaworld.utils.toMangaModel
 import java.io.IOException
@@ -50,6 +53,7 @@ class UpdateCheckService : IntentService(UpdateCheckService::class.java.name) {
                 try {
                     Triple(model.numChapters, model.toMangaModel().toInfoModel(), model)
                 } catch (e: Exception) {
+                    println(e.localizedMessage)
                     null
                 }
             }
@@ -59,6 +63,7 @@ class UpdateCheckService : IntentService(UpdateCheckService::class.java.name) {
                     val manga = triple.third
                     manga.numChapters = triple.second.chapters.size
                     dao.updateMangaById(manga).subscribe()
+                    FirebaseDb.updateManga(manga).subscribe()
                 }
             }
             .let {
@@ -84,19 +89,45 @@ class UpdateCheckService : IntentService(UpdateCheckService::class.java.name) {
                                 .getPendingIntent(pair.second.hashCode(), PendingIntent.FLAG_UPDATE_CURRENT)
                         }
                     }
-                }
+                } to it.map { it.third.toMangaModel() }
             }
             .let {
                 val n = notificationManager
-                it.forEach { pair -> n.notify(pair.first, pair.second) }
-                if (it.isNotEmpty()) n.notify(
+                it.first.forEach { pair -> n.notify(pair.first, pair.second) }
+                if (it.first.isNotEmpty()) n.notify(
                     42,
                     NotificationDslBuilder.builder(this@UpdateCheckService, "mangaChannel", R.mipmap.ic_launcher) {
                         title = getText(R.string.app_name)
-                        subText = resources.getQuantityString(R.plurals.updateAmount, it.size, it.size)
+                        subText = resources.getQuantityString(R.plurals.updateAmount, it.first.size, it.first.size)
                         groupSummary = true
                         groupAlertBehavior = GroupBehavior.ALL
                         groupId = "mangaGroup"
+                        if (canBubble) {
+                            addBubble {
+                                bubbleIntent(
+                                    PendingIntent.getActivity(
+                                        this@UpdateCheckService, 0,
+                                        Intent(this@UpdateCheckService, BubbleActivity::class.java).apply { putExtra("mangaList", it.second) },
+                                        0
+                                    )
+                                )
+                                desiredHeight = 600
+                                icon = Icon.createWithResource(this@UpdateCheckService, R.mipmap.ic_launcher)
+                            }
+                            messageStyle {
+                                setMainPerson {
+                                    name = "MangaBot"
+                                    isBot = true
+                                }
+                                message {
+                                    message = resources.getQuantityString(R.plurals.updateAmount, it.first.size, it.first.size)
+                                    setPerson {
+                                        name = "MangaBot"
+                                        isBot = true
+                                    }
+                                }
+                            }
+                        }
                     }
                 )
                 //maybe add bubble?

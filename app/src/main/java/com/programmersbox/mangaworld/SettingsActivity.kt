@@ -126,6 +126,17 @@ class SettingsActivity : AppCompatActivity() {
             }
         }
 
+        switch("canBubble") {
+            title = "Can Bubble"
+            defaultValue = canBubble
+            checkedChangeListener = object : TwoStatePreference.OnCheckedChangeListener {
+                override fun onCheckedChanged(preference: TwoStatePreference, holder: PreferencesAdapter.ViewHolder?, checked: Boolean): Boolean {
+                    canBubble = checked
+                    return true
+                }
+            }
+        }
+
         switch("useCache") {
             title = "Use Cache"
             defaultValue = useCache

@@ -17,6 +17,7 @@ import com.programmersbox.dragswipe.DragSwipeAdapter
 import com.programmersbox.gsonutils.putExtra
 import com.programmersbox.helpfulutils.ConstraintRange
 import com.programmersbox.helpfulutils.Range
+import com.programmersbox.helpfulutils.gone
 import com.programmersbox.helpfulutils.layoutInflater
 import com.programmersbox.manga_db.MangaDatabase
 import com.programmersbox.manga_sources.mangasources.MangaModel
@@ -133,6 +134,64 @@ class MangaHolder(private val binding: MangaListItemBinding) : RecyclerView.View
     fun bind(item: MangaModel) {
         binding.model = item
         binding.executePendingBindings()
+    }
+}
+
+class BubbleListAdapter(context: Context, disposable: CompositeDisposable = CompositeDisposable()) :
+    MangaViewAdapter<MangaHolder>(context, disposable) {
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MangaHolder =
+        MangaHolder(MangaListItemBinding.inflate(context.layoutInflater, parent, false))
+
+    override fun MangaHolder.onBind(item: MangaModel, position: Int) {
+
+        var range: Range<ConstraintSet> = ConstraintRange(
+            constraintLayout,
+            ConstraintSet().apply { clone(constraintLayout) },
+            ConstraintSet().apply { clone(context, R.layout.manga_list_item_alt) }
+        )
+
+        var swatch: Palette.Swatch? = null
+
+        itemView.setOnClickListener {
+            context.startActivity(Intent(context, MangaActivity::class.java).apply {
+                putExtra("manga", item)
+                putExtra("swatch", swatch)
+            })
+        }
+        itemView.setOnLongClickListener {
+            range++
+            favorite.gone()
+            true
+        }
+
+        favorite.gone()
+
+        bind(item)
+        Glide.with(cover)
+            .asBitmap()
+            .load(item.imageUrl)
+            .override(360, 480)
+            .transform(RoundedCorners(30))
+            .fallback(R.mipmap.ic_launcher)
+            .placeholder(R.mipmap.ic_launcher)
+            .error(R.mipmap.ic_launcher)
+            .into<Bitmap> {
+                resourceReady { image, _ ->
+                    cover.setImageBitmap(image)
+                    if (context.usePalette) {
+                        val p = Palette.from(image).generate()
+
+                        val dom = p.vibrantSwatch
+                        dom?.rgb?.let { layout.setCardBackgroundColor(it) }
+                        dom?.titleTextColor?.let { title.setTextColor(it) }
+                        dom?.bodyTextColor?.let { description.setTextColor(it) }
+                        dom?.titleTextColor?.let { favorite.changeTint(it) }
+
+                        swatch = dom
+                    }
+                }
+            }
     }
 }
 

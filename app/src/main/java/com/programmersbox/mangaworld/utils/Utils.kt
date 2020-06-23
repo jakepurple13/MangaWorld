@@ -27,6 +27,7 @@ var Context.groupManga: Boolean by sharedPrefNotNullDelegate(true)
 var Context.chapterHistory: List<ChapterHistory> by sharedPrefNotNullObjectDelegate(emptyList())
 var Context.chapterHistorySize: Int by sharedPrefNotNullDelegate(50)
 var Context.batteryAlertPercent: Float by sharedPrefNotNullDelegate(20f)
+var Context.canBubble: Boolean by sharedPrefNotNullDelegate(true)
 
 fun Context.changeChapterHistorySize(size: Int) {
     chapterHistorySize = size
