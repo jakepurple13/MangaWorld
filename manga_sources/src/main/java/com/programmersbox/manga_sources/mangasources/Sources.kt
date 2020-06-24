@@ -6,12 +6,12 @@ enum class Sources(val isAdult: Boolean = false, val filterOutOfUpdate: Boolean 
     MANGA_EDEN(filterOutOfUpdate = true),
     MANGANELO,
     MANGA_HERE,
-    INKR,
     MANGA_4_LIFE,
     NINE_ANIME,
     MANGAKAKALOT,
 
     //MANGA_DOG,
+    INKR,
     TSUMINO(isAdult = true);
 
     override val hasMorePages: Boolean get() = source().hasMorePages

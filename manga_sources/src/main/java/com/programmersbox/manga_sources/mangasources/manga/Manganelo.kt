@@ -8,15 +8,17 @@ object Manganelo : MangaSource {
 
     override val hasMorePages: Boolean = true
 
+    private const val baseUrl = "https://m.manganelo.com"
+
     override fun searchManga(searchText: CharSequence, pageNumber: Int, mangaList: List<MangaModel>): List<MangaModel> = try {
         if (searchText.isBlank()) throw Exception("No search necessary")
-        Jsoup.connect("https://m.manganelo.com/advanced_search?s=all&orby=newest&page=$pageNumber&keyw=$searchText").get().toMangaModel()
+        Jsoup.connect("$baseUrl/advanced_search?s=all&orby=latest&page=$pageNumber&keyw=$searchText").get().toMangaModel()
     } catch (e: Exception) {
         super.searchManga(searchText, pageNumber, mangaList)
     }
 
     override fun getManga(pageNumber: Int): List<MangaModel> =
-        Jsoup.connect("https://m.manganelo.com/advanced_search?s=all&orby=newest&page=$pageNumber").get().toMangaModel()
+        Jsoup.connect("$baseUrl/advanced_search?s=all&orby=latest&page=$pageNumber").get().toMangaModel()
 
     private fun Document.toMangaModel() = select("div.content-genres-item").map {
         MangaModel(
