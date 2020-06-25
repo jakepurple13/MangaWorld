@@ -19,6 +19,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade
 import com.bumptech.glide.util.ViewPreloadSizeProvider
 import com.github.piasy.biv.BigImageViewer
+import com.google.firebase.analytics.FirebaseAnalytics
 import com.mikepenz.iconics.IconicsDrawable
 import com.mikepenz.iconics.typeface.library.googlematerial.GoogleMaterial
 import com.mikepenz.iconics.utils.colorInt
@@ -144,6 +145,7 @@ class ReadActivity : AppCompatActivity() {
             .doOnError { Toast.makeText(this, it.localizedMessage, Toast.LENGTH_SHORT).show() }
             .subscribe { pages: List<String> ->
                 println(pages)
+                if (pages.any { it.contains("null", true) }) FirebaseAnalytics.getInstance(this).logEvent("Pages didn't load for $mangaTitle", null)
                 BigImageViewer.prefetch(*pages.map { Uri.parse(it) }.toTypedArray())
                 readLoading
                     .animate()

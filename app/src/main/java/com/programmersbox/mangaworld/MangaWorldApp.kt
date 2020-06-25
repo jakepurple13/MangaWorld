@@ -13,14 +13,10 @@ import com.programmersbox.helpfulutils.*
 import com.programmersbox.loggingutils.Loged
 import com.programmersbox.mangaworld.utils.MangaInfoCache
 import io.reactivex.plugins.RxJavaPlugins
-import java.util.concurrent.TimeUnit
-import kotlin.math.roundToLong
-import kotlin.time.ExperimentalTime
-import kotlin.time.toDuration
-
+import java.util.*
 
 class MangaWorldApp : Application() {
-    @ExperimentalTime
+
     override fun onCreate() {
         super.onCreate()
         Stetho.initializeWithDefaults(this)
@@ -43,14 +39,25 @@ class MangaWorldApp : Application() {
             } catch (e: Exception) {
             }
         }
-
-        val updateCheckIntent = Intent(this, UpdateCheckService::class.java)
-        val pendingIntent = PendingIntent.getService(this, 10, updateCheckIntent, 0)
-        alarmManager.setInexactRepeating(
-            AlarmManager.RTC_WAKEUP,
-            System.currentTimeMillis() + 30L.toDuration(TimeUnit.MINUTES).inMilliseconds.roundToLong(),
-            AlarmManager.INTERVAL_HALF_HOUR,
-            pendingIntent
-        )
+        setAlarmUp()
     }
+
+    private fun setAlarmUp() {
+        val updateCheckIntent = Intent(this, UpdateReceiver::class.java)
+        val code = 3
+        if (!AlarmUtils.hasAlarm(this, updateCheckIntent, code)) {
+            val pendingIntent = PendingIntent.getBroadcast(this, code, updateCheckIntent, 0)
+            val calendar = Calendar.getInstance()
+            calendar.timeInMillis = System.currentTimeMillis()
+            val timeToSet = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) timeToNextHourOrHalf() else 5000L
+            val firstMillis = calendar.timeInMillis + timeToSet
+            alarmManager.setRepeating(
+                AlarmManager.RTC_WAKEUP,
+                firstMillis,
+                AlarmManager.INTERVAL_HALF_HOUR,
+                pendingIntent
+            )
+        }
+    }
+
 }

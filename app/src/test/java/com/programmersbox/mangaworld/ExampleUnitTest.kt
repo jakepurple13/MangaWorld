@@ -11,6 +11,10 @@ import com.programmersbox.manga_sources.mangasources.Sources
 import com.programmersbox.manga_sources.mangasources.manga.MangaEden
 import com.programmersbox.manga_sources.mangasources.manga.Manganelo
 import org.junit.Test
+import java.time.Duration
+import java.time.ZonedDateTime
+import java.time.temporal.ChronoUnit
+import java.util.*
 
 /**
  * Example local unit test, which will execute on the development machine (host).
@@ -188,5 +192,76 @@ class ExampleUnitTest {
         key: (T) -> R,
         predicate: (key: T, check: T) -> Boolean
     ): List<Pair<R, List<T>>> = map { name -> key(name) to filter { s -> predicate(name, s) } }.distinctBy { it.first }
+
+    @Test
+    fun timeTest() {
+        val f = timeToNextHourOrHalf()
+        println(f)
+        val f1 = timeToNextHourOrHalfSdk()
+        println(f1)
+        val f2 = timeToNextHourOrHalfSdk2()
+        println(f2)
+    }
+
+    private fun timeToNextHourOrHalf(): Long {
+        val start = ZonedDateTime.now()
+        // Hour + 1, set Minute and Second to 00
+        val hour = start.plusHours(1).truncatedTo(ChronoUnit.HOURS)
+        val minute = start.plusHours(0).truncatedTo(ChronoUnit.HOURS)
+            .plusMinutes(30).truncatedTo(ChronoUnit.MINUTES).plusSeconds(1)
+
+        // Get Duration
+        val durationHour = Duration.between(start, hour).toMillis()
+        val durationMinute = Duration.between(start, minute).toMillis()
+        return if (durationHour <= durationMinute) durationHour else durationMinute
+    }
+
+    private fun timeToNextHourOrHalfSdk(): Long {
+        val start = System.currentTimeMillis()
+
+        val starter = Date(start)
+
+        val hourer = Date(start).apply {
+            hours += 1
+            minutes = 0
+            seconds = 0
+        }.toInstant().truncatedTo(ChronoUnit.HOURS)
+        val minuteer = Date(start).apply {
+            minutes += 30
+            seconds += 1
+        }.toInstant()
+            .plus(0, ChronoUnit.HOURS)
+            .truncatedTo(ChronoUnit.HOURS)
+            .plus(30, ChronoUnit.MINUTES)
+            .truncatedTo(ChronoUnit.MINUTES)
+            .plusSeconds(1)
+
+        val durationHour = Duration.between(starter.toInstant(), hourer).toMillis()
+        val durationMinute = Duration.between(starter.toInstant(), minuteer).toMillis()
+        return if (durationHour <= durationMinute) durationHour else durationMinute
+    }
+
+    private fun timeToNextHourOrHalfSdk2(): Long {
+        val start = System.currentTimeMillis()
+        val hour = start + 3_600_000
+        val minute = start + 1_800_000
+        val hourer = Date(hour).apply {
+            minutes += 0
+            seconds += 0
+        }
+        val minuteer = Date(minute).apply {
+            minutes += 30
+            seconds += 1
+        }
+
+        println(hourer)
+        println(minuteer)
+
+        /*val durationHour = Duration.between(starter.toInstant(), hourer).toMillis()
+        val durationMinute = Duration.between(starter.toInstant(), minuteer).toMillis()
+        return if (durationHour <= durationMinute) durationHour else durationMinute*/
+
+        return 0
+    }
 
 }
