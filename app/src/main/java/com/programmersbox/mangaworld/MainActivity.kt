@@ -83,26 +83,34 @@ class MainActivity : AppCompatActivity() {
         menuOptions.setOnActionSelectedListener {
             when (it.id) {
                 R.id.signInId -> {
-                    if (FirebaseAuthentication.currentUser != null) firebaseAuthentication.signOut()
+                    if (FirebaseAuthentication.currentUser != null)
+                        MaterialAlertDialogBuilder(this)
+                            .setTitle("Are you sure you want to sign out?")
+                            .setPositiveButton("Yes") { d, _ ->
+                                firebaseAuthentication.signOut()
+                                d.dismiss()
+                            }
+                            .setNegativeButton("No") { d, _ -> d.dismiss() }
+                            .show()
                     else firebaseAuthentication.signIn()
                     //menuOptions.replaceActionItem(signDial, signDial)
-                    menuOptions.close() // To close the Speed Dial with animation
-                    return@setOnActionSelectedListener true // false will close it without animation
+                    //menuOptions.close() // To close the Speed Dial with animation
+                    //return@setOnActionSelectedListener true // false will close it without animation
                 }
                 R.id.viewFavoritesMenu -> {
                     startActivity(Intent(this, FavoriteActivity::class.java))
-                    menuOptions.close() // To close the Speed Dial with animation
-                    return@setOnActionSelectedListener true // false will close it without animation
+                    //menuOptions.close() // To close the Speed Dial with animation
+                    //return@setOnActionSelectedListener true // false will close it without animation
                 }
                 R.id.viewSettingsMenu -> {
                     startActivity(Intent(this, SettingsActivity::class.java))
-                    menuOptions.close() // To close the Speed Dial with animation
-                    return@setOnActionSelectedListener true // false will close it without animation
+                    //menuOptions.close() // To close the Speed Dial with animation
+                    //return@setOnActionSelectedListener true // false will close it without animation
                 }
                 R.id.viewHistoryMenu -> {
                     startActivity(Intent(this, HistoryActivity::class.java))
-                    menuOptions.close() // To close the Speed Dial with animation
-                    return@setOnActionSelectedListener true // false will close it without animation
+                    //menuOptions.close() // To close the Speed Dial with animation
+                    //return@setOnActionSelectedListener true // false will close it without animation
                 }
                 R.id.changeSourcesMenu -> {
                     MaterialAlertDialogBuilder(this)
@@ -114,15 +122,18 @@ class MainActivity : AppCompatActivity() {
                             dialog.dismiss()
                         }
                         .show()
-                    menuOptions.close() // To close the Speed Dial with animation
-                    return@setOnActionSelectedListener true // false will close it without animation
+                    //menuOptions.close() // To close the Speed Dial with animation
+                    //return@setOnActionSelectedListener true // false will close it without animation
                 }
                 R.id.checkForUpdates -> {
                     val showCheck = Intent(this, UpdateCheckService::class.java)
                     startService(showCheck)
+                    //menuOptions.close()
+                    //return@setOnActionSelectedListener true // false will close it without animation
                 }
             }
-            false
+            menuOptions.close()
+            true
         }
     }
 

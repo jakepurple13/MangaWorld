@@ -10,13 +10,22 @@ import org.jsoup.Jsoup
 
 object MangaFourLife : MangaSource {
 
+    private val mangaList = mutableListOf<MangaModel>()
+
     override fun getManga(pageNumber: Int): List<MangaModel> = try {
-        "vm\\.Directory = (.*?.*;)".toRegex()
-            .find(Jsoup.connect("https://manga4life.com/search/?sort=lt&desc=true").get().html())
-            ?.groupValues?.get(1)?.dropLast(1)
-            ?.fromJson<List<LifeBase>>()
-            ?.sortedByDescending { m -> m.lt?.let { 1000 * it.toDouble() } }
-            ?.map(toMangaModel)
+        if (mangaList.isEmpty()) {
+            mangaList.addAll(
+                "vm\\.Directory = (.*?.*;)".toRegex()
+                    .find(Jsoup.connect("https://manga4life.com/search/?sort=lt&desc=true").get().html())
+                    ?.groupValues?.get(1)?.dropLast(1)
+                    ?.fromJson<List<LifeBase>>()
+                    ?.sortedByDescending { m -> m.lt?.let { 1000 * it.toDouble() } }
+                    ?.map(toMangaModel)
+                    .orEmpty()
+            )
+        }
+        val endRange = ((pageNumber * 24) - 1).let { if (it <= mangaList.lastIndex) it else mangaList.lastIndex }
+        mangaList.subList((pageNumber - 1) * 24, endRange)
     } catch (e: Exception) {
         getJsonApi<List<Life>>("https://manga4life.com/_search.php")?.map {
             MangaModel(
@@ -118,7 +127,7 @@ object MangaFourLife : MangaSource {
         })
     }
 
-    override val hasMorePages: Boolean = false
+    override val hasMorePages: Boolean = true
 
     private data class Life(val i: String?, val s: String?, val a: List<String>?)
 

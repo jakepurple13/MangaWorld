@@ -1,6 +1,7 @@
 package com.programmersbox.mangaworld
 
 import android.app.IntentService
+import android.app.Notification
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -9,25 +10,37 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.drawable.Icon
 import androidx.core.app.TaskStackBuilder
-import androidx.work.Worker
+import androidx.work.RxWorker
 import androidx.work.WorkerParameters
+import com.google.firebase.analytics.FirebaseAnalytics
 import com.programmersbox.gsonutils.putExtra
-import com.programmersbox.helpfulutils.*
+import com.programmersbox.helpfulutils.GroupBehavior
+import com.programmersbox.helpfulutils.NotificationDslBuilder
+import com.programmersbox.helpfulutils.intersect
+import com.programmersbox.helpfulutils.notificationManager
 import com.programmersbox.loggingutils.Loged
 import com.programmersbox.loggingutils.f
 import com.programmersbox.manga_db.MangaDatabase
+import com.programmersbox.manga_db.MangaDbModel
+import com.programmersbox.manga_sources.mangasources.MangaInfoModel
+import com.programmersbox.manga_sources.mangasources.MangaModel
 import com.programmersbox.manga_sources.mangasources.Sources
 import com.programmersbox.mangaworld.utils.FirebaseDb
 import com.programmersbox.mangaworld.utils.canBubble
 import com.programmersbox.mangaworld.utils.dbAndFireMangaSync
 import com.programmersbox.mangaworld.utils.toMangaModel
+import com.programmersbox.rxutils.invoke
+import io.reactivex.Single
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
 
 class UpdateCheckService : IntentService(UpdateCheckService::class.java.name) {
 
+    private val update by lazy { UpdateNotification(this) }
+
     override fun onHandleIntent(intent: Intent?) {
+        //FirebaseAnalytics.getInstance(this).logEvent("Start_update_check_UpdateCheckService", null)
         startForeground(13, NotificationDslBuilder.builder(this, "updateCheckChannel", R.mipmap.ic_launcher) {
             onlyAlertOnce = true
             ongoing = true
@@ -39,155 +52,46 @@ class UpdateCheckService : IntentService(UpdateCheckService::class.java.name) {
             message = getText(R.string.startingUpdateCheck)
             subText = getText(R.string.checkingUpdate)
         })
-        sendRunningNotification(100, 0, getText(R.string.startingUpdateCheck))
+        update.sendRunningNotification(100, 0, getText(R.string.startingUpdateCheck))
         val dao = MangaDatabase.getInstance(this@UpdateCheckService).mangaDao()
-        val mangaListSize: Int
-        //Sources.getUpdateSearches().flatMap { m -> m.getManga() }
+        val listSize: Int
         dbAndFireMangaSync(dao)
             .let {
                 it.intersect(Sources.getUpdateSearches()
-                    //.filter { s -> it.any { m -> m.source == s } }
+                    .filter { s -> it.any { m -> m.source == s } }
                     .flatMap { m -> m.getManga() }) { o, n -> o.mangaUrl == n.mangaUrl }
             }
             .distinctBy { m -> m.mangaUrl }
-            .also { mangaListSize = it.size }
+            .also { listSize = it.lastIndex }
             .mapIndexedNotNull { index, model ->
-                sendRunningNotification(mangaListSize, index, model.title)
+                update.sendRunningNotification(listSize, index, model.title)
                 try {
-                    Triple(model.numChapters, model.toMangaModel().toInfoModel(), model)
+                    val newData = model.toMangaModel().toInfoModel()
+                    if (model.numChapters >= newData.chapters.size) null
+                    else Pair(newData, model)
                 } catch (e: Exception) {
                     println(e.localizedMessage)
                     null
                 }
             }
-            .filter { it.first < it.second.chapters.size }
             .also {
                 it.forEach { triple ->
-                    val manga = triple.third
-                    manga.numChapters = triple.second.chapters.size
+                    val manga = triple.second
+                    manga.numChapters = triple.first.chapters.size
                     dao.updateMangaById(manga).subscribe()
                     FirebaseDb.updateManga(manga).subscribe()
                 }
             }
-            .let {
-                it.mapIndexed { index, pair ->
-                    sendRunningNotification(it.size, index, pair.second.title)
-                    pair.second.hashCode() to NotificationDslBuilder.builder(this@UpdateCheckService, "mangaChannel", R.mipmap.ic_launcher) {
-                        title = pair.second.title
-                        subText = pair.third.source.name
-                        getBitmapFromURL(pair.second.imageUrl)?.let {
-                            pictureStyle {
-                                bigPicture = it
-                                largeIcon = it
-                                summaryText = getString(R.string.hadAnUpdate, pair.second.title, pair.second.chapters.firstOrNull()?.name ?: "")
-                            }
-                        } ?: bigTextStyle {
-                            bigText = getString(R.string.hadAnUpdate, pair.second.title, pair.second.chapters.firstOrNull()?.name.orEmpty())
-                        }
-                        groupId = "mangaGroup"
-                        pendingIntent { context ->
-                            TaskStackBuilder.create(context)
-                                .addParentStack(MainActivity::class.java)
-                                .addNextIntent(Intent(context, MangaActivity::class.java).apply { putExtra("manga", pair.third.toMangaModel()) })
-                                .getPendingIntent(pair.second.hashCode(), PendingIntent.FLAG_UPDATE_CURRENT)
-                        }
-                    }
-                } to it.map { m -> m.third.toMangaModel() }
-            }
-            .let {
-                val n = notificationManager
-                it.first.forEach { pair -> n.notify(pair.first, pair.second) }
-                if (it.first.isNotEmpty()) n.notify(
-                    42,
-                    NotificationDslBuilder.builder(this@UpdateCheckService, "mangaChannel", R.mipmap.ic_launcher) {
-                        title = getText(R.string.app_name)
-                        subText = resources.getQuantityString(R.plurals.updateAmount, it.first.size, it.first.size)
-                        groupSummary = true
-                        groupAlertBehavior = GroupBehavior.ALL
-                        groupId = "mangaGroup"
-                        if (canBubble) {
-                            addBubble {
-                                bubbleIntent(
-                                    PendingIntent.getActivity(
-                                        this@UpdateCheckService, 0,
-                                        Intent(this@UpdateCheckService, BubbleActivity::class.java).apply { putExtra("mangaList", it.second) },
-                                        0
-                                    )
-                                )
-                                desiredHeight = 600
-                                icon = Icon.createWithResource(this@UpdateCheckService, R.mipmap.ic_launcher)
-                            }
-                            messageStyle {
-                                setMainPerson {
-                                    name = "MangaBot"
-                                    isBot = true
-                                }
-                                message {
-                                    message = resources.getQuantityString(R.plurals.updateAmount, it.first.size, it.first.size)
-                                    setPerson {
-                                        name = "MangaBot"
-                                        isBot = true
-                                    }
-                                }
-                            }
-                        }
-                    }
-                )
-                //maybe add bubble?
-                sendFinishedNotification()
-            }
-    }
-
-    private fun getBitmapFromURL(strURL: String?): Bitmap? = try {
-        val url = URL(strURL)
-        val connection: HttpURLConnection = url.openConnection() as HttpURLConnection
-        connection.doInput = true
-        connection.connect()
-        BitmapFactory.decodeStream(connection.inputStream)
-    } catch (e: IOException) {
-        e.printStackTrace()
-        null
-    }
-
-    private fun sendRunningNotification(max: Int, progress: Int, contextText: CharSequence = "") {
-        val notification = NotificationDslBuilder.builder(this, "updateCheckChannel", R.mipmap.ic_launcher) {
-            onlyAlertOnce = true
-            ongoing = true
-            progress {
-                this.max = max
-                this.progress = progress
-                indeterminate = progress == 0
-            }
-            message = contextText
-            subText = getText(R.string.checkingUpdate)
-        }
-        notificationManager.notify(13, notification)
-        Loged.f("Checking for $contextText")
-    }
-
-    private fun sendFinishedNotification() {
-        val notification = NotificationDslBuilder.builder(this, "updateCheckChannel", R.mipmap.ic_launcher) {
-            onlyAlertOnce = true
-            subText = getText(R.string.finishedChecking)
-            timeoutAfter = 750L
-        }
-        notificationManager.notify(13, notification)
-    }
-
-    private fun isMyServiceRunning(serviceClass: Class<*>): Boolean {
-        val manager = activityManager
-        for (service in manager.getRunningServices(Integer.MAX_VALUE)) {
-            if (serviceClass.name == service.service.className) {
-                return true
-            }
-        }
-        return false
+            .let { update.mapDbModel(it) }
+            .let { update.onEnd(it) }
+        update.sendFinishedNotification()
     }
 
 }
 
 class UpdateReceiver : BroadcastReceiver() {
     override fun onReceive(p0: Context?, p1: Intent?) {
+        p0?.let { FirebaseAnalytics.getInstance(it).logEvent("Start_update_check_UpdateReceiver", null) }
         try {
             p0?.startService(Intent(p0, UpdateCheckService::class.java))
         } catch (e: IllegalStateException) {
@@ -195,140 +99,131 @@ class UpdateReceiver : BroadcastReceiver() {
     }
 }
 
-class UpdateWorker(context: Context, workerParams: WorkerParameters) : Worker(context, workerParams) {
+class UpdateWorker(context: Context, workerParams: WorkerParameters) : RxWorker(context, workerParams) {
 
-    override fun doWork(): Result = try {
-        /*startForeground(13, NotificationDslBuilder.builder(this@UpdateWorker.applicationContext, "updateCheckChannel", R.mipmap.ic_launcher) {
-            onlyAlertOnce = true
-            ongoing = true
-            progress {
-                this.max = 100
-                this.progress = 0
-                indeterminate = true
-            }
-            message = this@UpdateWorker.applicationContext.getText(R.string.startingUpdateCheck)
-            subText = this@UpdateWorker.applicationContext.getText(R.string.checkingUpdate)
-        })*/
-        sendRunningNotification(100, 0, this@UpdateWorker.applicationContext.getText(R.string.startingUpdateCheck))
-        val dao = MangaDatabase.getInstance(this@UpdateWorker.applicationContext).mangaDao()
-        val mangaListSize: Int
-        //dao.getAllMangaSync()
-        this@UpdateWorker.applicationContext.dbAndFireMangaSync(dao)
-            .let {
-                it.intersect(
-                    Sources.getUpdateSearches()
-                        .filter { s -> it.any { m -> m.source == s } }
-                        .flatMap { m -> m.getManga() }) { o, n -> o.mangaUrl == n.mangaUrl }
-                    .distinctBy { m -> m.mangaUrl }
-            }
-            .also { mangaListSize = it.size }
-            .mapIndexedNotNull { index, model ->
-                sendRunningNotification(mangaListSize, index, model.title)
+    private val update by lazy { UpdateNotification(this.applicationContext) }
+    private val dao by lazy { MangaDatabase.getInstance(this@UpdateWorker.applicationContext).mangaDao() }
+
+    override fun createWork(): Single<Result> = Single.create<List<MangaDbModel>> { emitter ->
+        val list = applicationContext.dbAndFireMangaSync(dao)
+        val sourceList = Sources.getUpdateSearches()
+            .filter { s -> list.any { m -> m.source == s } }
+            .flatMap { m -> m.getManga() }
+        emitter(list.filter { m -> sourceList.any { it.mangaUrl == m.mangaUrl } })
+    }
+        .map { list ->
+            list.mapIndexedNotNull { index, model ->
+                update.sendRunningNotification(list.size, index, model.title)
                 try {
-                    Triple(model.numChapters, model.toMangaModel().toInfoModel(), model)
+                    val newData = model.toMangaModel().toInfoModel()
+                    if (model.numChapters >= newData.chapters.size) null
+                    else Pair(newData, model)
                 } catch (e: Exception) {
                     println(e.localizedMessage)
                     null
                 }
             }
-            .filter { it.first < it.second.chapters.size }
-            .also {
-                it.forEach { triple ->
-                    val manga = triple.third
-                    manga.numChapters = triple.second.chapters.size
-                    dao.updateMangaById(manga).subscribe()
-                    FirebaseDb.updateManga(manga).subscribe()
+        }
+        .map {
+            it.forEach { triple ->
+                val manga = triple.second
+                manga.numChapters = triple.first.chapters.size
+                dao.updateMangaById(manga).subscribe()
+                FirebaseDb.updateManga(manga).subscribe()
+            }
+            update.mapDbModel(it)
+        }
+        .map {
+            update.onEnd(it)
+            update.sendFinishedNotification()
+        }
+        .doOnSubscribe { update.sendRunningNotification(100, 0, this@UpdateWorker.applicationContext.getText(R.string.startingUpdateCheck)) }
+        .map { Result.success() }
+        .onErrorReturn { Result.failure() }
+
+}
+
+class UpdateNotification(private val context: Context) {
+
+    fun mapDbModel(list: List<Pair<MangaInfoModel, MangaDbModel>>) = list.mapIndexed { index, pair ->
+        sendRunningNotification(list.size, index, pair.second.title)
+        pair.second.hashCode() to NotificationDslBuilder.builder(
+            context,
+            "mangaChannel",
+            R.mipmap.ic_launcher
+        ) {
+            title = pair.second.title
+            subText = pair.second.source.name
+            getBitmapFromURL(pair.second.imageUrl)?.let {
+                pictureStyle {
+                    bigPicture = it
+                    largeIcon = it
+                    summaryText = context.getString(
+                        R.string.hadAnUpdate,
+                        pair.second.title,
+                        pair.first.chapters.firstOrNull()?.name ?: ""
+                    )
                 }
-            }
-            .let {
-                it.mapIndexed { index, pair ->
-                    sendRunningNotification(it.size, index, pair.second.title)
-                    pair.second.hashCode() to NotificationDslBuilder.builder(
-                        this@UpdateWorker.applicationContext,
-                        "mangaChannel",
-                        R.mipmap.ic_launcher
-                    ) {
-                        title = pair.second.title
-                        subText = pair.third.source.name
-                        getBitmapFromURL(pair.second.imageUrl)?.let {
-                            pictureStyle {
-                                bigPicture = it
-                                largeIcon = it
-                                summaryText = this@UpdateWorker.applicationContext.getString(
-                                    R.string.hadAnUpdate,
-                                    pair.second.title,
-                                    pair.second.chapters.firstOrNull()?.name ?: ""
-                                )
-                            }
-                        } ?: bigTextStyle {
-                            bigText = this@UpdateWorker.applicationContext.getString(
-                                R.string.hadAnUpdate,
-                                pair.second.title,
-                                pair.second.chapters.firstOrNull()?.name.orEmpty()
-                            )
-                        }
-                        groupId = "mangaGroup"
-                        pendingIntent { context ->
-                            TaskStackBuilder.create(context)
-                                .addParentStack(MainActivity::class.java)
-                                .addNextIntent(Intent(context, MangaActivity::class.java).apply { putExtra("manga", pair.third.toMangaModel()) })
-                                .getPendingIntent(pair.second.hashCode(), PendingIntent.FLAG_UPDATE_CURRENT)
-                        }
-                    }
-                } to it.map { m -> m.third.toMangaModel() }
-            }
-            .let {
-                val n = this@UpdateWorker.applicationContext.notificationManager
-                it.first.forEach { pair -> n.notify(pair.first, pair.second) }
-                if (it.first.isNotEmpty()) n.notify(
-                    42,
-                    NotificationDslBuilder.builder(this@UpdateWorker.applicationContext, "mangaChannel", R.mipmap.ic_launcher) {
-                        title = this@UpdateWorker.applicationContext.getText(R.string.app_name)
-                        subText =
-                            this@UpdateWorker.applicationContext.resources.getQuantityString(R.plurals.updateAmount, it.first.size, it.first.size)
-                        groupSummary = true
-                        groupAlertBehavior = GroupBehavior.ALL
-                        groupId = "mangaGroup"
-                        if (this@UpdateWorker.applicationContext.canBubble) {
-                            addBubble {
-                                bubbleIntent(
-                                    PendingIntent.getActivity(
-                                        this@UpdateWorker.applicationContext, 0,
-                                        Intent(this@UpdateWorker.applicationContext, BubbleActivity::class.java)
-                                            .apply { putExtra("mangaList", it.second) },
-                                        0
-                                    )
-                                )
-                                desiredHeight = 600
-                                icon = Icon.createWithResource(this@UpdateWorker.applicationContext, R.mipmap.ic_launcher)
-                            }
-                            messageStyle {
-                                setMainPerson {
-                                    name = "MangaBot"
-                                    isBot = true
-                                }
-                                message {
-                                    message = this@UpdateWorker.applicationContext.resources.getQuantityString(
-                                        R.plurals.updateAmount,
-                                        it.first.size,
-                                        it.first.size
-                                    )
-                                    setPerson {
-                                        name = "MangaBot"
-                                        isBot = true
-                                    }
-                                }
-                            }
-                        }
-                    }
+            } ?: bigTextStyle {
+                bigText = context.getString(
+                    R.string.hadAnUpdate,
+                    pair.second.title,
+                    pair.first.chapters.firstOrNull()?.name.orEmpty()
                 )
             }
-        sendFinishedNotification()
-        Loged.f("Done")
-        Result.success()
-    } catch (e: Exception) {
-        e.printStackTrace()
-        Result.failure()
+            groupId = "mangaGroup"
+            pendingIntent { context ->
+                TaskStackBuilder.create(context)
+                    .addParentStack(MainActivity::class.java)
+                    .addNextIntent(Intent(context, MangaActivity::class.java).apply { putExtra("manga", pair.second.toMangaModel()) })
+                    .getPendingIntent(pair.second.hashCode(), PendingIntent.FLAG_UPDATE_CURRENT)
+            }
+        }
+    } to list.map { m -> m.second.toMangaModel() }
+
+    fun onEnd(list: Pair<List<Pair<Int, Notification>>, List<MangaModel>>) {
+        val n = context.notificationManager
+        list.first.forEach { pair -> n.notify(pair.first, pair.second) }
+        if (list.first.isNotEmpty()) n.notify(
+            42,
+            NotificationDslBuilder.builder(context, "mangaChannel", R.mipmap.ic_launcher) {
+                title = context.getText(R.string.app_name)
+                subText = context.resources.getQuantityString(R.plurals.updateAmount, list.first.size, list.first.size)
+                groupSummary = true
+                groupAlertBehavior = GroupBehavior.ALL
+                groupId = "mangaGroup"
+                if (context.canBubble) {
+                    addBubble {
+                        bubbleIntent(
+                            PendingIntent.getActivity(
+                                context, 0,
+                                Intent(context, BubbleActivity::class.java).apply { putExtra("mangaList", list.second) },
+                                0
+                            )
+                        )
+                        desiredHeight = 600
+                        icon = Icon.createWithResource(context, R.mipmap.ic_launcher)
+                    }
+                    messageStyle {
+                        setMainPerson {
+                            name = "MangaBot"
+                            isBot = true
+                        }
+                        message {
+                            message = context.resources.getQuantityString(
+                                R.plurals.updateAmount,
+                                list.first.size,
+                                list.first.size
+                            )
+                            setPerson {
+                                name = "MangaBot"
+                                isBot = true
+                            }
+                        }
+                    }
+                }
+            }
+        )
     }
 
     private fun getBitmapFromURL(strURL: String?): Bitmap? = try {
@@ -342,8 +237,8 @@ class UpdateWorker(context: Context, workerParams: WorkerParameters) : Worker(co
         null
     }
 
-    private fun sendRunningNotification(max: Int, progress: Int, contextText: CharSequence = "") {
-        val notification = NotificationDslBuilder.builder(this@UpdateWorker.applicationContext, "updateCheckChannel", R.mipmap.ic_launcher) {
+    fun sendRunningNotification(max: Int, progress: Int, contextText: CharSequence = "") {
+        val notification = NotificationDslBuilder.builder(context, "updateCheckChannel", R.mipmap.ic_launcher) {
             onlyAlertOnce = true
             ongoing = true
             progress {
@@ -352,18 +247,18 @@ class UpdateWorker(context: Context, workerParams: WorkerParameters) : Worker(co
                 indeterminate = progress == 0
             }
             message = contextText
-            subText = this@UpdateWorker.applicationContext.getText(R.string.checkingUpdate)
+            subText = context.getText(R.string.checkingUpdate)
         }
-        this@UpdateWorker.applicationContext.notificationManager.notify(13, notification)
+        context.notificationManager.notify(13, notification)
         Loged.f("Checking for $contextText")
     }
 
-    private fun sendFinishedNotification() {
-        val notification = NotificationDslBuilder.builder(this@UpdateWorker.applicationContext, "updateCheckChannel", R.mipmap.ic_launcher) {
+    fun sendFinishedNotification() {
+        val notification = NotificationDslBuilder.builder(context, "updateCheckChannel", R.mipmap.ic_launcher) {
             onlyAlertOnce = true
-            subText = this@UpdateWorker.applicationContext.getText(R.string.finishedChecking)
+            subText = context.getText(R.string.finishedChecking)
             timeoutAfter = 750L
         }
-        this@UpdateWorker.applicationContext.notificationManager.notify(13, notification)
+        context.notificationManager.notify(13, notification)
     }
 }

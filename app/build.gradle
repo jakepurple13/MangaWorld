@@ -99,7 +99,7 @@ dependencies {
     implementation "androidx.work:work-runtime-ktx:$work_version"
 
     // optional - RxJava2 support
-    //implementation "androidx.work:work-rxjava2:$work_version"
+    implementation "androidx.work:work-rxjava2:$work_version"
 
     implementation project(':manga_db')
     implementation project(':manga_sources')

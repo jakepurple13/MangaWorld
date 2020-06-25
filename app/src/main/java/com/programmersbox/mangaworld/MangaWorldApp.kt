@@ -9,6 +9,7 @@ import android.widget.Toast
 import com.facebook.stetho.Stetho
 import com.github.piasy.biv.BigImageViewer
 import com.github.piasy.biv.loader.glide.GlideImageLoader
+import com.google.firebase.analytics.FirebaseAnalytics
 import com.programmersbox.helpfulutils.*
 import com.programmersbox.loggingutils.Loged
 import com.programmersbox.mangaworld.utils.MangaInfoCache
@@ -23,6 +24,7 @@ class MangaWorldApp : Application() {
         MangaInfoCache.init(this)
         Loged.FILTER_BY_PACKAGE_NAME = "programmersbox"
         Loged.TAG = "MangaWorld"
+        val analytics = FirebaseAnalytics.getInstance(this)
         defaultSharedPrefName = "mangaworld"
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             createNotificationChannel("mangaChannel", importance = NotificationChannelImportance.HIGH)
@@ -49,15 +51,54 @@ class MangaWorldApp : Application() {
             val pendingIntent = PendingIntent.getBroadcast(this, code, updateCheckIntent, 0)
             val calendar = Calendar.getInstance()
             calendar.timeInMillis = System.currentTimeMillis()
-            val timeToSet = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) timeToNextHourOrHalf() else 5000L
+            val timeToSet = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) timeToNextHourOrHalf() else 10000L
             val firstMillis = calendar.timeInMillis + timeToSet
+            //alarmManager.cancel(pendingIntent)
             alarmManager.setRepeating(
                 AlarmManager.RTC_WAKEUP,
                 firstMillis,
-                AlarmManager.INTERVAL_HALF_HOUR,
+                AlarmManager.INTERVAL_HOUR,
                 pendingIntent
             )
         }
+
+        //val work = WorkManager.getInstance(this)
+
+        //work.cancelAllWork()
+
+        /*try {
+
+            val work = WorkManager.getInstance(this)
+
+            work.cancelAllWork()
+
+            work.enqueueUniquePeriodicWork(
+                "updateChecks",
+                ExistingPeriodicWorkPolicy.KEEP,
+                PeriodicWorkRequest.Builder(UpdateWorker::class.java, 1, TimeUnit.HOURS, 15, TimeUnit.MINUTES)
+                    .setConstraints(
+                        Constraints.Builder()
+                            .setRequiredNetworkType(NetworkType.CONNECTED)
+                            .setRequiresBatteryNotLow(false)
+                            .setRequiresCharging(false)
+                            .setRequiresDeviceIdle(false)
+                            .setRequiresStorageNotLow(false)
+                            .build()
+                    )
+                    .also {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            it.setInitialDelay(timeToNextHourOrHalf(), TimeUnit.MILLISECONDS)
+                        } else {
+                            it.setInitialDelay(10, TimeUnit.SECONDS)
+                        }
+                    }
+                    .build()
+            ).state.observeForever {
+                println("The state is $it")
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }*/
     }
 
 }
