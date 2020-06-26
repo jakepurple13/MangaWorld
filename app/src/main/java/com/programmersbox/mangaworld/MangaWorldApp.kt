@@ -9,7 +9,6 @@ import android.widget.Toast
 import com.facebook.stetho.Stetho
 import com.github.piasy.biv.BigImageViewer
 import com.github.piasy.biv.loader.glide.GlideImageLoader
-import com.google.firebase.analytics.FirebaseAnalytics
 import com.programmersbox.helpfulutils.*
 import com.programmersbox.loggingutils.Loged
 import com.programmersbox.mangaworld.utils.MangaInfoCache
@@ -24,12 +23,12 @@ class MangaWorldApp : Application() {
         MangaInfoCache.init(this)
         Loged.FILTER_BY_PACKAGE_NAME = "programmersbox"
         Loged.TAG = "MangaWorld"
-        val analytics = FirebaseAnalytics.getInstance(this)
         defaultSharedPrefName = "mangaworld"
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             createNotificationChannel("mangaChannel", importance = NotificationChannelImportance.HIGH)
             createNotificationGroup("mangaGroup")
             createNotificationChannel("updateCheckChannel", importance = NotificationChannelImportance.MIN)
+            createNotificationChannel("appUpdate", importance = NotificationChannelImportance.HIGH)
         }
 
         BigImageViewer.initialize(GlideImageLoader.with(this))
@@ -51,7 +50,7 @@ class MangaWorldApp : Application() {
             val pendingIntent = PendingIntent.getBroadcast(this, code, updateCheckIntent, 0)
             val calendar = Calendar.getInstance()
             calendar.timeInMillis = System.currentTimeMillis()
-            val timeToSet = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) timeToNextHourOrHalf() else 10000L
+            val timeToSet = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) timeToNextHourOrHalf() else 1_800_000
             val firstMillis = calendar.timeInMillis + timeToSet
             //alarmManager.cancel(pendingIntent)
             alarmManager.setRepeating(

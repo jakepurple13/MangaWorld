@@ -10,10 +10,7 @@ import com.programmersbox.gsonutils.fromJson
 import com.programmersbox.gsonutils.getObject
 import com.programmersbox.gsonutils.putObject
 import com.programmersbox.gsonutils.sharedPrefNotNullObjectDelegate
-import com.programmersbox.helpfulutils.defaultSharedPref
-import com.programmersbox.helpfulutils.requestPermissions
-import com.programmersbox.helpfulutils.runOnUIThread
-import com.programmersbox.helpfulutils.sharedPrefNotNullDelegate
+import com.programmersbox.helpfulutils.*
 import com.programmersbox.loggingutils.Loged
 import com.programmersbox.loggingutils.f
 import com.programmersbox.manga_db.MangaDbModel
@@ -21,14 +18,14 @@ import com.programmersbox.manga_sources.mangasources.ChapterModel
 import com.programmersbox.manga_sources.mangasources.MangaInfoModel
 import com.programmersbox.manga_sources.mangasources.MangaModel
 import com.programmersbox.manga_sources.mangasources.Sources
+import com.programmersbox.mangaworld.R
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
+import zlc.season.rxdownload4.delete
 import zlc.season.rxdownload4.download
 import zlc.season.rxdownload4.file
-import zlc.season.rxdownload4.manager.manager
-import zlc.season.rxdownload4.notification.SimpleNotificationCreator
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -126,6 +123,7 @@ class AppUpdateChecker(private val activity: androidx.activity.ComponentActivity
 
     private val disposable = CompositeDisposable()
 
+    @Suppress("RedundantSuspendModifier", "BlockingMethodInNonBlockingContext")
     suspend fun checkForUpdate() {
         try {
             val url = URL(updateUrl).readText()
@@ -149,7 +147,7 @@ class AppUpdateChecker(private val activity: androidx.activity.ComponentActivity
             if (it.isGranted) {
                 runOnUIThread {
                     MaterialAlertDialogBuilder(context)
-                        .setTitle("There's an update!")
+                        .setTitle("There's an update! ${info.version}")
                         .setMessage(info.releaseNotes.joinToString("\n"))
                         .setPositiveButton("Update") { d, _ ->
                             download(info)
@@ -164,25 +162,55 @@ class AppUpdateChecker(private val activity: androidx.activity.ComponentActivity
     }
 
     private fun download(info: AppInfo) {
-        info.url.manager(notificationCreator = SimpleNotificationCreator())
+        val n = context.notificationManager
+
+        val finished = NotificationDslBuilder.builder(context, "appUpdate", R.mipmap.ic_launcher) {
+            subText = "Downloaded Update ${info.version}"
+            timeoutAfter = 750L
+            onlyAlertOnce = true
+        }
+
         info.url.download()
             .subscribeOn(Schedulers.io())
             .observeOn(Schedulers.io())
+            .doOnSubscribe {
+                n.notify(2, NotificationDslBuilder.builder(context, "appUpdate", R.mipmap.ic_launcher) {
+                    subText = "Downloading Update ${info.version}"
+                    ongoing = true
+                    onlyAlertOnce = true
+                    progress {
+                        max = 100
+                        progress = 0
+                        indeterminate = true
+                    }
+                })
+            }
             .subscribeBy(
                 onNext = { progress ->
                     //download progress
-                    //button.text = "${progress.downloadSizeStr()}/${progress.totalSizeStr()}"
-                    //button.setProgress(progress)
+                    n.notify(
+                        2,
+                        NotificationDslBuilder.builder(context, "appUpdate", R.mipmap.ic_launcher) {
+                            message = "Downloading Update ${info.version}"
+                            subText = "Downloading...${progress.percentStr()}"
+                            ongoing = true
+                            onlyAlertOnce = true
+                            progress {
+                                max = 100
+                                this.progress = progress.percent().toInt()
+                            }
+                        }
+                    )
                 },
                 onComplete = {
                     //download complete
-                    //button.text = "Open"
-                    if (info.url.file().exists())
-                        install(info)
+                    n.notify(2, finished)
+                    if (info.url.file().exists()) install(info)
                 },
                 onError = {
+                    n.notify(2, finished)
                     //download failed
-                    //button.text = "Retry"
+                    info.url.delete()
                 }
             )
             .addTo(disposable)
