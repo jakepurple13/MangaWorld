@@ -1,21 +1,39 @@
 package com.programmersbox.mangaworld.utils
 
+import android.Manifest
 import android.content.Context
+import android.content.Intent
+import androidx.core.content.FileProvider
 import androidx.lifecycle.ViewModel
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.programmersbox.gsonutils.fromJson
 import com.programmersbox.gsonutils.getObject
 import com.programmersbox.gsonutils.putObject
 import com.programmersbox.gsonutils.sharedPrefNotNullObjectDelegate
 import com.programmersbox.helpfulutils.defaultSharedPref
+import com.programmersbox.helpfulutils.requestPermissions
+import com.programmersbox.helpfulutils.runOnUIThread
 import com.programmersbox.helpfulutils.sharedPrefNotNullDelegate
+import com.programmersbox.loggingutils.Loged
+import com.programmersbox.loggingutils.f
 import com.programmersbox.manga_db.MangaDbModel
 import com.programmersbox.manga_sources.mangasources.ChapterModel
 import com.programmersbox.manga_sources.mangasources.MangaInfoModel
 import com.programmersbox.manga_sources.mangasources.MangaModel
 import com.programmersbox.manga_sources.mangasources.Sources
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.addTo
+import io.reactivex.rxkotlin.subscribeBy
+import io.reactivex.schedulers.Schedulers
+import zlc.season.rxdownload4.download
+import zlc.season.rxdownload4.file
+import zlc.season.rxdownload4.manager.manager
+import zlc.season.rxdownload4.notification.SimpleNotificationCreator
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.IOException
+import java.net.URL
 import java.nio.channels.FileChannel
 
 var Context.usePalette: Boolean by sharedPrefNotNullDelegate(true)
@@ -97,3 +115,92 @@ fun moveFile(file: File, dir: File) {
         outputChannel?.close()
     }
 }
+
+data class AppInfo(val version: String, val url: String, val releaseNotes: List<String> = emptyList())
+
+class AppUpdateChecker(private val activity: androidx.activity.ComponentActivity) {
+
+    private val context: Context = activity
+
+    private val updateUrl = "https://raw.githubusercontent.com/jakepurple13/MangaWorld/master/app/src/main/res/raw/update_changelog.json"
+
+    private val disposable = CompositeDisposable()
+
+    suspend fun checkForUpdate() {
+        try {
+            val url = URL(updateUrl).readText()
+            val info = url.fromJson<AppInfo>()!!
+            val pInfo = context.packageManager.getPackageInfo(context.packageName, 0)
+            val version = pInfo.versionName
+            Loged.f("Current Version: $version | Server Version: ${info.version}")
+            if (version.toDouble() < info.version.toDouble()) {
+                installUpdate(info)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    private fun installUpdate(info: AppInfo) {
+        activity.requestPermissions(
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.READ_EXTERNAL_STORAGE
+        ) {
+            if (it.isGranted) {
+                runOnUIThread {
+                    MaterialAlertDialogBuilder(context)
+                        .setTitle("There's an update!")
+                        .setMessage(info.releaseNotes.joinToString("\n"))
+                        .setPositiveButton("Update") { d, _ ->
+                            download(info)
+                            d.dismiss()
+                        }
+                        .setNegativeButton("Not now") { d, _ -> d.dismiss() }
+                        .show()
+                }
+            }
+        }
+
+    }
+
+    private fun download(info: AppInfo) {
+        info.url.manager(notificationCreator = SimpleNotificationCreator())
+        info.url.download()
+            .subscribeOn(Schedulers.io())
+            .observeOn(Schedulers.io())
+            .subscribeBy(
+                onNext = { progress ->
+                    //download progress
+                    //button.text = "${progress.downloadSizeStr()}/${progress.totalSizeStr()}"
+                    //button.setProgress(progress)
+                },
+                onComplete = {
+                    //download complete
+                    //button.text = "Open"
+                    if (info.url.file().exists())
+                        install(info)
+                },
+                onError = {
+                    //download failed
+                    //button.text = "Retry"
+                }
+            )
+            .addTo(disposable)
+    }
+
+    private fun install(info: AppInfo) {
+        disposable.dispose()
+        val strApkToInstall = info.url.file()
+        // val path1 = File(File(Environment.getExternalStorageDirectory(), "Download"), strApkToInstall)
+
+        val apkUri = FileProvider.getUriForFile(context, context.packageName + ".utils.GenericFileProvider", strApkToInstall)
+        val intent = Intent(Intent.ACTION_INSTALL_PACKAGE)
+        intent.data = apkUri
+        intent.flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+        //intent.setDataAndType(apkUri, "application/vnd.android.package-archive")
+        context.startActivity(intent)
+    }
+
+}
+
+class GenericFileProvider : FileProvider()

@@ -1,9 +1,7 @@
 {
-  "version": "1.0",
-  "url": "https://github.com/jakepurple13/MangaWorld/releases/download/v9/app-debug.apk",
+  "version": "1.1",
+  "url": "https://github.com/jakepurple13/MangaWorld/releases/download/v10/app-debug.apk",
   "releaseNotes": [
-    "- First evolution",
-    "- Second evolution",
-    "- Bug fixes"
+    "- Added this update! So now you guys don't have to get the apk manually!"
   ]
 }

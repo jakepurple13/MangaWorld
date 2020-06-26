@@ -8,9 +8,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.github.javiersantos.appupdater.AppUpdater
-import com.github.javiersantos.appupdater.enums.Display
-import com.github.javiersantos.appupdater.enums.UpdateFrom
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.jakewharton.rxbinding2.widget.textChanges
 import com.leinardi.android.speeddial.SpeedDialActionItem
@@ -21,10 +18,7 @@ import com.programmersbox.manga_sources.mangasources.MangaModel
 import com.programmersbox.manga_sources.mangasources.Sources
 import com.programmersbox.mangaworld.adapters.GalleryListAdapter
 import com.programmersbox.mangaworld.adapters.MangaListAdapter
-import com.programmersbox.mangaworld.utils.FirebaseAuthentication
-import com.programmersbox.mangaworld.utils.MangaListView
-import com.programmersbox.mangaworld.utils.currentSource
-import com.programmersbox.mangaworld.utils.stayOnAdult
+import com.programmersbox.mangaworld.utils.*
 import com.programmersbox.mangaworld.views.AutoFitGridLayoutManager
 import com.programmersbox.mangaworld.views.EndlessScrollingListener
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -70,11 +64,17 @@ class MainActivity : AppCompatActivity() {
         menuSetup()
         searchSetup()
 
-        AppUpdater(this)
+        /*AppUpdater(this)
             .setUpdateFrom(UpdateFrom.JSON)
             .setUpdateJSON("https://github.com/jakepurple13/MangaWorld/blob/master/app/src/main/res/raw/update_changelog.json")
             .setDisplay(Display.DIALOG)
-            .start()
+            .start()*/
+
+        GlobalScope.launch {
+            AppUpdateChecker(this@MainActivity)
+                .checkForUpdate()
+        }
+
     }
 
     private fun menuSetup() {
