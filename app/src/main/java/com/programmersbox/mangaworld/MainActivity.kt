@@ -8,6 +8,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.github.javiersantos.appupdater.AppUpdater
+import com.github.javiersantos.appupdater.enums.Display
+import com.github.javiersantos.appupdater.enums.UpdateFrom
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.jakewharton.rxbinding2.widget.textChanges
 import com.leinardi.android.speeddial.SpeedDialActionItem
@@ -66,6 +69,12 @@ class MainActivity : AppCompatActivity() {
         rvSetup()
         menuSetup()
         searchSetup()
+
+        AppUpdater(this)
+            .setUpdateFrom(UpdateFrom.JSON)
+            .setUpdateJSON("https://github.com/jakepurple13/MangaWorld/blob/master/app/src/main/res/raw/update_changelog.json")
+            .setDisplay(Display.DIALOG)
+            .start()
     }
 
     private fun menuSetup() {

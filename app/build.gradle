@@ -101,6 +101,8 @@ dependencies {
     // optional - RxJava2 support
     implementation "androidx.work:work-rxjava2:$work_version"
 
+    implementation 'com.github.javiersantos:AppUpdater:2.7'
+
     implementation project(':manga_db')
     implementation project(':manga_sources')
 
