@@ -3,6 +3,8 @@ package com.programmersbox.mangaworld.utils
 import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
+import android.os.Environment
 import androidx.core.content.FileProvider
 import androidx.lifecycle.ViewModel
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -150,7 +152,7 @@ class AppUpdateChecker(private val activity: androidx.activity.ComponentActivity
                         .setTitle("There's an update! ${info.version}")
                         .setMessage(info.releaseNotes.joinToString("\n"))
                         .setPositiveButton("Update") { d, _ ->
-                            download(info)
+                            download2(info)
                             d.dismiss()
                         }
                         .setNegativeButton("Not now") { d, _ -> d.dismiss() }
@@ -159,6 +161,28 @@ class AppUpdateChecker(private val activity: androidx.activity.ComponentActivity
             }
         }
 
+    }
+
+    private fun download2(info: AppInfo) {
+        val direct = File(context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)!!.absolutePath + "/")
+
+        if (!direct.exists()) {
+            direct.mkdir()
+        }
+
+        val request = DownloadDslManager(context) {
+            downloadUri = Uri.parse(info.url)
+            allowOverRoaming = true
+            networkType = DownloadDslManager.NetworkType.WIFI_MOBILE
+            title = "Manga World Update ${info.version}"
+            mimeType = "application/vnd.android.package-archive"
+            visibility = DownloadDslManager.NotificationVisibility.COMPLETED
+            destinationInExternalPublicDir(
+                Environment.DIRECTORY_DOWNLOADS, File.separator + "mangaworld${info.version}.apk"
+            )
+        }
+
+        context.downloadManager.enqueue(request)
     }
 
     private fun download(info: AppInfo) {
