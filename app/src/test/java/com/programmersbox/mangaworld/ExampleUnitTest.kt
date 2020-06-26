@@ -101,7 +101,7 @@ class ExampleUnitTest {
         println(f)
         val g = f.fromJson<Sources>()
         println(g)
-        val d = g?.source()?.getManga()
+        val d = g?.getManga()
         println(d)
     }
 

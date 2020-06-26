@@ -35,6 +35,7 @@ class ChapterListAdapter(
     private val mangaTitle: String,
     private val mangaUrl: String,
     private val dao: MangaDao,
+    private val isAdult: Boolean,
     private val toChapterHistory: (ChapterModel) -> ChapterHistory
 ) : DragSwipeAdapter<ChapterModel, ChapterHolder>(dataList) {
 
@@ -49,7 +50,7 @@ class ChapterListAdapter(
         bind(item, info)
         itemView.setOnClickListener {
             readChapter.isChecked = true
-            context.addToHistory(toChapterHistory(item))
+            if (!isAdult) context.addToHistory(toChapterHistory(item))
             context.startActivity(
                 Intent(context, ReadActivity::class.java).apply {
                     //putExtra("chapter", position)

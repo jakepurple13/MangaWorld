@@ -53,6 +53,7 @@ class MangaActivity : AppCompatActivity() {
     private var range: MutableItemRange<String> = MutableItemRange()
     private val disposable = CompositeDisposable()
     private var adapter: ChapterListAdapter? = null
+    private var mangaModel: MangaModel? = null
 
     @Suppress("EXPERIMENTAL_API_USAGE")
     private var isFavorite = MutableStateFlow(false)
@@ -61,12 +62,12 @@ class MangaActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         val binding: ActivityMangaBinding = DataBindingUtil.setContentView(this@MangaActivity, R.layout.activity_manga)
 
-        val manga = intent.getObjectExtra<MangaModel>("manga", null)
+        mangaModel = intent.getObjectExtra<MangaModel>("manga", null)
 
         isFavorite.collectOnUi { favoriteManga.check(it) }
         isFavorite.collectOnUi { favoriteInfo.text = getText(if (it) R.string.removeFromFavorites else R.string.addToFavorites) }
 
-        loadMangaInfo(binding, manga)
+        loadMangaInfo(binding, mangaModel)
     }
 
     private fun loadMangaInfo(binding: ActivityMangaBinding, manga: MangaModel?) {
@@ -121,7 +122,7 @@ class MangaActivity : AppCompatActivity() {
             swatch?.rgb?.let { mangaInfoLayout.setBackgroundColor(it) }
             adapter = ChapterListAdapter(
                 dataList = manga.chapters.toMutableList(), context = this@MangaActivity, swatch = swatch,
-                mangaTitle = manga.title, mangaUrl = manga.mangaUrl, dao = dao
+                mangaTitle = manga.title, mangaUrl = manga.mangaUrl, dao = dao, isAdult = mangaModel?.source?.isAdult == true
             ) { ChapterHistory(mangaUrl = manga.mangaUrl, imageUrl = manga.imageUrl, title = manga.title, chapterModel = it) }
 
             mangaInfoChapterList.adapter = adapter

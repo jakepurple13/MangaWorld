@@ -50,6 +50,9 @@
                     android:pathPrefix="/manga" />
                 <data android:host="www.tsumino.com" />
                 <data android:host="api.mangarockhd.com" />
+                <data
+                    android:host="mangapark.net"
+                    android:pathPrefix="/manga" />
                 <!-- note that the leading "/" is required for pathPrefix -->
             </intent-filter>
         </activity>

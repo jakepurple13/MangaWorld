@@ -1,7 +1,10 @@
 {
-  "version": "1.1",
-  "url": "https://github.com/jakepurple13/MangaWorld/releases/download/v10/app-debug.apk",
+  "version": "1.2",
+  "url": "https://github.com/jakepurple13/MangaWorld/releases/download/v11/app-debug.apk",
   "releaseNotes": [
-    "- Added this update! So now you guys don't have to get the apk manually!"
+    "- Added a new source! MangaPark!",
+    "- Added no adding adult sources to history",
+    "- Moved info bar on reader to the top",
+    "- Optimizations and clean up"
   ]
 }

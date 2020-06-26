@@ -23,7 +23,7 @@ object MangaEden : MangaSource {
                 description = "Last updated: ${SimpleDateFormat("MM/dd/yyyy hh:mm a", Locale.getDefault()).format(1000 * it.ld.toDouble())}",
                 mangaUrl = "$baseUrl/api/manga/${it.i}/",
                 imageUrl = "$imageUrl${it.im}",
-                source = Sources.MANGA_EDEN
+                source = Sources.TSUMINO//Sources.MANGA_EDEN
             )
         }.orEmpty()
 
@@ -58,7 +58,7 @@ object MangaEden : MangaSource {
             description = details?.description.orEmpty(),
             mangaUrl = url,
             imageUrl = details?.imageURL.orEmpty(),
-            source = Sources.MANGA_EDEN
+            source = Sources.TSUMINO//Sources.MANGA_EDEN
         )
     }
 
