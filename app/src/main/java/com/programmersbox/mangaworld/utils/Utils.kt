@@ -35,6 +35,7 @@ import java.io.IOException
 import java.net.URL
 import java.nio.channels.FileChannel
 
+
 var Context.usePalette: Boolean by sharedPrefNotNullDelegate(true)
 var Context.currentSource: Sources by sharedPrefNotNullObjectDelegate(defaultValue = Sources.values().filterNot(Sources::isAdult).random())
 var Context.useCache: Boolean by sharedPrefNotNullDelegate(true)
@@ -154,6 +155,10 @@ class AppUpdateChecker(private val activity: androidx.activity.ComponentActivity
                         .setMessage(info.releaseNotes.joinToString("\n"))
                         .setPositiveButton("Update") { d, _ ->
                             download2(info)
+                            d.dismiss()
+                        }
+                        .setNeutralButton("Go to browser") { d, _ ->
+                            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(info.url)))
                             d.dismiss()
                         }
                         .setNegativeButton("Not now") { d, _ -> d.dismiss() }

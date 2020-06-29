@@ -53,6 +53,10 @@ class SettingsActivity : AppCompatActivity() {
     private fun createRootScreen() = screen(this) {
         categoryHeader("settingsHeader") { title = "Settings" }
 
+        pref("appInfo") {
+            title = "Version: ${packageManager.getPackageInfo(packageName, 0).versionName}"
+        }
+
         switch("stayOnAdult") {
             title = "Leave app while adult manga visible"
             summary = "When you leave the app, we can choose a different source if you are on a source that's for adults"
