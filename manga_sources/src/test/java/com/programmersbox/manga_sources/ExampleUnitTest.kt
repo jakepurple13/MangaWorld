@@ -3,6 +3,7 @@ package com.programmersbox.manga_sources
 import com.programmersbox.gsonutils.fromJson
 import com.programmersbox.gsonutils.getApi
 import com.programmersbox.gsonutils.toPrettyJson
+import com.programmersbox.helpfulutils.random
 import com.programmersbox.manga_sources.mangasources.MangaModel
 import com.programmersbox.manga_sources.mangasources.Sources
 import com.programmersbox.manga_sources.mangasources.manga.*
@@ -36,6 +37,7 @@ class ExampleUnitTest {
         println(r)
         val d = f.first().toInfoModel()
         println(d)
+        println(d.chapters.joinToString("\n") { "$it | ${it.uploadedTime}" })
         val c = d.chapters.first().getPageInfo()
         println(c)
     }
@@ -69,6 +71,9 @@ class ExampleUnitTest {
         val s = d.chapters.random().getPageInfo()
         println(s)*/
         println(MangaFourLife.getMangaModelByUrl("https://manga4life.com/manga/Shouwa-Genroku-Rakugo-Shinjuu"))
+
+        val d = f.random().toInfoModel()
+        println(d.chapters.joinToString("\n") { "$it | ${it.uploadedTime}" })
     }
 
     @Test
@@ -113,6 +118,7 @@ class ExampleUnitTest {
         println(f.size)
         val d = f.first().toInfoModel()
         println(d)
+        println(d.chapters.joinToString("\n") { "$it | ${it.uploadedTime}" })
         val s = d.chapters.random().getPageInfo()
         println(s)
 
@@ -126,6 +132,10 @@ class ExampleUnitTest {
         //println(f.joinToString("\n"))
         val d = f.first().toInfoModel()
         println(d)
+        val c = d.chapters
+        val ci = c.random()
+        println(ci)
+        println(ci.uploadedTime)
         val s = d.chapters.random().getPageInfo()
         println(s)
 
@@ -146,8 +156,10 @@ class ExampleUnitTest {
     fun alot() {
         val f = Mangakakalot.getManga()
         println(f.size)
-        val d = f.random().toInfoModel()
+        //val d = f.random().toInfoModel()
+        val d = f.random { it.source == Sources.MANGAKAKALOT }.toInfoModel()
         println(d)
+        println(d.chapters.joinToString("\n") { "$it | ${it.uploadedTime}" })
         val s = d.chapters.random().getPageInfo()
         println(s)
         //val dragon = Mangakakalot.searchManga("Dragon", 1, f)
@@ -245,11 +257,11 @@ class ExampleUnitTest {
         println(s)
         val r = MangaPark.searchManga("solo", 1, park)
         println(r)*/
-        val dr = MangaPark.getMangaModelByUrl("https://mangapark.net/manga/dr-stone")
+        val dr = MangaPark.getMangaModelByUrl("https://mangapark.net/manga/furyou-taimashi-reina-otosama")
         val f = dr.toInfoModel()
         println(f)
         println(f.chapters.size)
-        println(f.chapters.joinToString("\n"))
+        println(f.chapters.joinToString("\n") { "$it | ${it.uploadedTime}" })
 
     }
 

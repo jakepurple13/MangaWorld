@@ -133,6 +133,18 @@ class SettingsActivity : AppCompatActivity() {
             }
         }
 
+        switch("useAgo") {
+            title = "Use Time Ago"
+            summary = "See how long ago a chapter was updated"
+            defaultValue = useAgo
+            checkedChangeListener = object : TwoStatePreference.OnCheckedChangeListener {
+                override fun onCheckedChanged(preference: TwoStatePreference, holder: PreferencesAdapter.ViewHolder?, checked: Boolean): Boolean {
+                    useAgo = checked
+                    return true
+                }
+            }
+        }
+
         pref("show10Random") {
             title = "Show 10 Random Favorites"
             onClicked {

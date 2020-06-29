@@ -97,9 +97,9 @@ object MangaPark : MangaSource {
             ChapterModel(
                 name = it.name,
                 url = "${baseUrl}${it.url}",
-                uploaded = it.dateUploaded?.let { d -> dateFormat.format(Date(d)) } ?: it.originalDate,
+                uploaded = it.originalDate,
                 sources = Sources.MANGA_PARK
-            )
+            ).apply { uploadedTime = it.dateUploaded }
         }
     }
 
@@ -141,7 +141,7 @@ object MangaPark : MangaSource {
     private val dateFormatTimeOnly = SimpleDateFormat("HH:mm a", Locale.ENGLISH)
 
     @SuppressLint("DefaultLocale")
-    private fun parseDate(date: String): Long {
+    private fun parseDate(date: String): Long? {
         val lcDate = date.toLowerCase()
         if (lcDate.endsWith("ago")) return parseRelativeDate(lcDate)
 
@@ -166,21 +166,21 @@ object MangaPark : MangaSource {
             return it.timeInMillis
         }
 
-        return dateFormat.parse(lcDate).time
+        return dateFormat.parse(lcDate)?.time
     }
 
     /**
      * Parses dates in this form:
      * `11 days ago`
      */
-    private fun parseRelativeDate(date: String): Long {
+    private fun parseRelativeDate(date: String): Long? {
         val trimmedDate = date.split(" ")
 
-        if (trimmedDate[2] != "ago") return 0
+        if (trimmedDate[2] != "ago") return null
 
         val number = when (trimmedDate[0]) {
             "a" -> 1
-            else -> trimmedDate[0].toIntOrNull() ?: return 0
+            else -> trimmedDate[0].toIntOrNull() ?: return null
         }
         val unit = trimmedDate[1].removeSuffix("s") // Remove 's' suffix
 
@@ -195,7 +195,7 @@ object MangaPark : MangaSource {
             "hour" -> Calendar.HOUR
             "minute" -> Calendar.MINUTE
             "second" -> Calendar.SECOND
-            else -> return 0
+            else -> return null
         }
 
         now.add(javaUnit, -number)

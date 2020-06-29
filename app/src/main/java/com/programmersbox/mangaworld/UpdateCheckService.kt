@@ -155,6 +155,7 @@ class UpdateNotification(private val context: Context) {
             title = pair.second.title
             subText = pair.second.source.name
             getBitmapFromURL(pair.second.imageUrl)?.let {
+                largeIconBitmap = it
                 pictureStyle {
                     bigPicture = it
                     largeIcon = it

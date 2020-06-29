@@ -4,6 +4,9 @@ import com.programmersbox.manga_sources.mangasources.*
 import org.jsoup.Jsoup
 import java.net.URI
 import java.net.URISyntaxException
+import java.text.ParseException
+import java.text.SimpleDateFormat
+import java.util.*
 
 object NineAnime : MangaSource {
 
@@ -50,7 +53,7 @@ object NineAnime : MangaSource {
                     url = it.select("a").attr("abs:href"),
                     uploaded = it.select("span.time").text(),
                     sources = Sources.NINE_ANIME
-                )
+                ).apply { uploadedTime = uploaded.toDate() }
             },
             genres = genreAndDescription.select("p:has(span:contains(Genre)) a").map { it.text() },
             alternativeNames = doc.select("div.detail-info").select("p:has(span:contains(Alternative))").text()
@@ -91,6 +94,24 @@ object NineAnime : MangaSource {
             out
         } catch (e: URISyntaxException) {
             orig
+        }
+    }
+
+    private fun String.toDate(): Long {
+        return try {
+            if (this.contains("ago")) {
+                val split = this.split(" ")
+                val cal = Calendar.getInstance()
+                when {
+                    split[1].contains("minute") -> cal.apply { add(Calendar.MINUTE, split[0].toInt()) }.timeInMillis
+                    split[1].contains("hour") -> cal.apply { add(Calendar.HOUR, split[0].toInt()) }.timeInMillis
+                    else -> 0
+                }
+            } else {
+                SimpleDateFormat("MMM dd, yyyy", Locale.ENGLISH).parse(this).time
+            }
+        } catch (_: ParseException) {
+            0
         }
     }
 }

@@ -3,6 +3,8 @@ package com.programmersbox.manga_sources.mangasources.manga
 import com.programmersbox.manga_sources.mangasources.*
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
+import java.text.SimpleDateFormat
+import java.util.*
 
 object Manganelo : MangaSource {
 
@@ -45,12 +47,19 @@ object Manganelo : MangaSource {
                     url = it.select("a.chapter-name").attr("abs:href"),
                     uploaded = it.select("span.chapter-time").attr("title"),
                     sources = model.source
-                )
+                ).apply {
+                    try {
+                        uploadedTime = dateFormat.parse(uploaded)?.time
+                    } catch (_: Exception) {
+                    }
+                }
             },
             genres = info.getOrNull(3)?.select("td.table-value")?.select("a")?.map { it.text() }.orEmpty(),
             alternativeNames = info.getOrNull(0)?.select("td.table-value")?.map { it.text() }.orEmpty()
         )
     }
+
+    private val dateFormat = SimpleDateFormat("MMM dd,yyyy hh:mm", Locale.ENGLISH)
 
     override fun getMangaModelByUrl(url: String): MangaModel {
         val doc = Jsoup.connect(url).get()

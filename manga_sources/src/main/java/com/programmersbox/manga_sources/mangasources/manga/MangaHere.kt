@@ -8,6 +8,9 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
+import java.text.ParseException
+import java.text.SimpleDateFormat
+import java.util.*
 import java.util.concurrent.TimeUnit
 
 object MangaHere : MangaSource {
@@ -77,11 +80,36 @@ object MangaHere : MangaSource {
                     url = it.select("a").attr("abs:href"),
                     uploaded = it.select("a").select("p.title2").text(),
                     sources = Sources.MANGA_HERE
-                )
+                ).apply { uploadedTime = parseChapterDate(uploaded) }
             },
             genres = doc.select("p.detail-info-right-tag-list").select("a").eachText(),
             alternativeNames = emptyList()
         )
+    }
+
+    private fun parseChapterDate(date: String): Long {
+        return if ("Today" in date || " ago" in date) {
+            Calendar.getInstance().apply {
+                set(Calendar.HOUR_OF_DAY, 0)
+                set(Calendar.MINUTE, 0)
+                set(Calendar.SECOND, 0)
+                set(Calendar.MILLISECOND, 0)
+            }.timeInMillis
+        } else if ("Yesterday" in date) {
+            Calendar.getInstance().apply {
+                add(Calendar.DATE, -1)
+                set(Calendar.HOUR_OF_DAY, 0)
+                set(Calendar.MINUTE, 0)
+                set(Calendar.SECOND, 0)
+                set(Calendar.MILLISECOND, 0)
+            }.timeInMillis
+        } else {
+            try {
+                SimpleDateFormat("MMM dd,yyyy", Locale.ENGLISH).parse(date).time
+            } catch (e: ParseException) {
+                0L
+            }
+        }
     }
 
     override fun getMangaModelByUrl(url: String): MangaModel {

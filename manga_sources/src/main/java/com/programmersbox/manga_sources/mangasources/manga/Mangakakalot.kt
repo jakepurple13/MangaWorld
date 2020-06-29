@@ -2,6 +2,9 @@ package com.programmersbox.manga_sources.mangasources.manga
 
 import com.programmersbox.manga_sources.mangasources.*
 import org.jsoup.Jsoup
+import java.text.ParseException
+import java.text.SimpleDateFormat
+import java.util.*
 
 object Mangakakalot : MangaSource {
     private const val url = "https://mangakakalot.com"
@@ -50,11 +53,32 @@ object Mangakakalot : MangaSource {
                     url = it.select("span").select("a").attr("abs:href"),
                     uploaded = it.select("span").last().text(),
                     sources = model.source
-                )
+                ).apply { uploadedTime = parseChapterDate(uploaded) }
             },
             genres = doc.select("li:contains(Genre)").select("a").eachText().map { it.removeSuffix(",") },
             alternativeNames = doc.select("h2.story-alternatives").text().removePrefix("Alternative :").split(";")
         )
+    }
+
+    private val dateformat: SimpleDateFormat = SimpleDateFormat("MMM-dd-yy", Locale.ENGLISH)
+
+    private fun parseChapterDate(date: String): Long? {
+        return if ("ago" in date) {
+            val value = date.split(' ')[0].toIntOrNull()
+            val cal = Calendar.getInstance()
+            when {
+                value != null && "min" in date -> cal.apply { add(Calendar.MINUTE, value * -1) }
+                value != null && "hour" in date -> cal.apply { add(Calendar.HOUR_OF_DAY, value * -1) }
+                value != null && "day" in date -> cal.apply { add(Calendar.DATE, value * -1) }
+                else -> null
+            }?.timeInMillis
+        } else {
+            try {
+                dateformat.parse(date)
+            } catch (e: ParseException) {
+                null
+            }?.time
+        }
     }
 
     override fun getMangaModelByUrl(url: String): MangaModel {

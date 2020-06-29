@@ -7,6 +7,8 @@ import com.programmersbox.gsonutils.fromJson
 import com.programmersbox.gsonutils.getJsonApi
 import com.programmersbox.manga_sources.mangasources.*
 import org.jsoup.Jsoup
+import java.text.SimpleDateFormat
+import java.util.*
 
 object MangaFourLife : MangaSource {
 
@@ -48,6 +50,8 @@ object MangaFourLife : MangaSource {
         )
     }
 
+    private val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+
     override fun toInfoModel(model: MangaModel): MangaInfoModel {
         val doc = Jsoup.connect(model.mangaUrl).get()
         val description = doc.select("div.BoxBody > div.row").select("div.Content").text()
@@ -69,7 +73,12 @@ object MangaFourLife : MangaSource {
                             .last()}${chapterURLEncode(it.Chapter)}",
                         uploaded = it.Date.toString(),
                         sources = Sources.MANGA_4_LIFE
-                    )
+                    ).apply {
+                        try {
+                            uploadedTime = dateFormat.parse(uploaded.substringBefore(" "))?.time
+                        } catch (_: Exception) {
+                        }
+                    }
                 }.orEmpty(),
             genres = genres,
             alternativeNames = altNames

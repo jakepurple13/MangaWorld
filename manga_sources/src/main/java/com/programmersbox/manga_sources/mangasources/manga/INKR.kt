@@ -93,7 +93,7 @@ object INKR : MangaSource {
                         Locale.getDefault()
                     ).format(1000 * (it.updatedAt?.toDouble() ?: 0.0))}",
                     sources = Sources.INKR
-                )
+                ).apply { uploadedTime = it.updatedAt?.let { t -> 1000 * t.toLong() } }
             }.orEmpty(),
             genres = it?.rich_categories?.map { it.name.toString() }.orEmpty(),
             alternativeNames = it?.alias.orEmpty()

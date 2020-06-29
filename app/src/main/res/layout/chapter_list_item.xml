@@ -55,10 +55,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:onClick="@{() -> startReading.performClick()}"
-                android:text="@{chapter.uploaded}"
                 app:bodyColor="@{swatch}"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
+                app:uploadedText="@{chapter}"
                 tools:text="@tools:sample/date/mmddyy"
                 tools:textColor="@sample/sample_colors" />
 

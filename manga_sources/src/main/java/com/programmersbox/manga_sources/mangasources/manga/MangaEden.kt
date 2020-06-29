@@ -44,7 +44,7 @@ object MangaEden : MangaSource {
                     url = "$baseUrl/api/chapter/${list[3]}/",
                     uploaded = SimpleDateFormat("MM/dd/yyyy hh:mm a", Locale.getDefault()).format(1000 * list[1] as Double),
                     sources = model.source
-                )
+                ).apply { uploadedTime = (1000 * list[1] as Double).toLong() }
             } ?: emptyList(),
             genres = details?.categories ?: emptyList(),
             alternativeNames = details?.aka ?: emptyList()

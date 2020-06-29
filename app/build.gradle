@@ -100,6 +100,7 @@ dependencies {
     implementation "androidx.work:work-rxjava2:$work_version"
     implementation 'com.github.javiersantos:AppUpdater:2.7'
     implementation "com.github.ssseasonnn:RxDownload:1.0.9"
+    implementation "com.github.perfomer:blitz:1.0.4"
 
     implementation project(':manga_db')
     implementation project(':manga_sources')

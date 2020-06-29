@@ -5,13 +5,16 @@ import android.content.Intent
 import android.content.res.ColorStateList
 import android.view.ViewGroup
 import android.widget.CheckBox
+import android.widget.TextView
 import androidx.core.graphics.ColorUtils
 import androidx.databinding.BindingAdapter
 import androidx.palette.graphics.Palette
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
+import com.perfomer.blitz.setTimeAgo
 import com.programmersbox.dragswipe.DragSwipeAdapter
 import com.programmersbox.gsonutils.putExtra
+import com.programmersbox.helpfulutils.isDateBetween
 import com.programmersbox.helpfulutils.layoutInflater
 import com.programmersbox.helpfulutils.whatIfNotNull
 import com.programmersbox.manga_db.MangaDao
@@ -24,9 +27,12 @@ import com.programmersbox.mangaworld.databinding.ChapterListItemBinding
 import com.programmersbox.mangaworld.utils.ChapterHistory
 import com.programmersbox.mangaworld.utils.FirebaseDb
 import com.programmersbox.mangaworld.utils.addToHistory
+import com.programmersbox.mangaworld.utils.useAgo
 import io.reactivex.Completable
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.chapter_list_item.view.*
+import kotlin.time.ExperimentalTime
+import kotlin.time.days
 
 class ChapterListAdapter(
     private val context: Context,
@@ -111,4 +117,18 @@ class ChapterHolder(private val binding: ChapterListItemBinding) : RecyclerView.
 @BindingAdapter("checkedButtonTint")
 fun buttonTint(view: CheckBox, swatchInfo: SwatchInfo?) {
     swatchInfo?.bodyColor?.let { view.buttonTintList = ColorStateList.valueOf(it) }
+}
+
+@ExperimentalTime
+@BindingAdapter("uploadedText")
+fun uploadedText(view: TextView, chapterModel: ChapterModel) {
+    if (
+        view.context.useAgo &&
+        chapterModel.uploadedTime != null &&
+        chapterModel.uploadedTime?.isDateBetween(System.currentTimeMillis() - 8.days.inMilliseconds.toLong(), System.currentTimeMillis()) == true
+    ) {
+        view.setTimeAgo(chapterModel.uploadedTime!!, showSeconds = true, autoUpdate = false)
+    } else {
+        view.text = chapterModel.uploaded
+    }
 }

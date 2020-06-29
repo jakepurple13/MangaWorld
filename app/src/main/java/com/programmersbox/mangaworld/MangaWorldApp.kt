@@ -50,7 +50,7 @@ class MangaWorldApp : Application() {
             val pendingIntent = PendingIntent.getBroadcast(this, code, updateCheckIntent, 0)
             val calendar = Calendar.getInstance()
             calendar.timeInMillis = System.currentTimeMillis()
-            val timeToSet = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) timeToNextHourOrHalf() else 1_800_000
+            val timeToSet = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) timeToNextHourOrHalf() else timeToNext(1_800_000)
             val firstMillis = calendar.timeInMillis + timeToSet
             //alarmManager.cancel(pendingIntent)
             alarmManager.setRepeating(
