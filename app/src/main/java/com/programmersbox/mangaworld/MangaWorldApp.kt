@@ -9,6 +9,7 @@ import android.widget.Toast
 import com.facebook.stetho.Stetho
 import com.github.piasy.biv.BigImageViewer
 import com.github.piasy.biv.loader.glide.GlideImageLoader
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.programmersbox.helpfulutils.*
 import com.programmersbox.loggingutils.Loged
 import com.programmersbox.mangaworld.utils.MangaInfoCache
@@ -37,6 +38,7 @@ class MangaWorldApp : Application() {
             try {
                 runOnUIThread { Toast.makeText(this, it.cause?.localizedMessage, Toast.LENGTH_SHORT).show() }
             } catch (e: Exception) {
+                FirebaseCrashlytics.getInstance().recordException(e)
             }
         }
         setAlarmUp()
