@@ -194,6 +194,20 @@ object FirebaseDb {
             } ?: emitter()
     }
 
+    fun addManga(mangaModel: MangaModel, chapterSize: Int) = Completable.create { emitter ->
+        mangaDoc
+            ?.update("second", FieldValue.arrayUnion(mangaModel.toFirebaseManga().apply { chapterCount = chapterSize }))
+            ?.addOnSuccessListener {
+                Loged.d("Success!")
+                emitter()
+            }?.addOnFailureListener {
+                Loged.wtf("Failure!")
+                emitter(it)
+            }?.addOnCompleteListener {
+                Loged.d("All done!")
+            } ?: emitter()
+    }
+
     fun updateManga(mangaDbModel: MangaDbModel) = Completable.create { emitter ->
         mangaDoc
             ?.update("second", FieldValue.arrayUnion(mangaDbModel.toFirebaseManga()))

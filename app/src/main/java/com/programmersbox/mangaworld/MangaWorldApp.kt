@@ -13,7 +13,6 @@ import com.programmersbox.helpfulutils.*
 import com.programmersbox.loggingutils.Loged
 import com.programmersbox.mangaworld.utils.MangaInfoCache
 import io.reactivex.plugins.RxJavaPlugins
-import java.util.*
 
 class MangaWorldApp : Application() {
 
@@ -48,10 +47,8 @@ class MangaWorldApp : Application() {
         val code = 3
         if (!AlarmUtils.hasAlarm(this, updateCheckIntent, code)) {
             val pendingIntent = PendingIntent.getBroadcast(this, code, updateCheckIntent, 0)
-            val calendar = Calendar.getInstance()
-            calendar.timeInMillis = System.currentTimeMillis()
             val timeToSet = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) timeToNextHourOrHalf() else timeToNext(1_800_000)
-            val firstMillis = calendar.timeInMillis + timeToSet
+            val firstMillis = System.currentTimeMillis() + timeToSet
             //alarmManager.cancel(pendingIntent)
             alarmManager.setRepeating(
                 AlarmManager.RTC_WAKEUP,

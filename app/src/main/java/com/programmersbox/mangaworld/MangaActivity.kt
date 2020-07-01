@@ -64,8 +64,10 @@ class MangaActivity : AppCompatActivity() {
 
         mangaModel = intent.getObjectExtra<MangaModel>("manga", null)
 
-        isFavorite.collectOnUi { favoriteManga.check(it) }
-        isFavorite.collectOnUi { favoriteInfo.text = getText(if (it) R.string.removeFromFavorites else R.string.addToFavorites) }
+        isFavorite.collectOnUi {
+            favoriteManga.check(it)
+            favoriteInfo.text = getText(if (it) R.string.removeFromFavorites else R.string.addToFavorites)
+        }
 
         loadMangaInfo(binding, mangaModel)
     }
@@ -87,17 +89,30 @@ class MangaActivity : AppCompatActivity() {
 
     private fun dbLoad(manga: MangaModel?) {
         favoriteManga.setOnClickListener {
-            manga?.let {
-                val count = (mangaInfoChapterList.adapter as? DragSwipeAdapter<*, *>)?.itemCount ?: 0
+
+            fun addManga(mangaModel: MangaModel, count: Int) {
                 Completable.mergeArray(
-                    if (isFavorite()) FirebaseDb.removeManga(it) else if (!isFavorite()) FirebaseDb.addManga(it) else null,
-                    it.toMangaDbModel(count)
-                        .let { it1 -> if (isFavorite()) dao.deleteManga(it1) else if (!isFavorite()) dao.insertManga(it1) else null }
+                    FirebaseDb.addManga(mangaModel, count),
+                    dao.insertManga(mangaModel.toMangaDbModel(count))
                 )
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe { isFavorite(true) }
             }
-                ?.subscribeOn(Schedulers.io())
-                ?.observeOn(AndroidSchedulers.mainThread())
-                ?.subscribe { isFavorite(!isFavorite()) }
+
+            fun removeManga(mangaModel: MangaModel) {
+                Completable.mergeArray(
+                    FirebaseDb.removeManga(mangaModel),
+                    dao.deleteManga(mangaModel.toMangaDbModel())
+                )
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe { isFavorite(false) }
+            }
+
+            manga?.let {
+                if (isFavorite()) removeManga(it) else addManga(it, (mangaInfoChapterList.adapter as? DragSwipeAdapter<*, *>)?.itemCount ?: 0)
+            }
         }
 
         manga?.mangaUrl?.let {

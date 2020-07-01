@@ -6,7 +6,6 @@ import android.net.Uri
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.ListPreloader
 import com.bumptech.glide.RequestBuilder
 import com.github.piasy.biv.indicator.progresspie.ProgressPieIndicator
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -22,7 +21,7 @@ class PageAdapter(
     private val context: Context,
     dataList: MutableList<String>,
     private val canDownload: (String) -> Unit = { }
-) : DragSwipeGlideAdapter<String, PageHolder, String>(dataList), ListPreloader.PreloadModelProvider<String> {
+) : DragSwipeGlideAdapter<String, PageHolder, String>(dataList) {
 
     override val itemToModel: (String) -> String = { it }
 

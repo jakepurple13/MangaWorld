@@ -9,6 +9,11 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.analytics.ktx.analytics
+import com.google.firebase.analytics.ktx.logEvent
+import com.google.firebase.crashlytics.FirebaseCrashlytics
+import com.google.firebase.ktx.Firebase
 import com.jakewharton.rxbinding2.widget.textChanges
 import com.leinardi.android.speeddial.SpeedDialActionItem
 import com.programmersbox.gsonutils.sharedPrefNotNullObjectDelegate
@@ -149,13 +154,29 @@ class MainActivity : AppCompatActivity() {
     private fun loadNewManga() {
         refresh.isRefreshing = true
         GlobalScope.launch {
-            val list = currentSource.getManga(pageNumber++).toList()
-            mangaList.addAll(list)
-            runOnUiThread {
-                adapter.addItems(list)
-                adapter2.addItems(list)
-                refresh.isRefreshing = false
-                search_layout.suffixText = "${mangaList.size}"
+            try {
+                val list = currentSource.getManga(pageNumber++).toList()
+                mangaList.addAll(list)
+                runOnUiThread {
+                    adapter.addItems(list)
+                    adapter2.addItems(list)
+                    search_layout.suffixText = "${mangaList.size}"
+                }
+            } catch (e: Exception) {
+                FirebaseCrashlytics.getInstance().log("$currentSource had an error")
+                FirebaseCrashlytics.getInstance().recordException(e)
+                Firebase.analytics.logEvent("manga_load_error") {
+                    param(FirebaseAnalytics.Param.ITEM_NAME, currentSource.name)
+                }
+                runOnUiThread {
+                    MaterialAlertDialogBuilder(this@MainActivity)
+                        .setTitle("Something Went Wrong!")
+                        .setMessage("Something happened while trying to load $currentSource. Please try again or use a different source, but please report this to the developer.")
+                        .setPositiveButton("OK") { d, _ -> d.dismiss() }
+                        .show()
+                }
+            } finally {
+                runOnUiThread { refresh.isRefreshing = false }
             }
         }
     }
