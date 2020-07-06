@@ -152,7 +152,7 @@ class AppUpdateChecker(private val activity: androidx.activity.ComponentActivity
                 runOnUIThread {
                     MaterialAlertDialogBuilder(context)
                         .setTitle("There's an update! ${info.version}")
-                        .setMessage(info.releaseNotes.joinToString("\n"))
+                        .setItems(info.releaseNotes.toTypedArray(), null)
                         .setPositiveButton("Update") { d, _ ->
                             download2(info)
                             d.dismiss()
