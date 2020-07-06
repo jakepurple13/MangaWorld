@@ -265,4 +265,25 @@ class ExampleUnitTest {
 
     }
 
+    @Test
+    fun munity() {
+        val baseUrl = "https://api.mangamutiny.org/"
+        val apiPath = "v1/public/manga"
+        /*val f = Uri.parse(baseUrl).buildUpon()
+            .appendEncodedPath(apiPath)
+            .appendQueryParameter("sort", "-rating -ratingCount")
+            .appendQueryParameter("limit", "20")
+            .build().toString()*/
+        //"-lastReleasedAt", "Last update"
+        val page = 1
+        val api = Mangamutiny.getManga(page)
+        //println(api.joinToString("\n"))
+        val r = Mangamutiny.toInfoModel(api.first())
+        println(r)
+        val f1 = r.chapters.first()
+        println(f1)
+        println(Mangamutiny.getPageInfo(f1))
+        println(Mangamutiny.searchManga("dragon", 1, api))
+    }
+
 }

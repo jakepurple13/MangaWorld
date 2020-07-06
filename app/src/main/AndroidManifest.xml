@@ -53,6 +53,7 @@
                 <data
                     android:host="mangapark.net"
                     android:pathPrefix="/manga" />
+                <data android:host="api.mangamutiny.org" />
                 <!-- note that the leading "/" is required for pathPrefix -->
             </intent-filter>
         </activity>
