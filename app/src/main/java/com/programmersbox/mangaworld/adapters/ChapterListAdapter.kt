@@ -63,6 +63,9 @@ class ChapterListAdapter(
                     //putExtra("nextChapter", dataList)
                     putExtra("mangaTitle", mangaTitle)
                     putExtra("currentChapter", item)
+                    putExtra("mangaUrl", item.url)
+                    putExtra("allChapters", dataList)
+                    putExtra("mangaInfoUrl", mangaUrl)
                 }
             )
         }

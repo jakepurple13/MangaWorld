@@ -31,6 +31,7 @@ import com.programmersbox.gsonutils.getObjectExtra
 import com.programmersbox.helpfulutils.*
 import com.programmersbox.manga_sources.mangasources.ChapterModel
 import com.programmersbox.mangaworld.adapters.PageAdapter
+import com.programmersbox.mangaworld.adapters.PageAdapter2
 import com.programmersbox.mangaworld.adapters.PageHolder
 import com.programmersbox.mangaworld.utils.batteryAlertPercent
 import com.programmersbox.rxutils.invoke
@@ -76,6 +77,35 @@ class ReadActivity : AppCompatActivity() {
         }
     }
 
+    private val adapter2: PageAdapter2 by lazy {
+        loader.let {
+            val list = intent.getObjectExtra<List<ChapterModel>>("allChapters") ?: emptyList()
+            val url = intent.getStringExtra("mangaUrl") ?: ""
+            val mangaUrl = intent.getStringExtra("mangaInfoUrl") ?: ""
+            PageAdapter2(
+                fullRequest = it
+                    .asDrawable()
+                    .skipMemoryCache(true)
+                    .diskCacheStrategy(DiskCacheStrategy.NONE)
+                    .centerCrop(),
+                thumbRequest = it
+                    .asDrawable()
+                    .diskCacheStrategy(DiskCacheStrategy.DATA)
+                    .transition(withCrossFade()),
+                context = this@ReadActivity,
+                dataList = mutableListOf(),
+                chapterModels = list,
+                currentChapter = list.indexOfFirst { it.url == url },
+                mangaUrl = mangaUrl,
+                loadNewPages = this::loadPages
+            ) { image ->
+                requestPermissions(Manifest.permission.WRITE_EXTERNAL_STORAGE) { p ->
+                    if (p.isGranted) saveImage("${mangaTitle}_${model?.name}_${image.toUri().lastPathSegment}", image)
+                }
+            }
+        }
+    }
+
     private var batteryInfo: BroadcastReceiver? = null
     private var timeTicker: BroadcastReceiver? = null
 
@@ -111,11 +141,11 @@ class ReadActivity : AppCompatActivity() {
     }
 
     private fun readerSetup() {
-        val preloader: RecyclerViewPreloader<String> = RecyclerViewPreloader(loader, adapter, ViewPreloadSizeProvider(), 10)
+        val preloader: RecyclerViewPreloader<String> = RecyclerViewPreloader(loader, adapter2, ViewPreloadSizeProvider(), 10)
         readView.addOnScrollListener(preloader)
         readView.setItemViewCacheSize(0)
 
-        readView.adapter = adapter
+        readView.adapter = adapter2
 
         readView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
@@ -131,14 +161,27 @@ class ReadActivity : AppCompatActivity() {
 
         readView.setRecyclerListener { (it as? PageHolder)?.image?.ssiv?.recycle() }
 
+        /*val models = intent.getObjectExtra<List<ChapterModel>>("allChapters")
+        val url = intent.getStringExtra("mangaUrl")
+        var currentIndex = models?.indexOfFirst { it.url == url }
+        var currentModel = currentIndex?.let { models?.getOrNull(it) }*/
+
         mangaTitle = intent.getStringExtra("mangaTitle")
         model = intent.getObjectExtra<ChapterModel>("currentChapter")
 
         //titleManga.text = mangaTitle
+        model?.let { loadPages(it) }
+    }
 
+    private fun loadPages(model: ChapterModel) {
+        readLoading
+            .animate()
+            .alpha(1f)
+            .withEndAction { readLoading.visible() }
+            .start()
         Single.create<List<String>> { emitter ->
             try {
-                emitter.onSuccess(model?.getPageInfo()?.pages.orEmpty())
+                emitter.onSuccess(model.getPageInfo().pages)
             } catch (e: Exception) {
                 emitter.onError(Throwable("Something went wrong. Please try again"))
             }
@@ -156,8 +199,9 @@ class ReadActivity : AppCompatActivity() {
                     .alpha(0f)
                     .withEndAction { readLoading.gone() }
                     .start()
-                adapter.addItems(pages)
-                readView.layoutManager!!.scrollToPosition(model?.url?.let { defaultSharedPref.getInt(it, 0) } ?: 0)
+                adapter2.setListNotify(pages)
+                //adapter.addItems(pages)
+                //readView.layoutManager!!.scrollToPosition(model?.url?.let { defaultSharedPref.getInt(it, 0) } ?: 0)
             }
             .addTo(disposable)
     }
