@@ -5,18 +5,15 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.GridLayoutManager
 import com.google.android.material.chip.Chip
-import com.google.android.material.snackbar.Snackbar
 import com.jakewharton.rxbinding2.widget.textChanges
 import com.programmersbox.dragswipe.DragSwipeAdapter
 import com.programmersbox.dragswipe.DragSwipeDiffUtil
 import com.programmersbox.helpfulutils.groupByCondition
 import com.programmersbox.helpfulutils.similarity
 import com.programmersbox.manga_db.MangaDatabase
-import com.programmersbox.manga_db.MangaDbModel
 import com.programmersbox.manga_sources.mangasources.MangaModel
 import com.programmersbox.manga_sources.mangasources.Sources
-import com.programmersbox.mangaworld.adapters.GalleryListAdapter
-import com.programmersbox.mangaworld.adapters.GalleryListFavoriteAdapter
+import com.programmersbox.mangaworld.adapters.GalleryFavoriteAdapter
 import com.programmersbox.mangaworld.utils.dbAndFireManga
 import com.programmersbox.mangaworld.utils.groupManga
 import com.programmersbox.mangaworld.views.AutoFitGridLayoutManager
@@ -35,11 +32,14 @@ class FavoriteActivity : AppCompatActivity() {
 
     private val disposable = CompositeDisposable()
 
-    private val adapter = GalleryListAdapter(this, disposable, false)
-    private val groupAdapter = GalleryListFavoriteAdapter(this)
     private val sourcePublisher = BehaviorSubject.createDefault(mutableListOf(*Sources.values()))
     private var sourcesList by behaviorDelegate(sourcePublisher)
     private val dao by lazy { MangaDatabase.getInstance(this).mangaDao() }
+
+    private val adapterType by lazy {
+        if (groupManga) GalleryFavoriteAdapter.GalleryGroupAdapter(this, dao)
+        else GalleryFavoriteAdapter.GalleryListingAdapter(this, disposable, false, dao)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,22 +60,18 @@ class FavoriteActivity : AppCompatActivity() {
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .map { if (groupManga) mapManga2(it) else mapManga(it) }
-            .subscribe {
+            .subscribe { list ->
                 @Suppress("UNCHECKED_CAST")
-                if (groupManga) newData2(it as List<Pair<String, List<MangaModel>>>)
-                else newData(it as List<MangaModel>)
+                setNewDataUi(
+                    when (val a = adapterType) {
+                        is GalleryFavoriteAdapter.GalleryListingAdapter -> a.setData(list as List<MangaModel>)
+                            .let { list.size }
+                        is GalleryFavoriteAdapter.GalleryGroupAdapter -> a.setData2(list as List<Pair<String, List<MangaModel>>>)
+                            .let { list.flatMap { it.second }.size }
+                    }
+                )
             }
             .addTo(disposable)
-    }
-
-    private fun newData2(data: List<Pair<String, List<MangaModel>>>) {
-        groupAdapter.setData2(data)
-        setNewDataUi(data.flatMap { it.second }.size)
-    }
-
-    private fun newData(data: List<MangaModel>) {
-        adapter.setData(data)
-        setNewDataUi(data.size)
     }
 
     private fun setNewDataUi(size: Int) {
@@ -85,7 +81,7 @@ class FavoriteActivity : AppCompatActivity() {
 
     private fun uiSetup() {
         favoriteMangaRV.layoutManager = AutoFitGridLayoutManager(this, 360).apply { orientation = GridLayoutManager.VERTICAL }
-        favoriteMangaRV.adapter = if (groupManga) groupAdapter else adapter
+        favoriteMangaRV.adapter = adapterType
         favoriteMangaRV.setHasFixedSize(true)
 
         Sources.values().forEach {
@@ -115,22 +111,6 @@ class FavoriteActivity : AppCompatActivity() {
     private fun addOrRemoveSource(isChecked: Boolean, sources: Sources) {
         sourcesList = sourcesList?.apply { if (isChecked) add(sources) else remove(sources) }
     }
-
-    private fun addOrRemoveManga(item: MangaDbModel) = dao
-        .deleteManga(item)
-        .subscribeOn(Schedulers.io())
-        .observeOn(Schedulers.io())
-        .subscribe {
-            Snackbar.make(favoriteMangaRV, getString(R.string.removed, item.title), Snackbar.LENGTH_LONG)
-                .setAction(getText(R.string.undo)) {
-                    dao
-                        .insertManga(item)
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(Schedulers.io())
-                        .subscribe()
-                }
-                .show()
-        }
 
     override fun onDestroy() {
         disposable.dispose()

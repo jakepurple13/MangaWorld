@@ -19,6 +19,7 @@ import com.programmersbox.helpfulutils.ConstraintRange
 import com.programmersbox.helpfulutils.Range
 import com.programmersbox.helpfulutils.gone
 import com.programmersbox.helpfulutils.layoutInflater
+import com.programmersbox.manga_db.MangaDao
 import com.programmersbox.manga_db.MangaDatabase
 import com.programmersbox.manga_sources.mangasources.MangaModel
 import com.programmersbox.mangaworld.MangaActivity
@@ -393,4 +394,196 @@ class GalleryListFavoriteAdapter(private val context: Context) : DragSwipeAdapte
                 }
                 .show()
         }
+}
+
+sealed class GalleryFavoriteAdapter<T>(
+    protected val context: Context,
+    protected val dao: MangaDao = MangaDatabase.getInstance(context).mangaDao()
+) : DragSwipeAdapter<T, GalleryHolder>() {
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GalleryHolder =
+        GalleryHolder(MangaListItemGalleryViewBinding.inflate(context.layoutInflater, parent, false))
+
+    class GalleryListingAdapter(
+        context: Context,
+        private val disposable: CompositeDisposable = CompositeDisposable(),
+        private val showMenu: Boolean = true,
+        dao: MangaDao
+    ) : GalleryFavoriteAdapter<MangaModel>(context, dao) {
+
+        override fun GalleryHolder.onBind(item: MangaModel, position: Int) {
+
+            var swatch: Palette.Swatch? = null
+
+            itemView.setOnClickListener {
+                context.startActivity(Intent(context, MangaActivity::class.java).apply {
+                    putExtra("manga", item)
+                    putExtra("swatch", swatch)
+                })
+            }
+
+            if (showMenu) {
+                val menu = PopupMenu(context, itemView)
+                    .apply {
+                        setOnMenuItemClickListener {
+                            Completable.mergeArray(
+                                when (it.itemId) {
+                                    1 -> FirebaseDb.addManga(item)
+                                    2 -> FirebaseDb.removeManga(item)
+                                    else -> null
+                                },
+                                when (it.itemId) {
+                                    1 -> dao.insertManga(item.toMangaDbModel())
+                                    2 -> dao.deleteManga(item.toMangaDbModel())
+                                    else -> null
+                                }
+                            )
+                                .subscribeOn(Schedulers.io())
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .subscribe()
+                                .addTo(disposable)
+                            true
+                        }
+                    }
+
+                itemView.setOnLongClickListener {
+                    menu.show()
+                    true
+                }
+
+                dao.getAllManga()
+                    //context.dbAndFireManga(dao)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .map { it.any { model -> model.mangaUrl == item.mangaUrl } }
+                    .subscribe {
+                        menu.menu.clear()
+                        if (it) menu.menu.removeItem(1) else menu.menu.removeItem(2)
+                        menu.menu.add(
+                            1,
+                            if (it) 2 else 1,
+                            1,
+                            if (it) context.getText(R.string.removeFromFavorites) else context.getText(R.string.addToFavorites)
+                        )
+                    }
+                    .addTo(disposable)
+            }
+
+            bind(item)
+            Glide.with(context)
+                .asBitmap()
+                .load(item.imageUrl)
+                //.override(360, 480)
+                .fitCenter()
+                .transform(RoundedCorners(15))
+                .fallback(R.mipmap.ic_launcher)
+                .placeholder(R.mipmap.ic_launcher)
+                .error(R.mipmap.ic_launcher)
+                .into<Bitmap> {
+                    resourceReady { image, _ ->
+                        cover.setImageBitmap(image)
+                        if (context.usePalette) {
+                            swatch = Palette.from(image).generate().vibrantSwatch
+                        }
+                    }
+                }
+        }
+    }
+
+    class GalleryGroupAdapter(context: Context, dao: MangaDao) : GalleryFavoriteAdapter<Pair<String, List<MangaModel>>>(context, dao) {
+
+        private val listToArray: (List<MangaModel>) -> Array<out String> = { list -> list.map { "${it.source.name} - ${it.title}" }.toTypedArray() }
+
+        override fun GalleryHolder.onBind(item: Pair<String, List<MangaModel>>, position: Int) {
+
+            val manga = item.second.random()
+
+            var swatch: Palette.Swatch? = null
+
+            itemView.setOnClickListener {
+
+                fun startActivity(mangaModel: MangaModel) {
+                    context.startActivity(Intent(context, MangaActivity::class.java).apply {
+                        putExtra("manga", mangaModel)
+                        putExtra("swatch", swatch)
+                    })
+                }
+
+                if (item.second.size > 1) {
+                    MaterialAlertDialogBuilder(context)
+                        .setTitle("Select ${item.first} Source")
+                        .setItems(listToArray(item.second)) { d, index ->
+                            startActivity(item.second[index])
+                            d.dismiss()
+                        }
+                        .setNegativeButton("Cancel") { d, _ -> d.dismiss() }
+                        .show()
+                } else {
+                    startActivity(item.second.first())
+                }
+            }
+
+            itemView.setOnLongClickListener {
+                if (item.second.size > 1) {
+                    MaterialAlertDialogBuilder(context)
+                        .setTitle("Remove Source from Favorites")
+                        .setItems(listToArray(item.second)) { d, index ->
+                            addOrRemoveManga(itemView, item.second[index])
+                            d.dismiss()
+                        }
+                        .setNegativeButton("Cancel") { d, _ -> d.dismiss() }
+                        .show()
+                } else {
+                    PopupMenu(context, itemView)
+                        .apply {
+                            menu.add(1, 1, 1, context.getText(R.string.removeFromFavorites))
+                            setOnMenuItemClickListener {
+                                if (it.itemId == 1) addOrRemoveManga(itemView, item.second.first())
+                                true
+                            }
+                        }.show()
+                }
+                true
+            }
+
+            bind(manga)
+            Glide.with(context)
+                .asBitmap()
+                .load(manga.imageUrl)
+                //.override(360, 480)
+                .fitCenter()
+                .transform(RoundedCorners(15))
+                .fallback(R.mipmap.ic_launcher)
+                .placeholder(R.mipmap.ic_launcher)
+                .error(R.mipmap.ic_launcher)
+                .into<Bitmap> {
+                    resourceReady { image, _ ->
+                        cover.setImageBitmap(image)
+                        if (context.usePalette) {
+                            swatch = Palette.from(image).generate().vibrantSwatch
+                        }
+                    }
+                }
+        }
+
+        private fun addOrRemoveManga(view: View, item: MangaModel) = Completable.mergeArray(
+            FirebaseDb.removeManga(item),
+            dao.deleteManga(item.toMangaDbModel())
+        )
+            .subscribeOn(Schedulers.io())
+            .observeOn(Schedulers.io())
+            .subscribe {
+                Snackbar.make(view, context.getString(R.string.removed, item.title), Snackbar.LENGTH_LONG)
+                    .setAction(context.getText(R.string.undo)) {
+                        Completable.mergeArray(
+                            FirebaseDb.addManga(item),
+                            dao.insertManga(item.toMangaDbModel())
+                        )
+                            .subscribeOn(Schedulers.io())
+                            .observeOn(Schedulers.io())
+                            .subscribe()
+                    }
+                    .show()
+            }
+    }
 }

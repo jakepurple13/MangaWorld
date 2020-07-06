@@ -62,7 +62,7 @@
                     android:linksClickable="true"
                     android:text="@{info.mangaUrl}"
                     app:linkColor="@{swatch}"
-                    tools:text="@tools:sample/avatars"
+                    tools:text="@tools:sample/cities"
                     tools:textColorLink="@sample/sample_colors" />
 
                 <TextView

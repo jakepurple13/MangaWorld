@@ -213,13 +213,13 @@ class ReadActivity : AppCompatActivity() {
     }
 
     private fun saveCurrentChapterSpot() {
-        model?.let {
+        /*model?.let {
             defaultSharedPref.edit().apply {
                 val currentItem = (readView.layoutManager as LinearLayoutManager).findFirstCompletelyVisibleItemPosition()
                 if (currentItem >= adapter.dataList.size - 2) remove(it.url)
                 else putInt(it.url, currentItem)
             }.apply()
-        }
+        }*/
     }
 
     private fun saveImage(filename: String, downloadUrlOfImage: String) {
