@@ -173,10 +173,10 @@ class ReadActivity : AppCompatActivity() {
         model = intent.getObjectExtra<ChapterModel>("currentChapter")
 
         //titleManga.text = mangaTitle
-        model?.let { loadPages(it) }
+        loadPages(model)
     }
 
-    private fun loadPages(model: ChapterModel) {
+    private fun loadPages(model: ChapterModel?) {
         readLoading
             .animate()
             .alpha(1f)
@@ -185,7 +185,7 @@ class ReadActivity : AppCompatActivity() {
         adapter2.setListNotify(emptyList())
         Single.create<List<String>> { emitter ->
             try {
-                emitter.onSuccess(model.getPageInfo().pages)
+                emitter.onSuccess(model?.getPageInfo()?.pages.orEmpty())
             } catch (e: Exception) {
                 emitter.onError(Throwable("Something went wrong. Please try again"))
             }
@@ -205,7 +205,7 @@ class ReadActivity : AppCompatActivity() {
                     .start()
                 adapter2.setListNotify(pages)
                 //adapter.addItems(pages)
-                //readView.layoutManager!!.scrollToPosition(model?.url?.let { defaultSharedPref.getInt(it, 0) } ?: 0)
+                readView.layoutManager!!.scrollToPosition(model?.url?.let { defaultSharedPref.getInt(it, 0) } ?: 0)
             }
             .addTo(disposable)
     }
