@@ -1,9 +1,10 @@
 {
-  "version": "1.4",
-  "url": "https://github.com/jakepurple13/MangaWorld/releases/download/v13/app-debug.apk",
+  "version": "1.5",
+  "url": "https://github.com/jakepurple13/MangaWorld/releases/download/v14/app-debug.apk",
   "releaseNotes": [
-    "- Added new icon to notification!",
-    "- Changed uploaded date format",
-    "- Optimizations and Fixes"
+    "- Made favoriting/unfavoriting a little faster....hopefully",
+    "- Added some logs for if things break",
+    "- Optimizations and Fixes",
+    "- Possibly got next chapter working! (Here's hoping, its been working so far)"
   ]
 }
