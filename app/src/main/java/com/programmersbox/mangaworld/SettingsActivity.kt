@@ -8,10 +8,12 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.mikepenz.iconics.IconicsDrawable
 import com.mikepenz.iconics.typeface.library.googlematerial.GoogleMaterial
 import com.mikepenz.iconics.utils.colorInt
 import com.mikepenz.iconics.utils.sizeDp
+import com.programmersbox.gsonutils.fromJson
 import com.programmersbox.gsonutils.putExtra
 import com.programmersbox.helpfulutils.NotificationDslBuilder
 import com.programmersbox.helpfulutils.notificationManager
@@ -19,6 +21,7 @@ import com.programmersbox.helpfulutils.sizedListOf
 import com.programmersbox.manga_db.MangaDatabase
 import com.programmersbox.mangaworld.utils.*
 import com.programmersbox.rxutils.invoke
+import de.Maxr1998.modernpreferences.Preference
 import de.Maxr1998.modernpreferences.PreferencesAdapter
 import de.Maxr1998.modernpreferences.helpers.*
 import de.Maxr1998.modernpreferences.preferences.SeekBarPreference
@@ -26,8 +29,11 @@ import de.Maxr1998.modernpreferences.preferences.TwoStatePreference
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.subjects.PublishSubject
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.net.URL
 import java.util.concurrent.TimeUnit
 import kotlin.math.roundToInt
 
@@ -55,6 +61,29 @@ class SettingsActivity : AppCompatActivity() {
 
         pref("appInfo") {
             title = "Version: ${packageManager.getPackageInfo(packageName, 0).versionName}"
+
+            clickListener = object : Preference.OnClickListener {
+                override fun onClick(preference: Preference, holder: PreferencesAdapter.ViewHolder): Boolean {
+                    GlobalScope.launch {
+                        val info = try {
+                            withContext(Dispatchers.Default) {
+                                URL("https://raw.githubusercontent.com/jakepurple13/MangaWorld/master/app/src/main/res/raw/update_changelog.json").readText()
+                            }
+                        } catch (e: Exception) {
+                            resources.openRawResource(R.raw.update_changelog).bufferedReader().readText()
+                        }.fromJson<AppInfo>()!!
+                        runOnUiThread {
+                            MaterialAlertDialogBuilder(this@SettingsActivity)
+                                .setTitle("Update notes for ${info.version}")
+                                .setItems(info.releaseNotes.toTypedArray(), null)
+                                .setPositiveButton("Ok") { d, _ -> d.dismiss() }
+                                .show()
+                        }
+
+                    }
+                    return true
+                }
+            }
         }
 
         switch("stayOnAdult") {
