@@ -13,6 +13,10 @@ import androidx.core.app.TaskStackBuilder
 import androidx.work.RxWorker
 import androidx.work.WorkerParameters
 import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.analytics.ktx.analytics
+import com.google.firebase.analytics.ktx.logEvent
+import com.google.firebase.crashlytics.FirebaseCrashlytics
+import com.google.firebase.ktx.Firebase
 import com.programmersbox.gsonutils.putExtra
 import com.programmersbox.helpfulutils.GroupBehavior
 import com.programmersbox.helpfulutils.NotificationDslBuilder
@@ -57,9 +61,20 @@ class UpdateCheckService : IntentService(UpdateCheckService::class.java.name) {
         val listSize: Int
         dbAndFireMangaSync(dao)
             .let {
-                it.intersect(Sources.getUpdateSearches()
-                    .filter { s -> it.any { m -> m.source == s } }
-                    .flatMap { m -> m.getManga() }) { o, n -> o.mangaUrl == n.mangaUrl }
+                it.intersect(
+                    Sources.getUpdateSearches()
+                        .filter { s -> it.any { m -> m.source == s } }
+                        .mapNotNull { m ->
+                            try {
+                                m.getManga()
+                            } catch (e: Exception) {
+                                FirebaseCrashlytics.getInstance().log("$m had an error")
+                                FirebaseCrashlytics.getInstance().recordException(e)
+                                Firebase.analytics.logEvent("manga_load_error") { param(FirebaseAnalytics.Param.ITEM_NAME, m.name) }
+                                null
+                            }
+                        }.flatten()
+                ) { o, n -> o.mangaUrl == n.mangaUrl }
             }
             .distinctBy { m -> m.mangaUrl }
             .also { listSize = it.lastIndex }
