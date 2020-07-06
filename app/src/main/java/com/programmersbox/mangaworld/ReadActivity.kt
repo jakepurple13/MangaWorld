@@ -136,6 +136,9 @@ class ReadActivity : AppCompatActivity() {
             }
         }*/
 
+        //next chapter doesnt work with Manganelo, Mangakakalot?
+        //Manganelo, Mangakakalot seems to be weird right now
+
         infoSetup()
         readerSetup()
     }
@@ -179,6 +182,7 @@ class ReadActivity : AppCompatActivity() {
             .alpha(1f)
             .withEndAction { readLoading.visible() }
             .start()
+        adapter2.setListNotify(emptyList())
         Single.create<List<String>> { emitter ->
             try {
                 emitter.onSuccess(model.getPageInfo().pages)
