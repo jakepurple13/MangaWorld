@@ -10,6 +10,8 @@ import androidx.constraintlayout.widget.ConstraintSet
 import androidx.palette.graphics.Palette
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.model.GlideUrl
+import com.bumptech.glide.load.model.LazyHeaders
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
@@ -97,9 +99,15 @@ class MangaListAdapter(context: Context, disposable: CompositeDisposable = Compo
         }
 
         bind(item)
+        val url = GlideUrl(
+            item.imageUrl, LazyHeaders.Builder()
+                .apply { item.source.headers.forEach { addHeader(it.first, it.second) } }
+                .build()
+        )
         Glide.with(cover)
             .asBitmap()
-            .load(item.imageUrl)
+            //.load(item.imageUrl)
+            .load(url)
             .override(360, 480)
             .transform(RoundedCorners(30))
             .fallback(R.mipmap.ic_launcher)
@@ -169,9 +177,17 @@ class BubbleListAdapter(context: Context, disposable: CompositeDisposable = Comp
         favorite.gone()
 
         bind(item)
+
+        val url = GlideUrl(
+            item.imageUrl, LazyHeaders.Builder()
+                .apply { item.source.headers.forEach { addHeader(it.first, it.second) } }
+                .build()
+        )
+
         Glide.with(cover)
             .asBitmap()
-            .load(item.imageUrl)
+            //.load(item.imageUrl)
+            .load(url)
             .override(360, 480)
             .transform(RoundedCorners(30))
             .fallback(R.mipmap.ic_launcher)
@@ -263,9 +279,15 @@ class GalleryListAdapter(context: Context, disposable: CompositeDisposable = Com
         }
 
         bind(item)
+        val url = GlideUrl(
+            item.imageUrl, LazyHeaders.Builder()
+                .apply { item.source.headers.forEach { addHeader(it.first, it.second) } }
+                .build()
+        )
         Glide.with(context)
             .asBitmap()
-            .load(item.imageUrl)
+            //.load(item.imageUrl)
+            .load(url)
             //.override(360, 480)
             .fitCenter()
             .transform(RoundedCorners(15))
@@ -404,6 +426,34 @@ sealed class GalleryFavoriteAdapter<T>(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GalleryHolder =
         GalleryHolder(MangaListItemGalleryViewBinding.inflate(context.layoutInflater, parent, false))
 
+    protected fun GalleryHolder.loadImage(model: MangaModel, swatch: SwatchHolder) {
+        val url = GlideUrl(
+            model.imageUrl, LazyHeaders.Builder()
+                .apply { model.source.headers.forEach { addHeader(it.first, it.second) } }
+                .build()
+        )
+        Glide.with(context)
+            .asBitmap()
+            //.load(item.imageUrl)
+            .load(url)
+            //.override(360, 480)
+            .fitCenter()
+            .transform(RoundedCorners(15))
+            .fallback(R.mipmap.ic_launcher)
+            .placeholder(R.mipmap.ic_launcher)
+            .error(R.mipmap.ic_launcher)
+            .into<Bitmap> {
+                resourceReady { image, _ ->
+                    cover.setImageBitmap(image)
+                    if (context.usePalette) {
+                        swatch.swatch = Palette.from(image).generate().vibrantSwatch
+                    }
+                }
+            }
+    }
+
+    protected data class SwatchHolder(var swatch: Palette.Swatch? = null)
+
     class GalleryListingAdapter(
         context: Context,
         private val disposable: CompositeDisposable = CompositeDisposable(),
@@ -413,12 +463,13 @@ sealed class GalleryFavoriteAdapter<T>(
 
         override fun GalleryHolder.onBind(item: MangaModel, position: Int) {
 
-            var swatch: Palette.Swatch? = null
+            //var swatch: Palette.Swatch? = null
+            val swatch = SwatchHolder()
 
             itemView.setOnClickListener {
                 context.startActivity(Intent(context, MangaActivity::class.java).apply {
                     putExtra("manga", item)
-                    putExtra("swatch", swatch)
+                    putExtra("swatch", swatch.swatch)
                 })
             }
 
@@ -470,23 +521,7 @@ sealed class GalleryFavoriteAdapter<T>(
             }
 
             bind(item)
-            Glide.with(context)
-                .asBitmap()
-                .load(item.imageUrl)
-                //.override(360, 480)
-                .fitCenter()
-                .transform(RoundedCorners(15))
-                .fallback(R.mipmap.ic_launcher)
-                .placeholder(R.mipmap.ic_launcher)
-                .error(R.mipmap.ic_launcher)
-                .into<Bitmap> {
-                    resourceReady { image, _ ->
-                        cover.setImageBitmap(image)
-                        if (context.usePalette) {
-                            swatch = Palette.from(image).generate().vibrantSwatch
-                        }
-                    }
-                }
+            loadImage(item, swatch)
         }
     }
 
@@ -498,14 +533,14 @@ sealed class GalleryFavoriteAdapter<T>(
 
             val manga = item.second.random()
 
-            var swatch: Palette.Swatch? = null
+            val swatch = SwatchHolder()
 
             itemView.setOnClickListener {
 
                 fun startActivity(mangaModel: MangaModel) {
                     context.startActivity(Intent(context, MangaActivity::class.java).apply {
                         putExtra("manga", mangaModel)
-                        putExtra("swatch", swatch)
+                        putExtra("swatch", swatch.swatch)
                     })
                 }
 
@@ -547,23 +582,7 @@ sealed class GalleryFavoriteAdapter<T>(
             }
 
             bind(manga)
-            Glide.with(context)
-                .asBitmap()
-                .load(manga.imageUrl)
-                //.override(360, 480)
-                .fitCenter()
-                .transform(RoundedCorners(15))
-                .fallback(R.mipmap.ic_launcher)
-                .placeholder(R.mipmap.ic_launcher)
-                .error(R.mipmap.ic_launcher)
-                .into<Bitmap> {
-                    resourceReady { image, _ ->
-                        cover.setImageBitmap(image)
-                        if (context.usePalette) {
-                            swatch = Palette.from(image).generate().vibrantSwatch
-                        }
-                    }
-                }
+            loadImage(manga, swatch)
         }
 
         private fun addOrRemoveManga(view: View, item: MangaModel) = Completable.mergeArray(

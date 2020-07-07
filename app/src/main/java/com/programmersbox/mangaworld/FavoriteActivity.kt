@@ -2,6 +2,7 @@ package com.programmersbox.mangaworld
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.children
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.GridLayoutManager
 import com.google.android.material.chip.Chip
@@ -14,7 +15,7 @@ import com.programmersbox.manga_db.MangaDatabase
 import com.programmersbox.manga_sources.mangasources.MangaModel
 import com.programmersbox.manga_sources.mangasources.Sources
 import com.programmersbox.mangaworld.adapters.GalleryFavoriteAdapter
-import com.programmersbox.mangaworld.utils.dbAndFireManga
+import com.programmersbox.mangaworld.utils.dbAndFireManga2
 import com.programmersbox.mangaworld.utils.groupManga
 import com.programmersbox.mangaworld.views.AutoFitGridLayoutManager
 import com.programmersbox.rxutils.behaviorDelegate
@@ -48,7 +49,7 @@ class FavoriteActivity : AppCompatActivity() {
         uiSetup()
 
         Flowables.combineLatest(
-            source1 = dbAndFireManga(dao)
+            source1 = dbAndFireManga2(dao)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread()),
             source2 = sourcePublisher.toLatestFlowable(),
@@ -64,8 +65,7 @@ class FavoriteActivity : AppCompatActivity() {
                 @Suppress("UNCHECKED_CAST")
                 setNewDataUi(
                     when (val a = adapterType) {
-                        is GalleryFavoriteAdapter.GalleryListingAdapter -> a.setData(list as List<MangaModel>)
-                            .let { list.size }
+                        is GalleryFavoriteAdapter.GalleryListingAdapter -> a.setData(list as List<MangaModel>).let { list.size }
                         is GalleryFavoriteAdapter.GalleryGroupAdapter -> a.setData2(list as List<Pair<String, List<MangaModel>>>)
                             .let { list.flatMap { it.second }.size }
                     }
@@ -82,6 +82,7 @@ class FavoriteActivity : AppCompatActivity() {
     private fun uiSetup() {
         favoriteMangaRV.layoutManager = AutoFitGridLayoutManager(this, 360).apply { orientation = GridLayoutManager.VERTICAL }
         favoriteMangaRV.adapter = adapterType
+        favoriteMangaRV.setItemViewCacheSize(20)
         favoriteMangaRV.setHasFixedSize(true)
 
         Sources.values().forEach {
@@ -91,6 +92,11 @@ class FavoriteActivity : AppCompatActivity() {
                 isClickable = true
                 isChecked = true
                 setOnCheckedChangeListener { _, isChecked -> addOrRemoveSource(isChecked, it) }
+                setOnLongClickListener {
+                    sourceFilter.children.filterIsInstance<Chip>().forEach { it.isChecked = false }
+                    isChecked = true
+                    true
+                }
             })
         }
 

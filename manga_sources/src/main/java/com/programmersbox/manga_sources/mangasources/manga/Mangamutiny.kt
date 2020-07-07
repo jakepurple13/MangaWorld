@@ -31,7 +31,7 @@ object Mangamutiny : MangaSource {
                     description = "",
                     mangaUrl = "$baseUrl$mangaApiPath/${it.slug}",
                     imageUrl = it.thumbnail.orEmpty(),
-                    source = Sources.MANGAKAKALOT//MANGAMUTINY
+                    source = Sources.MANGAMUTINY
                 )
             }
             .orEmpty()
@@ -48,7 +48,7 @@ object Mangamutiny : MangaSource {
             description = "",
             mangaUrl = "$baseUrl$mangaApiPath/${it.slug}",
             imageUrl = it.thumbnail.orEmpty(),
-            source = Sources.MANGAKAKALOT//MANGAMUTINY
+            source = Sources.MANGAMUTINY
         )
     }.orEmpty()
 
@@ -60,15 +60,36 @@ object Mangamutiny : MangaSource {
             imageUrl = model.imageUrl,
             chapters = it?.chapters?.map { c ->
                 ChapterModel(
-                    name = c.title.orEmpty(),
+                    name = chapterTitleBuilder(c),
                     url = "$baseUrl$chapterApiPath/${c.slug}",
                     uploaded = c.releasedAt.orEmpty(),
-                    sources = Sources.MANGAKAKALOT//MANGAMUTINY
+                    sources = Sources.MANGAMUTINY
                 )
             }.orEmpty(),
             genres = it?.genres.orEmpty(),
             alternativeNames = listOf(it?.alias.orEmpty())
         )
+    }
+
+    private fun chapterTitleBuilder(rootNode: MunityChapters): String {
+        val volume = rootNode.volume//volumegetNullable("volume")?.asInt
+
+        val chapter = rootNode.chapter?.toInt()//getNullable("chapter")?.asInt
+
+        val textTitle = rootNode.title//getNullable("title")?.asString
+
+        val chapterTitle = StringBuilder()
+        if (volume != null) chapterTitle.append("Vol. $volume")
+        if (chapter != null) {
+            if (volume != null) chapterTitle.append(" ")
+            chapterTitle.append("Chapter $chapter")
+        }
+        if (textTitle != null && textTitle != "") {
+            if (volume != null || chapter != null) chapterTitle.append(" ")
+            chapterTitle.append(textTitle)
+        }
+
+        return chapterTitle.toString()
     }
 
     override fun getMangaModelByUrl(url: String): MangaModel = getJsonApi<MangaInfoMunity>(url, header).let {
@@ -77,7 +98,7 @@ object Mangamutiny : MangaSource {
             description = it?.summary.orEmpty(),
             mangaUrl = url,
             imageUrl = it?.thumbnail.orEmpty(),
-            source = Sources.MANGAKAKALOT//MANGAMUTINY
+            source = Sources.MANGAMUTINY
         )
     }
 
@@ -116,7 +137,7 @@ object Mangamutiny : MangaSource {
     private data class MunityChapters(
         val viewCount: Number?,
         val title: String?,
-        val volume: Any?,
+        val volume: Int?,
         val chapter: Number?,
         val slug: String?,
         val releasedAt: String?,

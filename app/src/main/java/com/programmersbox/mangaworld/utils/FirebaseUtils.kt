@@ -319,7 +319,7 @@ object FirebaseDb {
         mangaDoc?.addSnapshotListener { documentSnapshot, _ ->
             documentSnapshot?.toObject(FirebaseAllManga::class.java)?.second?.map { it.toMangaDbModel() }?.let { emitter(it) }
         } ?: emitter()
-    }.toLatestFlowable().subscribeOn(Schedulers.io())
+    }.subscribeOn(Schedulers.io()).toLatestFlowable()
 
     private data class FirebaseChapter(
         val url: String? = null,
@@ -381,6 +381,11 @@ fun Context.dbAndFireManga(dao: MangaDao = MangaDatabase.getInstance(this).manga
     dao.getAllManga(),
     FirebaseDb.getAllMangaFlowable()
 ) { db, fire -> (db + fire).distinctBy { it.mangaUrl }.map { it.toMangaModel() } }
+
+fun Context.dbAndFireManga2(dao: MangaDao = MangaDatabase.getInstance(this).mangaDao()) = Flowables.combineLatest(
+    dao.getAllManga(),
+    FirebaseDb.getAllMangaFlowable()
+) { db, fire -> (db + fire).groupBy(MangaDbModel::mangaUrl).map { it.value.maxBy(MangaDbModel::numChapters)!! }.map { it.toMangaModel() } }
 
 fun Context.dbAndFireMangaSync(dao: MangaDao = MangaDatabase.getInstance(this).mangaDao()) = listOf(
     dao.getAllMangaSync(),

@@ -9,14 +9,14 @@ enum class Sources(
     val source: MangaSource
 ) : MangaSource by source {
 
-    MANGA_EDEN(domain = "mangaeden", filterOutOfUpdate = true, source = MangaEden),
+    //MANGA_EDEN(domain = "mangaeden", filterOutOfUpdate = true, source = MangaEden),
     MANGANELO(domain = "manganelo", source = Manganelo),
     MANGA_HERE(domain = "mangahere", source = MangaHere),
     MANGA_4_LIFE(domain = "manga4life", source = MangaFourLife),
     NINE_ANIME(domain = "nineanime", source = NineAnime),
     MANGAKAKALOT(domain = "mangakakalot", source = Mangakakalot),
     MANGA_PARK(domain = "mangapark", source = MangaPark),
-    //MANGAMUTINY(domain = "mangamutiny", source = Mangamutiny),
+    MANGAMUTINY(domain = "mangamutiny", source = Mangamutiny),
 
     //MANGA_DOG(domain = "mangadog", source = MangaDog),
     INKR(domain = "mangarock", source = com.programmersbox.manga_sources.mangasources.manga.INKR),
