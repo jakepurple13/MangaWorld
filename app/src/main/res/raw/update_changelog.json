@@ -1,12 +1,9 @@
 {
-  "version": "1.6",
-  "url": "https://github.com/jakepurple13/MangaWorld/releases/download/v15/app-debug.apk",
+  "version": "1.7",
+  "url": "https://github.com/jakepurple13/MangaWorld/releases/download/v16/app-debug.apk",
   "releaseNotes": [
-    "- Made favoriting/unfavoriting a little faster....hopefully",
-    "- Added some logs for if things break",
-    "- Optimizations and Fixes",
-    "- Possibly got next chapter working! (Here's hoping, its been working so far)",
-    "- Fixed a bug known in the Reader",
-    "- Small Error Fixes"
+    "- Click and hold on sources in favorites will now show just that source",
+    "- Added new source! Mangamutiny!",
+    "- Improved notifications a bit"
   ]
 }
