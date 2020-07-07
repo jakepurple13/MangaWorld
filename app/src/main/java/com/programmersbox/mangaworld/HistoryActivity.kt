@@ -51,6 +51,9 @@ class HistoryActivity : AppCompatActivity() {
                     Intent(it.context, ReadActivity::class.java).apply {
                         putExtra("mangaTitle", item.title)
                         putExtra("currentChapter", item.chapterModel)
+                        putExtra("mangaUrl", item.chapterModel.url)
+                        //putExtra("allChapters", "")
+                        putExtra("mangaInfoUrl", item.mangaUrl)
                     }
                 )
             }

@@ -387,6 +387,11 @@ fun Context.dbAndFireMangaSync(dao: MangaDao = MangaDatabase.getInstance(this).m
     FirebaseDb.getAllManga()?.requireNoNulls().orEmpty()
 ).flatten().distinctBy { it.mangaUrl }
 
+fun Context.dbAndFireMangaSync2(dao: MangaDao = MangaDatabase.getInstance(this).mangaDao()) = listOf(
+    dao.getAllMangaSync(),
+    FirebaseDb.getAllManga()?.requireNoNulls().orEmpty()
+).flatten().groupBy(MangaDbModel::mangaUrl).map { it.value.maxBy(MangaDbModel::numChapters)!! }
+
 fun Context.dbAndFireChapter(
     url: String,
     dao: MangaDao = MangaDatabase.getInstance(this).mangaDao()

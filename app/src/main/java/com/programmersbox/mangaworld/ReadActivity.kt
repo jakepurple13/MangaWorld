@@ -30,7 +30,6 @@ import com.mikepenz.iconics.utils.sizePx
 import com.programmersbox.gsonutils.getObjectExtra
 import com.programmersbox.helpfulutils.*
 import com.programmersbox.manga_sources.mangasources.ChapterModel
-import com.programmersbox.mangaworld.adapters.PageAdapter
 import com.programmersbox.mangaworld.adapters.PageAdapter2
 import com.programmersbox.mangaworld.adapters.PageHolder
 import com.programmersbox.mangaworld.utils.batteryAlertPercent
@@ -55,7 +54,7 @@ class ReadActivity : AppCompatActivity() {
     private var model: ChapterModel? = null
     private var mangaTitle: String? = null
     private val loader by lazy { Glide.with(this) }
-    private val adapter by lazy {
+    /*private val adapter by lazy {
         loader.let {
             PageAdapter(
                 fullRequest = it
@@ -75,7 +74,7 @@ class ReadActivity : AppCompatActivity() {
                 }
             }
         }
-    }
+    }*/
 
     private val adapter2: PageAdapter2 by lazy {
         loader.let {
@@ -95,7 +94,7 @@ class ReadActivity : AppCompatActivity() {
                 context = this@ReadActivity,
                 dataList = mutableListOf(),
                 chapterModels = list,
-                currentChapter = list.indexOfFirst { it.url == url },
+                currentChapter = list.indexOfFirst { l -> l.url == url },
                 mangaUrl = mangaUrl,
                 loadNewPages = this::loadPages
             ) { image ->
@@ -135,9 +134,6 @@ class ReadActivity : AppCompatActivity() {
                 titleManga.animate().alpha(0f).withEndAction { titleManga.invisible() }.start()
             }
         }*/
-
-        //next chapter doesnt work with Manganelo, Mangakakalot?
-        //Manganelo, Mangakakalot seems to be weird right now
 
         infoSetup()
         readerSetup()
@@ -179,8 +175,8 @@ class ReadActivity : AppCompatActivity() {
     private fun loadPages(model: ChapterModel?) {
         readLoading
             .animate()
+            .withStartAction { readLoading.visible() }
             .alpha(1f)
-            .withEndAction { readLoading.visible() }
             .start()
         adapter2.setListNotify(emptyList())
         Single.create<List<String>> { emitter ->

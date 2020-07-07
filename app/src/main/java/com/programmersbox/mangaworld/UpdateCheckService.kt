@@ -31,7 +31,7 @@ import com.programmersbox.manga_sources.mangasources.MangaModel
 import com.programmersbox.manga_sources.mangasources.Sources
 import com.programmersbox.mangaworld.utils.FirebaseDb
 import com.programmersbox.mangaworld.utils.canBubble
-import com.programmersbox.mangaworld.utils.dbAndFireMangaSync
+import com.programmersbox.mangaworld.utils.dbAndFireMangaSync2
 import com.programmersbox.mangaworld.utils.toMangaModel
 import com.programmersbox.rxutils.invoke
 import io.reactivex.Single
@@ -59,7 +59,7 @@ class UpdateCheckService : IntentService(UpdateCheckService::class.java.name) {
         update.sendRunningNotification(100, 0, getText(R.string.startingUpdateCheck))
         val dao = MangaDatabase.getInstance(this@UpdateCheckService).mangaDao()
         val listSize: Int
-        dbAndFireMangaSync(dao)
+        dbAndFireMangaSync2(dao)
             .let {
                 it.intersect(
                     Sources.getUpdateSearches()
@@ -120,7 +120,7 @@ class UpdateWorker(context: Context, workerParams: WorkerParameters) : RxWorker(
     private val dao by lazy { MangaDatabase.getInstance(this@UpdateWorker.applicationContext).mangaDao() }
 
     override fun createWork(): Single<Result> = Single.create<List<MangaDbModel>> { emitter ->
-        val list = applicationContext.dbAndFireMangaSync(dao)
+        val list = applicationContext.dbAndFireMangaSync2(dao)
         val sourceList = Sources.getUpdateSearches()
             .filter { s -> list.any { m -> m.source == s } }
             .flatMap { m -> m.getManga() }
@@ -199,12 +199,14 @@ class UpdateNotification(private val context: Context) {
 
     fun onEnd(list: Pair<List<Pair<Int, Notification>>, List<MangaModel>>) {
         val n = context.notificationManager
+        val currentNotificationSize = n.activeNotifications.filterNot { list.first.any { l -> l.first == it.id } }.size
         list.first.forEach { pair -> n.notify(pair.first, pair.second) }
         if (list.first.isNotEmpty()) n.notify(
             42,
             NotificationDslBuilder.builder(context, "mangaChannel", R.mipmap.ic_launcher) {
                 title = context.getText(R.string.app_name)
-                subText = context.resources.getQuantityString(R.plurals.updateAmount, list.first.size, list.first.size)
+                val size = list.first.size + currentNotificationSize
+                subText = context.resources.getQuantityString(R.plurals.updateAmount, size, size)
                 groupSummary = true
                 groupAlertBehavior = GroupBehavior.ALL
                 groupId = "mangaGroup"

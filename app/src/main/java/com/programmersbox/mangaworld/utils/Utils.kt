@@ -35,7 +35,6 @@ import java.io.IOException
 import java.net.URL
 import java.nio.channels.FileChannel
 
-
 var Context.usePalette: Boolean by sharedPrefNotNullDelegate(true)
 var Context.currentSource: Sources by sharedPrefNotNullObjectDelegate(defaultValue = Sources.values().filterNot(Sources::isAdult).random())
 var Context.useCache: Boolean by sharedPrefNotNullDelegate(true)
