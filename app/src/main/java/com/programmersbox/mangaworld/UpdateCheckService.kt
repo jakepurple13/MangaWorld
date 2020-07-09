@@ -199,7 +199,7 @@ class UpdateNotification(private val context: Context) {
 
     fun onEnd(list: Pair<List<Pair<Int, Notification>>, List<MangaModel>>) {
         val n = context.notificationManager
-        val currentNotificationSize = n.activeNotifications.filterNot { list.first.any { l -> l.first == it.id } }.size
+        val currentNotificationSize = n.activeNotifications.filterNot { list.first.any { l -> l.first == it.id } }.size - 1
         list.first.forEach { pair -> n.notify(pair.first, pair.second) }
         if (list.first.isNotEmpty()) n.notify(
             42,

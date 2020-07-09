@@ -8,9 +8,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.palette.graphics.Palette
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.model.GlideUrl
+import com.bumptech.glide.load.model.LazyHeaders
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.programmersbox.dragswipe.DragSwipeAdapter
 import com.programmersbox.gsonutils.putExtra
+import com.programmersbox.manga_sources.mangasources.Sources
 import com.programmersbox.mangaworld.databinding.HistoryListItemBinding
 import com.programmersbox.mangaworld.utils.ChapterHistory
 import com.programmersbox.mangaworld.utils.chapterHistory
@@ -59,7 +62,9 @@ class HistoryActivity : AppCompatActivity() {
             }
             Glide.with(cover)
                 .asBitmap()
-                .load(item.imageUrl)
+                .load(GlideUrl(item.imageUrl, LazyHeaders.Builder().apply {
+                    Sources.getSourceByUrl(item.mangaUrl)?.headers?.forEach { addHeader(it.first, it.second) }
+                }.build()))
                 .override(360, 480)
                 .transform(RoundedCorners(30))
                 .fallback(R.mipmap.ic_launcher)

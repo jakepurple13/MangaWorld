@@ -66,8 +66,8 @@ class FavoriteActivity : AppCompatActivity() {
                 setNewDataUi(
                     when (val a = adapterType) {
                         is GalleryFavoriteAdapter.GalleryListingAdapter -> a.setData(list as List<MangaModel>).let { list.size }
-                        is GalleryFavoriteAdapter.GalleryGroupAdapter -> a.setData2(list as List<Pair<String, List<MangaModel>>>)
-                            .let { list.flatMap { it.second }.size }
+                        is GalleryFavoriteAdapter.GalleryGroupAdapter -> a.setData2((list as Map<String, List<MangaModel>>).toList())
+                            .let { list.flatMap { it.value }.size }
                     }
                 )
             }
@@ -106,12 +106,11 @@ class FavoriteActivity : AppCompatActivity() {
         pair.first.sortedBy(MangaModel::title).filter { it.source in pair.second && it.title.contains(pair.third, true) }
     }
 
-    private val mapManga2: (Triple<List<MangaModel>, List<Sources>, CharSequence>) -> List<Pair<String, List<MangaModel>>> = { pair ->
+    private val mapManga2: (Triple<List<MangaModel>, List<Sources>, CharSequence>) -> Map<String, List<MangaModel>> = { pair ->
         pair.first
             .sortedBy(MangaModel::title)
             .filter { it.source in pair.second && it.title.contains(pair.third, true) }
             .groupByCondition(MangaModel::title) { s, name -> s.title.similarity(name.title) >= .8f }
-            .toList()
     }
 
     private fun addOrRemoveSource(isChecked: Boolean, sources: Sources) {

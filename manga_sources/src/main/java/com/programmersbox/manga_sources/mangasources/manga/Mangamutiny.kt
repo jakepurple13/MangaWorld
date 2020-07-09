@@ -42,15 +42,17 @@ object Mangamutiny : MangaSource {
     override fun getManga(pageNumber: Int): List<MangaModel> = getJsonApi<Munity>(
         "$baseUrl$mangaApiPath?sort=-lastReleasedAt&limit=20${if (pageNumber != 1) "&skip=${pageNumber * 20}" else ""}",
         header
-    )?.items?.map {
-        MangaModel(
-            title = it.title.orEmpty(),
-            description = "",
-            mangaUrl = "$baseUrl$mangaApiPath/${it.slug}",
-            imageUrl = it.thumbnail.orEmpty(),
-            source = Sources.MANGAMUTINY
-        )
-    }.orEmpty()
+    )
+        ?.items
+        ?.map {
+            MangaModel(
+                title = it.title.orEmpty(),
+                description = "",
+                mangaUrl = "$baseUrl$mangaApiPath/${it.slug}",
+                imageUrl = it.thumbnail.orEmpty(),
+                source = Sources.MANGAMUTINY
+            )
+        }.orEmpty()
 
     override fun toInfoModel(model: MangaModel): MangaInfoModel = getJsonApi<MangaInfoMunity>(model.mangaUrl, header).let {
         MangaInfoModel(
