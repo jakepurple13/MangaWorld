@@ -281,6 +281,7 @@ class MangaActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
+        FirebaseDb.detachChapterListener()
         disposable.dispose()
         super.onDestroy()
     }

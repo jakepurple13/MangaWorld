@@ -95,13 +95,11 @@ class MangaWorldApp : Application() {
                                     .build()
                             )
                             .also {
-                                /*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                                     it.setInitialDelay(timeToNextHour(), TimeUnit.MILLISECONDS)
                                 } else {
                                     it.setInitialDelay(10, TimeUnit.SECONDS)
-                                }*/
-
-                                it.setInitialDelay(10, TimeUnit.SECONDS)
+                                }
                             }
                             .build()
                     ).state.observeForever { println(it) }

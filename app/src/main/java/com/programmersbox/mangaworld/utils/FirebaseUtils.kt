@@ -14,10 +14,7 @@ import com.google.android.gms.tasks.Tasks
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
-import com.google.firebase.firestore.FieldValue
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.FirebaseFirestoreSettings
-import com.google.firebase.firestore.Source
+import com.google.firebase.firestore.*
 import com.programmersbox.loggingutils.Loged
 import com.programmersbox.loggingutils.f
 import com.programmersbox.manga_db.MangaDao
@@ -288,7 +285,7 @@ object FirebaseDb {
             ?.second
             ?.map { it.toMangaModel() }
             ?.find { it.mangaUrl == url }
-            ?.let { emitter(true) } ?: emitter(false)
+            .let { emitter(it != null) }
     }
 
     fun findMangaByUrlMaybe(url: String): Maybe<Boolean> = Maybe.create { emitter ->
@@ -315,10 +312,19 @@ object FirebaseDb {
         }*/
     }
 
+    private var allMangaFlowableListener: ListenerRegistration? = null
+
+    fun detachListener() {
+        allMangaFlowableListener?.remove()
+        allMangaFlowableListener = null
+    }
+
     fun getAllMangaFlowable(): Flowable<List<MangaDbModel>> = PublishSubject.create<List<MangaDbModel>> { emitter ->
-        mangaDoc?.addSnapshotListener { documentSnapshot, _ ->
+        allMangaFlowableListener?.remove()
+        allMangaFlowableListener = mangaDoc?.addSnapshotListener { documentSnapshot, _ ->
             documentSnapshot?.toObject(FirebaseAllManga::class.java)?.second?.map { it.toMangaDbModel() }?.let { emitter(it) }
-        } ?: emitter()
+        }
+        if (allMangaFlowableListener == null) emitter()
     }.subscribeOn(Schedulers.io()).toLatestFlowable()
 
     private data class FirebaseChapter(
@@ -339,12 +345,21 @@ object FirebaseDb {
         ?.second
         ?.map { it.toMangaChapter() }
 
+    private var allChapterFlowableListener: ListenerRegistration? = null
+
+    fun detachChapterListener() {
+        allChapterFlowableListener?.remove()
+        allChapterFlowableListener = null
+    }
+
     fun getAllChapterFlowable(): Flowable<List<MangaReadChapter>> = PublishSubject.create<List<MangaReadChapter>> { emitter ->
-        chapterDoc?.addSnapshotListener { documentSnapshot, _ ->
+        allChapterFlowableListener?.remove()
+        allChapterFlowableListener = chapterDoc?.addSnapshotListener { documentSnapshot, _ ->
             documentSnapshot?.toObject(FirebaseAllChapter::class.java)
                 ?.second
                 ?.map { it.toMangaChapter() }?.let { emitter(it) }
-        } ?: emitter()
+        }
+        if (allChapterFlowableListener == null) emitter()
     }.toLatestFlowable().subscribeOn(Schedulers.io())
 
     fun addChapter(mangaModel: MangaReadChapter) = Completable.create { emitter ->

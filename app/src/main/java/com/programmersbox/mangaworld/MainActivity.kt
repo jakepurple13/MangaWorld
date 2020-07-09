@@ -252,6 +252,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
+        FirebaseDb.detachListener()
         if (!stayOnAdult && currentSource.isAdult) currentSource = Sources.values().filterNot(Sources::isAdult).random()
         disposable.dispose()
         super.onDestroy()

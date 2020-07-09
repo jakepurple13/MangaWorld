@@ -251,14 +251,14 @@ class ExampleUnitTest {
 
     @Test
     fun park() {
-        /*val park = MangaPark.getManga()
+        val park = MangaPark.getManga()
         println(park)
-        val d = park.random().toInfoModel()
-        println(d)
-        val s = d.chapters.random().getPageInfo()
-        println(s)
-        val r = MangaPark.searchManga("solo", 1, park)
-        println(r)*/
+        /* val d = park.random().toInfoModel()
+         println(d)
+         val s = d.chapters.random().getPageInfo()
+         println(s)
+         val r = MangaPark.searchManga("solo", 1, park)
+         println(r)*/
         val dr = MangaPark.getMangaModelByUrl("https://mangapark.net/manga/furyou-taimashi-reina-otosama")
         val f = dr.toInfoModel()
         println(f)

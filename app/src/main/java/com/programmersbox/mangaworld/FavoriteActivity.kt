@@ -15,6 +15,7 @@ import com.programmersbox.manga_db.MangaDatabase
 import com.programmersbox.manga_sources.mangasources.MangaModel
 import com.programmersbox.manga_sources.mangasources.Sources
 import com.programmersbox.mangaworld.adapters.GalleryFavoriteAdapter
+import com.programmersbox.mangaworld.utils.FirebaseDb
 import com.programmersbox.mangaworld.utils.dbAndFireManga2
 import com.programmersbox.mangaworld.utils.groupManga
 import com.programmersbox.mangaworld.views.AutoFitGridLayoutManager
@@ -121,6 +122,7 @@ class FavoriteActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
+        FirebaseDb.detachListener()
         disposable.dispose()
         super.onDestroy()
     }

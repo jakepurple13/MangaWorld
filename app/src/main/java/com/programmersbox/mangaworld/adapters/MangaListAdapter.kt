@@ -260,7 +260,7 @@ class GalleryListAdapter(context: Context, disposable: CompositeDisposable = Com
                 true
             }
 
-            dao.getAllManga()
+            /*dao.getAllManga()
                 //context.dbAndFireManga(dao)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -275,7 +275,7 @@ class GalleryListAdapter(context: Context, disposable: CompositeDisposable = Com
                         if (it) context.getText(R.string.removeFromFavorites) else context.getText(R.string.addToFavorites)
                     )
                 }
-                .addTo(disposable)
+                .addTo(disposable)*/
         }
 
         bind(item)
