@@ -1,9 +1,8 @@
 {
-  "version": "1.7",
-  "url": "https://github.com/jakepurple13/MangaWorld/releases/download/v16/app-debug.apk",
+  "version": "1.8",
+  "url": "https://github.com/jakepurple13/MangaWorld/releases/download/v17/app-debug.apk",
   "releaseNotes": [
-    "- Click and hold on sources in favorites will now show just that source",
-    "- Added new source! Mangamutiny!",
-    "- Improved notifications a bit"
+    "- Improved Update Checker (again)",
+    "- Small improvements"
   ]
 }
