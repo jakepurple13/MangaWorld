@@ -7,6 +7,7 @@ import com.programmersbox.gsonutils.toJson
 import com.programmersbox.manga_sources.mangasources.*
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONObject
 import java.text.SimpleDateFormat
 import java.util.*
@@ -28,7 +29,7 @@ object INKR : MangaSource {
 
         val request = Request.Builder()
             .url("$apiUrl/mrs_search")
-            .post(RequestBody.create(jsonType, mapOf("type" to "series", "keywords" to searchText).toJson()))
+            .post(mapOf("type" to "series", "keywords" to searchText).toJson().toRequestBody(jsonType))
             .cacheControl(CacheControl.Builder().maxAge(10, TimeUnit.MINUTES).build())
             .build()
 

@@ -4,12 +4,10 @@ import android.app.PendingIntent
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.Icon
-import android.os.Build
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.work.*
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.mikepenz.iconics.IconicsDrawable
 import com.mikepenz.iconics.typeface.library.googlematerial.GoogleMaterial
@@ -20,7 +18,6 @@ import com.programmersbox.gsonutils.putExtra
 import com.programmersbox.helpfulutils.NotificationDslBuilder
 import com.programmersbox.helpfulutils.notificationManager
 import com.programmersbox.helpfulutils.sizedListOf
-import com.programmersbox.helpfulutils.timeToNextHourOrHalf
 import com.programmersbox.manga_db.MangaDatabase
 import com.programmersbox.mangaworld.utils.*
 import com.programmersbox.rxutils.invoke
@@ -134,33 +131,7 @@ class SettingsActivity : AppCompatActivity() {
             checkedChangeListener = object : TwoStatePreference.OnCheckedChangeListener {
                 override fun onCheckedChanged(preference: TwoStatePreference, holder: PreferencesAdapter.ViewHolder?, checked: Boolean): Boolean {
                     useUpdate = checked
-                    val work = WorkManager.getInstance(this@SettingsActivity)
-                    if (checked) {
-                        work.enqueueUniquePeriodicWork(
-                            "updateChecks",
-                            ExistingPeriodicWorkPolicy.KEEP,
-                            PeriodicWorkRequest.Builder(UpdateWorker::class.java, 1, TimeUnit.HOURS, 15, TimeUnit.MINUTES)
-                                .setConstraints(
-                                    Constraints.Builder()
-                                        .setRequiredNetworkType(NetworkType.CONNECTED)
-                                        .setRequiresBatteryNotLow(false)
-                                        .setRequiresCharging(false)
-                                        .setRequiresDeviceIdle(false)
-                                        .setRequiresStorageNotLow(false)
-                                        .build()
-                                )
-                                .also {
-                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                                        it.setInitialDelay(timeToNextHourOrHalf(), TimeUnit.MILLISECONDS)
-                                    } else {
-                                        it.setInitialDelay(10, TimeUnit.SECONDS)
-                                    }
-                                }
-                                .build()
-                        ).state.observeForever { println("The state is $it") }
-                    } else {
-                        work.cancelUniqueWork("updateChecks")
-                    }
+                    MangaWorldApp.setupUpdate(this@SettingsActivity, checked)
                     return true
                 }
             }

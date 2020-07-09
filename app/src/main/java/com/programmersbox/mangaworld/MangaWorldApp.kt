@@ -1,6 +1,7 @@
 package com.programmersbox.mangaworld
 
 import android.app.Application
+import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.widget.Toast
@@ -66,36 +67,48 @@ class MangaWorldApp : Application() {
 
         //work.cancelAllWork()
 
-        try {
+        setupUpdate(this, useUpdate)
 
-            val work = WorkManager.getInstance(this)
+    }
 
-            if (useUpdate) {
-                work.enqueueUniquePeriodicWork(
-                    "updateChecks",
-                    ExistingPeriodicWorkPolicy.KEEP,
-                    PeriodicWorkRequest.Builder(UpdateWorker::class.java, 1, TimeUnit.HOURS, 7, TimeUnit.MINUTES)
-                        .setConstraints(
-                            Constraints.Builder()
-                                .setRequiredNetworkType(NetworkType.CONNECTED)
-                                .setRequiresBatteryNotLow(false)
-                                .setRequiresCharging(false)
-                                .setRequiresDeviceIdle(false)
-                                .setRequiresStorageNotLow(false)
-                                .build()
-                        )
-                        .also {
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                                it.setInitialDelay(timeToNextHour(), TimeUnit.MILLISECONDS)
-                            } else {
+    companion object {
+        fun setupUpdate(context: Context, shouldCheck: Boolean) {
+            try {
+
+                val work = WorkManager.getInstance(context)
+
+                //work.cancelAllWork()
+
+                if (shouldCheck) {
+                    work.enqueueUniquePeriodicWork(
+                        "updateChecks",
+                        ExistingPeriodicWorkPolicy.KEEP,
+                        PeriodicWorkRequest.Builder(UpdateWorker::class.java, 1, TimeUnit.HOURS)
+                            //PeriodicWorkRequest.Builder(UpdateWorker::class.java, 15, TimeUnit.MINUTES)
+                            .setConstraints(
+                                Constraints.Builder()
+                                    .setRequiredNetworkType(NetworkType.CONNECTED)
+                                    .setRequiresBatteryNotLow(false)
+                                    .setRequiresCharging(false)
+                                    .setRequiresDeviceIdle(false)
+                                    .setRequiresStorageNotLow(false)
+                                    .build()
+                            )
+                            .also {
+                                /*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                    it.setInitialDelay(timeToNextHour(), TimeUnit.MILLISECONDS)
+                                } else {
+                                    it.setInitialDelay(10, TimeUnit.SECONDS)
+                                }*/
+
                                 it.setInitialDelay(10, TimeUnit.SECONDS)
                             }
-                        }
-                        .build()
-                ).state.observeForever { println("The state is $it") }
-            } else work.cancelAllWork()
-        } catch (e: Exception) {
-            e.printStackTrace()
+                            .build()
+                    ).state.observeForever { println(it) }
+                } else work.cancelAllWork()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 

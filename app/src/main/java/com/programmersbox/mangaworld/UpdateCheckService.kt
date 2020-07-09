@@ -12,6 +12,7 @@ import android.graphics.drawable.Icon
 import androidx.core.app.TaskStackBuilder
 import androidx.work.RxWorker
 import androidx.work.WorkerParameters
+import com.google.common.util.concurrent.ListenableFuture
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.analytics.ktx.logEvent
@@ -119,42 +120,73 @@ class UpdateWorker(context: Context, workerParams: WorkerParameters) : RxWorker(
     private val update by lazy { UpdateNotification(this.applicationContext) }
     private val dao by lazy { MangaDatabase.getInstance(this@UpdateWorker.applicationContext).mangaDao() }
 
-    override fun createWork(): Single<Result> = Single.create<List<MangaDbModel>> { emitter ->
-        val list = applicationContext.dbAndFireMangaSync2(dao)
-        val sourceList = Sources.getUpdateSearches()
-            .filter { s -> list.any { m -> m.source == s } }
-            .flatMap { m -> m.getManga() }
-        emitter(list.filter { m -> sourceList.any { it.mangaUrl == m.mangaUrl } })
+    override fun startWork(): ListenableFuture<Result> {
+        update.sendRunningNotification(100, 0, this@UpdateWorker.applicationContext.getText(R.string.startingUpdateCheck))
+        return super.startWork()
     }
-        .map { list ->
-            list.mapIndexedNotNull { index, model ->
-                update.sendRunningNotification(list.size, index, model.title)
-                try {
-                    val newData = model.toMangaModel().toInfoModel()
-                    if (model.numChapters >= newData.chapters.size) null
-                    else Pair(newData, model)
-                } catch (e: Exception) {
-                    println(e.localizedMessage)
-                    null
+
+    override fun createWork(): Single<Result> {
+        Loged.f("Starting check here")
+        return Single.create<List<MangaDbModel>> { emitter ->
+            Loged.f("Start")
+            val list = applicationContext.dbAndFireMangaSync2(dao)
+            /*val sourceList = Sources.getUpdateSearches()
+                .filter { s -> list.any { m -> m.source == s } }
+                .flatMap { m -> m.getManga() }*/
+            val newList = list.intersect(
+                Sources.getUpdateSearches()
+                    .filter { s -> list.any { m -> m.source == s } }
+                    .mapNotNull { m ->
+                        try {
+                            m.getManga()
+                        } catch (e: Exception) {
+                            FirebaseCrashlytics.getInstance().log("$m had an error")
+                            FirebaseCrashlytics.getInstance().recordException(e)
+                            Firebase.analytics.logEvent("manga_load_error") { param(FirebaseAnalytics.Param.ITEM_NAME, m.name) }
+                            null
+                        }
+                    }.flatten()
+            ) { o, n -> o.mangaUrl == n.mangaUrl }
+            //emitter(list.filter { m -> sourceList.any { it.mangaUrl == m.mangaUrl } })
+            emitter(newList.distinctBy { it.mangaUrl })
+        }
+            .map { list ->
+                Loged.f("Map1")
+                list.mapIndexedNotNull { index, model ->
+                    update.sendRunningNotification(list.size, index, model.title)
+                    try {
+                        val newData = model.toMangaModel().toInfoModel()
+                        if (model.numChapters >= newData.chapters.size) null
+                        else Pair(newData, model)
+                    } catch (e: Exception) {
+                        println(e.localizedMessage)
+                        null
+                    }
                 }
             }
-        }
-        .map {
-            it.forEach { triple ->
-                val manga = triple.second
-                manga.numChapters = triple.first.chapters.size
-                dao.updateMangaById(manga).subscribe()
-                FirebaseDb.updateManga(manga).subscribe()
+            .map {
+                Loged.f("Map2")
+                it.forEach { triple ->
+                    val manga = triple.second
+                    manga.numChapters = triple.first.chapters.size
+                    dao.updateMangaById(manga).subscribe()
+                    FirebaseDb.updateManga(manga).subscribe()
+                }
+                update.mapDbModel(it)
             }
-            update.mapDbModel(it)
-        }
-        .map {
-            update.onEnd(it)
-            update.sendFinishedNotification()
-        }
-        .doOnSubscribe { update.sendRunningNotification(100, 0, this@UpdateWorker.applicationContext.getText(R.string.startingUpdateCheck)) }
-        .map { Result.success() }
-        .onErrorReturn { Result.failure() }
+            .map {
+                update.onEnd(it)
+                Loged.f("Finished!")
+            }
+            .map {
+                update.sendFinishedNotification()
+                Result.success()
+            }
+            .onErrorReturn {
+                update.sendFinishedNotification()
+                Result.failure()
+            }
+    }
 
 }
 
