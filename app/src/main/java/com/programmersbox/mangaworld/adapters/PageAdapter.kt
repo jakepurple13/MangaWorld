@@ -5,6 +5,7 @@ import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.RequestBuilder
 import com.github.piasy.biv.indicator.progresspie.ProgressPieIndicator
@@ -19,6 +20,7 @@ import com.programmersbox.mangaworld.utils.FirebaseDb
 import com.programmersbox.thirdpartyutils.DragSwipeGlideAdapter
 import io.reactivex.Completable
 import io.reactivex.schedulers.Schedulers
+import kotlinx.android.synthetic.main.page_end_chapter_item.view.*
 import kotlinx.android.synthetic.main.page_item.view.*
 import kotlinx.android.synthetic.main.page_next_chapter_item.view.*
 import kotlinx.coroutines.GlobalScope
@@ -52,9 +54,9 @@ class PageHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         image.setOnLongClickListener {
             try {
                 MaterialAlertDialogBuilder(itemView.context)
-                    .setTitle("Download page?")
-                    .setPositiveButton("Yes") { d, _ -> canDownload(item!!);d.dismiss() }
-                    .setNegativeButton("No") { d, _ -> d.dismiss() }
+                    .setTitle(itemView.context.getText(R.string.downloadPage))
+                    .setPositiveButton(itemView.context.getText(android.R.string.ok)) { d, _ -> canDownload(item!!);d.dismiss() }
+                    .setNegativeButton(itemView.context.getText(R.string.fui_cancel)) { d, _ -> d.dismiss() }
                     .show()
             } catch (e: Exception) {
             }
@@ -66,7 +68,7 @@ class PageHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 class PageAdapter2(
     override val fullRequest: RequestBuilder<Drawable>,
     override val thumbRequest: RequestBuilder<Drawable>,
-    private val context: Context,
+    private val activity: AppCompatActivity,
     dataList: MutableList<String>,
     private val chapterModels: List<ChapterModel>,
     var currentChapter: Int,
@@ -74,6 +76,8 @@ class PageAdapter2(
     private val loadNewPages: (ChapterModel) -> Unit = {},
     private val canDownload: (String) -> Unit = { }
 ) : DragSwipeGlideAdapter<String, Page2Holder, String>(dataList) {
+
+    private val context: Context = activity
 
     private val dao by lazy { MangaDatabase.getInstance(context).mangaDao() }
 
@@ -97,34 +101,32 @@ class PageAdapter2(
     }
 
     override fun onBindViewHolder(holder: Page2Holder, position: Int) {
-        dataList.getOrNull(position)?.let { super.onBindViewHolder(holder, position) } ?: (holder as? Page2Holder.LoadNextChapterHolder)?.render {
-            chapterModels.getOrNull(--currentChapter)?.let(loadNewPages)
-            chapterModels.getOrNull(currentChapter)?.let { item ->
-                MangaReadChapter(item.url, item.name, mangaUrl)
-                    .let {
-                        Completable.mergeArray(
-                            FirebaseDb.addChapter(it),
-                            dao.insertChapter(it)
-                        )
+        when (holder) {
+            is Page2Holder.ReadingHolder -> holder.render(dataList[position], canDownload)
+            is Page2Holder.LoadNextChapterHolder -> {
+                holder.render {
+                    runOnUIThread {
+                        chapterModels.getOrNull(--currentChapter)?.let(loadNewPages)
+                        chapterModels.getOrNull(currentChapter)?.let { item ->
+                            MangaReadChapter(item.url, item.name, mangaUrl)
+                                .let {
+                                    Completable.mergeArray(
+                                        FirebaseDb.addChapter(it),
+                                        dao.insertChapter(it)
+                                    )
+                                }
+                                .subscribeOn(Schedulers.io())
+                                .observeOn(Schedulers.io())
+                                .subscribe()
+                        }
                     }
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(Schedulers.io())
-                    .subscribe()
+                }
             }
-
+            is Page2Holder.LastChapterHolder -> holder.render(activity)
         }
     }
 
-    override fun Page2Holder.onBind(item: String, position: Int) = when (this) {
-        is Page2Holder.ReadingHolder -> render(item, canDownload)
-        is Page2Holder.LastChapterHolder -> Unit
-        is Page2Holder.LoadNextChapterHolder -> render {
-            GlobalScope.launch {
-                val newList = chapterModels.getOrNull(--currentChapter)?.getPageInfo()?.pages
-                runOnUIThread { newList?.let { setListNotify(it) } }
-            }
-        }
-    }
+    override fun Page2Holder.onBind(item: String, position: Int) = Unit
 
     //override fun getPreloadItems(position: Int): List<String> = Collections.singletonList(dataList[position].let(itemToModel))
 
@@ -134,10 +136,15 @@ class PageAdapter2(
 
 sealed class Page2Holder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
-    class LastChapterHolder(itemView: View) : Page2Holder(itemView)
+    class LastChapterHolder(itemView: View) : Page2Holder(itemView) {
+        private val returnButton = itemView.goBackFromReading!!
+        fun render(activity: AppCompatActivity) {
+            returnButton.setOnClickListener { activity.finish() }
+        }
+    }
 
     class ReadingHolder(itemView: View) : Page2Holder(itemView) {
-        val image = itemView.chapterPage!!
+        private val image = itemView.chapterPage!!
 
         fun render(item: String?, canDownload: (String) -> Unit) {
             image.setProgressIndicator(ProgressPieIndicator())
@@ -145,9 +152,9 @@ sealed class Page2Holder(itemView: View) : RecyclerView.ViewHolder(itemView) {
             image.setOnLongClickListener {
                 try {
                     MaterialAlertDialogBuilder(itemView.context)
-                        .setTitle("Download page?")
-                        .setPositiveButton("Yes") { d, _ -> canDownload(item!!);d.dismiss() }
-                        .setNegativeButton("No") { d, _ -> d.dismiss() }
+                        .setTitle(itemView.context.getText(R.string.downloadPage))
+                        .setPositiveButton(itemView.context.getText(android.R.string.ok)) { d, _ -> canDownload(item!!);d.dismiss() }
+                        .setNegativeButton(itemView.context.getText(R.string.fui_cancel)) { d, _ -> d.dismiss() }
                         .show()
                 } catch (e: Exception) {
                 }
@@ -159,8 +166,8 @@ sealed class Page2Holder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     class LoadNextChapterHolder(itemView: View) : Page2Holder(itemView) {
         private val loadButton = itemView.loadNextChapter!!
 
-        fun render(load: () -> Unit) {
-            loadButton.setOnClickListener { load() }
+        fun render(load: suspend () -> Unit) {
+            loadButton.setOnClickListener { GlobalScope.launch { load() } }
         }
     }
 

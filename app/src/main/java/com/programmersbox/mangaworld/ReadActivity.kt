@@ -91,7 +91,7 @@ class ReadActivity : AppCompatActivity() {
                     .asDrawable()
                     .diskCacheStrategy(DiskCacheStrategy.DATA)
                     .transition(withCrossFade()),
-                context = this@ReadActivity,
+                activity = this@ReadActivity,
                 dataList = mutableListOf(),
                 chapterModels = list,
                 currentChapter = list.indexOfFirst { l -> l.url == url },

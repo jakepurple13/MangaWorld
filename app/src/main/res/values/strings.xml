@@ -24,4 +24,8 @@
         <item quantity="other">Search %d Favorites</item>
     </plurals>
 
+    <string name="removeSourceFromFavorites">Remove Source from Favorites</string>
+    <string name="selectSource">Select %s Source</string>
+    <string name="downloadPage">Download Page?</string>
+
 </resources>

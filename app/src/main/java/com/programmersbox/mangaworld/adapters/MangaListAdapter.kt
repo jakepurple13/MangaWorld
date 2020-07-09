@@ -342,12 +342,12 @@ class GalleryListFavoriteAdapter(private val context: Context) : DragSwipeAdapte
 
             if (item.second.size > 1) {
                 MaterialAlertDialogBuilder(context)
-                    .setTitle("Select ${item.first} Source")
+                    .setTitle(context.getString(R.string.selectSource, item.first))
                     .setItems(listToArray(item.second)) { d, index ->
                         startActivity(item.second[index])
                         d.dismiss()
                     }
-                    .setNegativeButton("Cancel") { d, _ -> d.dismiss() }
+                    .setNegativeButton(context.getText(R.string.fui_cancel)) { d, _ -> d.dismiss() }
                     .show()
             } else {
                 startActivity(item.second.first())
@@ -357,12 +357,12 @@ class GalleryListFavoriteAdapter(private val context: Context) : DragSwipeAdapte
         itemView.setOnLongClickListener {
             if (item.second.size > 1) {
                 MaterialAlertDialogBuilder(context)
-                    .setTitle("Remove Source from Favorites")
+                    .setTitle(context.getText(R.string.removeSourceFromFavorites))
                     .setItems(listToArray(item.second)) { d, index ->
                         addOrRemoveManga(itemView, item.second[index])
                         d.dismiss()
                     }
-                    .setNegativeButton("Cancel") { d, _ -> d.dismiss() }
+                    .setNegativeButton(context.getText(R.string.fui_cancel)) { d, _ -> d.dismiss() }
                     .show()
             } else {
                 PopupMenu(context, itemView)
@@ -546,12 +546,12 @@ sealed class GalleryFavoriteAdapter<T>(
 
                 if (item.second.size > 1) {
                     MaterialAlertDialogBuilder(context)
-                        .setTitle("Select ${item.first} Source")
+                        .setTitle(context.getString(R.string.selectSource, item.first))
                         .setItems(listToArray(item.second)) { d, index ->
                             startActivity(item.second[index])
                             d.dismiss()
                         }
-                        .setNegativeButton("Cancel") { d, _ -> d.dismiss() }
+                        .setNegativeButton(context.getText(R.string.fui_cancel)) { d, _ -> d.dismiss() }
                         .show()
                 } else {
                     startActivity(item.second.first())
@@ -561,12 +561,12 @@ sealed class GalleryFavoriteAdapter<T>(
             itemView.setOnLongClickListener {
                 if (item.second.size > 1) {
                     MaterialAlertDialogBuilder(context)
-                        .setTitle("Remove Source from Favorites")
+                        .setTitle(context.getText(R.string.removeSourceFromFavorites))
                         .setItems(listToArray(item.second)) { d, index ->
                             addOrRemoveManga(itemView, item.second[index])
                             d.dismiss()
                         }
-                        .setNegativeButton("Cancel") { d, _ -> d.dismiss() }
+                        .setNegativeButton(context.getText(R.string.fui_cancel)) { d, _ -> d.dismiss() }
                         .show()
                 } else {
                     PopupMenu(context, itemView)

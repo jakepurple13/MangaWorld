@@ -20,6 +20,7 @@ import com.programmersbox.mangaworld.utils.groupManga
 import com.programmersbox.mangaworld.views.AutoFitGridLayoutManager
 import com.programmersbox.rxutils.behaviorDelegate
 import com.programmersbox.rxutils.toLatestFlowable
+import io.reactivex.Flowable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.Flowables
@@ -60,19 +61,21 @@ class FavoriteActivity : AppCompatActivity() {
         )
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .map { if (groupManga) mapManga2(it) else mapManga(it) }
-            .subscribe { list ->
-                @Suppress("UNCHECKED_CAST")
-                setNewDataUi(
-                    when (val a = adapterType) {
-                        is GalleryFavoriteAdapter.GalleryListingAdapter -> a.setData(list as List<MangaModel>).let { list.size }
-                        is GalleryFavoriteAdapter.GalleryGroupAdapter -> a.setData2((list as Map<String, List<MangaModel>>).toList())
-                            .let { list.flatMap { it.value }.size }
-                    }
-                )
-            }
+            .let { if (groupManga) it.toGroup() else it.toListing() }
             .addTo(disposable)
     }
+
+    private fun Flowable<Triple<List<MangaModel>, MutableList<Sources>, CharSequence>>.toGroup() = map { mapManga2(it) }
+        .subscribe { list ->
+            (adapterType as GalleryFavoriteAdapter.GalleryGroupAdapter).setData2(list.toList())
+            setNewDataUi(list.flatMap(Map.Entry<String, List<MangaModel>>::value).size)
+        }
+
+    private fun Flowable<Triple<List<MangaModel>, MutableList<Sources>, CharSequence>>.toListing() = map { mapManga(it) }
+        .subscribe { list ->
+            (adapterType as GalleryFavoriteAdapter.GalleryListingAdapter).setData(list)
+            setNewDataUi(list.size)
+        }
 
     private fun setNewDataUi(size: Int) {
         favorite_search_layout.hint = resources.getQuantityString(R.plurals.numFavorites, size, size)

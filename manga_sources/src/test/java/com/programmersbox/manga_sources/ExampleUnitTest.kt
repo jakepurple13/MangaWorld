@@ -3,7 +3,9 @@ package com.programmersbox.manga_sources
 import com.programmersbox.gsonutils.fromJson
 import com.programmersbox.gsonutils.getApi
 import com.programmersbox.gsonutils.toPrettyJson
+import com.programmersbox.helpfulutils.groupByCondition
 import com.programmersbox.helpfulutils.random
+import com.programmersbox.helpfulutils.similarity
 import com.programmersbox.manga_sources.mangasources.MangaModel
 import com.programmersbox.manga_sources.mangasources.Sources
 import com.programmersbox.manga_sources.mangasources.manga.*
@@ -284,6 +286,25 @@ class ExampleUnitTest {
         println(f1)
         println(Mangamutiny.getPageInfo(f1))
         println(Mangamutiny.searchManga("dragon", 1, api))
+    }
+
+    @Test
+    fun testingAll() {
+        val all = Sources.getUpdateSearches()
+            .mapNotNull {
+                try {
+                    it.getManga()
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    null
+                }
+            }
+            .flatten()
+            .sortedBy(MangaModel::title)
+            .groupByCondition(MangaModel::title) { s, name -> s.title.similarity(name.title) >= .8f }
+
+        println(all.entries.joinToString("\n") { "${it.key} = ${it.value.map { "(${it.source}, ${it.title})" }}" })
+
     }
 
 }
