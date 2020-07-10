@@ -130,10 +130,12 @@ class MainActivity : AppCompatActivity() {
                     MaterialAlertDialogBuilder(this)
                         .setTitle(getText(R.string.chooseASource))
                         .setEnumSingleChoiceItems(Sources.values().map(Sources::name).toTypedArray(), currentSource) { source, dialog ->
-                            currentSource = source
-                            search_layout.hint = getString(R.string.searchHint, currentSource.name)
-                            reset()
-                            dialog.dismiss()
+                            if (currentSource != source) {
+                                currentSource = source
+                                search_layout.hint = getString(R.string.searchHint, currentSource.name)
+                                reset()
+                                dialog.dismiss()
+                            }
                         }
                         .show()
                     //menuOptions.close() // To close the Speed Dial with animation

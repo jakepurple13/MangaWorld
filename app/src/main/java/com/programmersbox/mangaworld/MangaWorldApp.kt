@@ -37,8 +37,9 @@ class MangaWorldApp : Application() {
 
         RxJavaPlugins.setErrorHandler {
             it.printStackTrace()
+            FirebaseCrashlytics.getInstance().recordException(it)
             try {
-                runOnUIThread { Toast.makeText(this, it.cause?.localizedMessage, Toast.LENGTH_SHORT).show() }
+                //runOnUIThread { Toast.makeText(this, it.cause?.localizedMessage, Toast.LENGTH_SHORT).show() }
             } catch (e: Exception) {
                 FirebaseCrashlytics.getInstance().recordException(e)
             }
