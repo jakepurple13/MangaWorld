@@ -67,7 +67,6 @@ class ChapterListAdapter(
     override fun ChapterHolder.onBind(item: ChapterModel, position: Int) {
         bind(item, info)
         itemView.setOnClickListener {
-            menu.resetStatus()
             readChapter.isChecked = true
             if (!isAdult) context.addToHistory(toChapterHistory(item))
             context.startActivity(
@@ -81,9 +80,11 @@ class ChapterListAdapter(
                     putExtra("mangaInfoUrl", mangaUrl)
                 }
             )
+            menu.resetStatus()
         }
 
         startReading.setOnClickListener { itemView.performClick() }
+        layout.setOnClickListener { itemView.performClick() }
 
         readChapterButton.setOnClickListener { itemView.performClick() }
 
@@ -163,6 +164,7 @@ class ChapterHolder(private val binding: ChapterListItemBinding) : RecyclerView.
     val downloadChapterButton = itemView.downloadChapterButton!!
     val markButton = itemView.markedReadButton!!
     val menu = itemView.swipeMenu!!
+    val layout = itemView.chapterListCard!!
 
     //val chapterName = itemView.chapterName!!
     fun bind(item: ChapterModel, swatchInfo: SwatchInfo?) {
