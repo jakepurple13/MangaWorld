@@ -26,15 +26,22 @@
         tools:text="@tools:sample/full_names"
         tools:visibility="visible" />-->
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/readView"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:orientation="vertical"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/readRefresh"
         app:layout_constraintTop_toBottomOf="@id/infoLayout"
         app:layout_constraintBottom_toBottomOf="parent"
-        tools:listitem="@layout/page_item" />
+        android:layout_width="match_parent"
+        android:layout_height="0dp">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/readView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            tools:listitem="@layout/page_item" />
+
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
     <RelativeLayout
         android:id="@+id/infoLayout"

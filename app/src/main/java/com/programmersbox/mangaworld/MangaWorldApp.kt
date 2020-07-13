@@ -4,7 +4,6 @@ import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import android.widget.Toast
 import androidx.work.*
 import com.facebook.stetho.Stetho
 import com.github.piasy.biv.BigImageViewer
@@ -14,7 +13,12 @@ import com.programmersbox.helpfulutils.*
 import com.programmersbox.loggingutils.Loged
 import com.programmersbox.mangaworld.utils.MangaInfoCache
 import com.programmersbox.mangaworld.utils.useUpdate
+import com.tonyodev.fetch2.DefaultFetchNotificationManager
+import com.tonyodev.fetch2.Fetch
+import com.tonyodev.fetch2.FetchConfiguration
+import com.tonyodev.fetch2okhttp.OkHttpDownloader
 import io.reactivex.plugins.RxJavaPlugins
+import okhttp3.OkHttpClient
 import java.util.concurrent.TimeUnit
 
 class MangaWorldApp : Application() {
@@ -34,6 +38,18 @@ class MangaWorldApp : Application() {
         }
 
         BigImageViewer.initialize(GlideImageLoader.with(this))
+
+        val okHttpClient: OkHttpClient = OkHttpClient.Builder().build()
+
+        val fetchConfiguration: FetchConfiguration = FetchConfiguration.Builder(this)
+            .setDownloadConcurrentLimit(10)
+            .setHttpDownloader(OkHttpDownloader(okHttpClient))
+            .setNotificationManager(object : DefaultFetchNotificationManager(this) {
+                override fun getFetchInstanceForNamespace(namespace: String): Fetch = Fetch.getDefaultInstance()
+            })
+            .build()
+
+        Fetch.setDefaultInstanceConfiguration(fetchConfiguration)
 
         RxJavaPlugins.setErrorHandler {
             it.printStackTrace()

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.programmersbox.mangaworld">
 
     <uses-permission android:name="android.permission.INTERNET" />
@@ -15,14 +16,17 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
+        android:requestLegacyExternalStorage="true"
         android:theme="@style/AppTheme"
-        android:usesCleartextTraffic="true">
+        android:usesCleartextTraffic="true"
+        tools:targetApi="q">
         <activity
             android:name=".BubbleActivity"
             android:allowEmbedded="true"
             android:documentLaunchMode="always"
             android:resizeableActivity="true"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            tools:targetApi="n" />
         <activity android:name=".HistoryActivity" />
         <activity android:name=".DeepLinkActivity">
             <intent-filter android:label="View Manga">
@@ -70,6 +74,7 @@
         <activity android:name=".FavoriteActivity" />
         <activity
             android:name=".ReadActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.Reading" />
         <activity android:name=".MangaActivity" />
         <activity android:name=".MainActivity">

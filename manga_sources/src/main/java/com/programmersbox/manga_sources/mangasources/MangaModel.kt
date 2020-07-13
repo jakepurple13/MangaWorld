@@ -40,7 +40,7 @@ data class ChapterModel(
     val name: String,
     val url: String,
     val uploaded: String,
-    private val sources: Sources
+    val sources: Sources
 ) : ViewModel() {
     var uploadedTime: Long? = null
     fun getPageInfo() = sources.getPageInfo(this)

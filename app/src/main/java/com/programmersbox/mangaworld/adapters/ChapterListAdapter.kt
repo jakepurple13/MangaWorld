@@ -3,6 +3,7 @@ package com.programmersbox.mangaworld.adapters
 import android.content.Context
 import android.content.Intent
 import android.content.res.ColorStateList
+import android.os.Environment
 import android.view.ViewGroup
 import android.widget.CheckBox
 import android.widget.TextView
@@ -10,6 +11,8 @@ import androidx.core.graphics.ColorUtils
 import androidx.databinding.BindingAdapter
 import androidx.palette.graphics.Palette
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.button.MaterialButton
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.perfomer.blitz.setTimeAgo
 import com.programmersbox.dragswipe.DragSwipeAdapter
@@ -17,6 +20,8 @@ import com.programmersbox.gsonutils.putExtra
 import com.programmersbox.helpfulutils.isDateBetween
 import com.programmersbox.helpfulutils.layoutInflater
 import com.programmersbox.helpfulutils.whatIfNotNull
+import com.programmersbox.loggingutils.Loged
+import com.programmersbox.loggingutils.f
 import com.programmersbox.manga_db.MangaDao
 import com.programmersbox.manga_db.MangaReadChapter
 import com.programmersbox.manga_sources.mangasources.ChapterModel
@@ -28,9 +33,16 @@ import com.programmersbox.mangaworld.utils.ChapterHistory
 import com.programmersbox.mangaworld.utils.FirebaseDb
 import com.programmersbox.mangaworld.utils.addToHistory
 import com.programmersbox.mangaworld.utils.useAgo
+import com.tonyodev.fetch2.Fetch
+import com.tonyodev.fetch2.NetworkType
+import com.tonyodev.fetch2.Priority
+import com.tonyodev.fetch2.Request
 import io.reactivex.Completable
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.chapter_list_item.view.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import java.io.File
 import kotlin.time.ExperimentalTime
 import kotlin.time.days
 
@@ -55,6 +67,7 @@ class ChapterListAdapter(
     override fun ChapterHolder.onBind(item: ChapterModel, position: Int) {
         bind(item, info)
         itemView.setOnClickListener {
+            menu.resetStatus()
             readChapter.isChecked = true
             if (!isAdult) context.addToHistory(toChapterHistory(item))
             context.startActivity(
@@ -71,6 +84,23 @@ class ChapterListAdapter(
         }
 
         startReading.setOnClickListener { itemView.performClick() }
+
+        readChapterButton.setOnClickListener { itemView.performClick() }
+
+        downloadChapterButton.setOnClickListener {
+            MaterialAlertDialogBuilder(context)
+                .setTitle("Download Chapter?")
+                .setPositiveButton("Yes") { d, _ ->
+                    menu.resetStatus()
+                    readChapter.isChecked = true
+                    GlobalScope.launch { downloadChapter(item, mangaTitle) }
+                    d.dismiss()
+                }
+                .setNegativeButton("No") { d, _ -> d.dismiss() }
+                .show()
+        }
+
+        markButton.setOnClickListener { readChapter.isChecked = !readChapter.isChecked }
 
         readChapter.setOnCheckedChangeListener(null)
         readChapter.isChecked = false
@@ -103,11 +133,36 @@ class ChapterListAdapter(
                 }
         }
     }
+
+    private suspend fun downloadChapter(model: ChapterModel, title: String) {
+        val fileLocation = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).toString() + "/MangaWorld/"
+        val direct = File("$fileLocation$title/${model.name}/")
+
+        if (!direct.exists()) {
+            direct.mkdir()
+        }
+
+        val pages = model.getPageInfo().pages.mapIndexed { index, s ->
+            Request(s, direct.absolutePath + "/$index.png").apply {
+                priority = Priority.HIGH
+                networkType = NetworkType.ALL
+                model.sources.headers.forEach { addHeader(it.first, it.second) }
+            }
+        }
+
+        Loged.f(pages.map { it.file })
+
+        Fetch.getDefaultInstance().enqueue(pages)
+    }
 }
 
 class ChapterHolder(private val binding: ChapterListItemBinding) : RecyclerView.ViewHolder(binding.root) {
     val readChapter = itemView.readChapter!!
     val startReading = itemView.startReading!!
+    val readChapterButton = itemView.readChapterButton!!
+    val downloadChapterButton = itemView.downloadChapterButton!!
+    val markButton = itemView.markedReadButton!!
+    val menu = itemView.swipeMenu!!
 
     //val chapterName = itemView.chapterName!!
     fun bind(item: ChapterModel, swatchInfo: SwatchInfo?) {
@@ -115,6 +170,13 @@ class ChapterHolder(private val binding: ChapterListItemBinding) : RecyclerView.
         binding.swatch = swatchInfo
         binding.executePendingBindings()
     }
+}
+
+@BindingAdapter("optionTint")
+fun optionTint(view: MaterialButton, swatchInfo: SwatchInfo?) {
+    swatchInfo?.titleColor?.let { view.compoundDrawableTintList = ColorStateList.valueOf(it) }
+    swatchInfo?.titleColor?.let { view.setTextColor(it) }
+    swatchInfo?.rgb?.let { view.strokeColor = ColorStateList.valueOf(it) }
 }
 
 @BindingAdapter("checkedButtonTint")

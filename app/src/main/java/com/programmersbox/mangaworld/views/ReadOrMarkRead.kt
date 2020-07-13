@@ -11,7 +11,6 @@ import com.programmersbox.dragswipe.DragSwipeManageAdapter
 import com.programmersbox.manga_sources.mangasources.ChapterModel
 import com.programmersbox.mangaworld.adapters.ChapterHolder
 
-
 class ReadOrMarkRead(
     dragSwipeAdapter: DragSwipeAdapter<ChapterModel, ChapterHolder>,
     dragDirs: Int,

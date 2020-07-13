@@ -128,6 +128,10 @@ class PageAdapter2(
 
     override fun Page2Holder.onBind(item: String, position: Int) = Unit
 
+    fun reloadChapter() {
+        chapterModels.getOrNull(currentChapter)?.let(loadNewPages)
+    }
+
     //override fun getPreloadItems(position: Int): List<String> = Collections.singletonList(dataList[position].let(itemToModel))
 
     override fun getPreloadItems(position: Int): List<String> = Collections.singletonList(dataList.getOrNull(position)?.let(itemToModel).orEmpty())

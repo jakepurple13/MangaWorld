@@ -18,7 +18,8 @@ import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.programmersbox.dragswipe.*
+import com.programmersbox.dragswipe.DragSwipeAdapter
+import com.programmersbox.dragswipe.get
 import com.programmersbox.flowutils.collectOnUi
 import com.programmersbox.flowutils.invoke
 import com.programmersbox.gsonutils.getObjectExtra
@@ -32,7 +33,6 @@ import com.programmersbox.mangaworld.adapters.ChapterHolder
 import com.programmersbox.mangaworld.adapters.ChapterListAdapter
 import com.programmersbox.mangaworld.databinding.ActivityMangaBinding
 import com.programmersbox.mangaworld.utils.*
-import com.programmersbox.mangaworld.views.ReadOrMarkRead
 import com.programmersbox.thirdpartyutils.changeTint
 import com.programmersbox.thirdpartyutils.check
 import io.reactivex.Completable
@@ -153,7 +153,7 @@ class MangaActivity : AppCompatActivity() {
                 }
                 .addTo(disposable)
 
-            DragSwipeUtils.setDragSwipeUp(
+            /*DragSwipeUtils.setDragSwipeUp(
                 mangaInfoChapterList,
                 ReadOrMarkRead(
                     mangaInfoChapterList.adapter as ChapterListAdapter,
@@ -174,7 +174,7 @@ class MangaActivity : AppCompatActivity() {
                         adapter.notifyItemChanged(viewHolder.adapterPosition)
                     }
                 }
-            )
+            )*/
 
             FastScrollerBuilder(mangaInfoChapterList)
                 .useMd2Style()

@@ -170,6 +170,11 @@ class ReadActivity : AppCompatActivity() {
 
         //titleManga.text = mangaTitle
         loadPages(model)
+
+        readRefresh.setOnRefreshListener {
+            readRefresh.isRefreshing = false
+            adapter2.reloadChapter()
+        }
     }
 
     private fun loadPages(model: ChapterModel?) {
