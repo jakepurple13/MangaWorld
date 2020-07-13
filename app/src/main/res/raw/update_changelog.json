@@ -1,11 +1,12 @@
 {
-  "version": "2.1",
-  "url": "https://github.com/jakepurple13/MangaWorld/releases/download/v20/app-debug.apk",
+  "version": "2.2",
+  "url": "https://github.com/jakepurple13/MangaWorld/releases/download/v21/app-debug.apk",
   "releaseNotes": [
     "- If you're on a source and change to the same source, no refreshing",
     "- Added download chapters",
     "- No landscape on reader",
     "- Added refresh to reader",
-    "- Added options to Chapter List! Just swipe right to left!"
+    "- Added options to Chapter List! Just swipe right to left!",
+    "- Small bug fix that could be annoying to some people"
   ]
 }
