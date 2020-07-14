@@ -117,7 +117,7 @@ dependencies {
     implementation "com.github.ssseasonnn:RxDownload:1.0.9"
 
     //Fetch
-    implementation "androidx.tonyodev.fetch2:xfetch2:3.1.4"
+    implementation "androidx.tonyodev.fetch2:xfetch2:3.1.5-preview"
     implementation "androidx.tonyodev.fetch2okhttp:xfetch2okhttp:3.1.4"
     implementation "androidx.tonyodev.fetch2rx:xfetch2rx:3.1.4"
 
