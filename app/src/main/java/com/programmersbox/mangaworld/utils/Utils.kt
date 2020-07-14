@@ -135,12 +135,16 @@ class AppUpdateChecker(private val activity: androidx.activity.ComponentActivity
             val pInfo = context.packageManager.getPackageInfo(context.packageName, 0)
             val version = pInfo.versionName
             Loged.f("Current Version: $version | Server Version: ${info.version}")
-            if (version.toDouble() < info.version.toDouble()) {
-                installUpdate(info)
-            }
+            if (version.toDouble() < info.version.toDouble()) installUpdate(info) else deleteApk(info)
         } catch (e: Exception) {
             e.printStackTrace()
         }
+    }
+
+    private fun deleteApk(info: AppInfo) {
+        val file =
+            File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).toString() + "/" + "mangaworld${info.version}.apk")
+        if (file.exists()) file.delete()
     }
 
     private fun installUpdate(info: AppInfo) {
