@@ -1,12 +1,11 @@
 {
-  "version": "2.2",
-  "url": "https://github.com/jakepurple13/MangaWorld/releases/download/v21/app-debug.apk",
+  "version": "2.3",
+  "url": "https://github.com/jakepurple13/MangaWorld/releases/download/v22/app-debug.apk",
   "releaseNotes": [
-    "- If you're on a source and change to the same source, no refreshing",
-    "- Added download chapters",
-    "- No landscape on reader",
-    "- Added refresh to reader",
-    "- Added options to Chapter List! Just swipe right to left!",
-    "- Small bug fix that could be annoying to some people"
+    "- Changed Chapter Options to be colored white aside from the stroke",
+    "- Reworked favorites. To sync and get up to date, after updating, go to settings, then sync. Wait either 5 minutes or for a popup to come up saying it finished.",
+    "- Fixed bug that sometimes doesn't remove favorites...The rework of favorites fixed this",
+    "- Favoriting a Manga is now faster",
+    "- MangaPark still doesn't work"
   ]
 }
