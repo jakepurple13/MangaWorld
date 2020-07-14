@@ -176,8 +176,6 @@ class ChapterHolder(private val binding: ChapterListItemBinding) : RecyclerView.
 
 @BindingAdapter("optionTint")
 fun optionTint(view: MaterialButton, swatchInfo: SwatchInfo?) {
-    swatchInfo?.titleColor?.let { view.compoundDrawableTintList = ColorStateList.valueOf(it) }
-    swatchInfo?.titleColor?.let { view.setTextColor(it) }
     swatchInfo?.rgb?.let { view.strokeColor = ColorStateList.valueOf(it) }
 }
 

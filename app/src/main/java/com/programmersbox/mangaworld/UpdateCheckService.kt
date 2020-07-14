@@ -30,10 +30,7 @@ import com.programmersbox.manga_db.MangaDbModel
 import com.programmersbox.manga_sources.mangasources.MangaInfoModel
 import com.programmersbox.manga_sources.mangasources.MangaModel
 import com.programmersbox.manga_sources.mangasources.Sources
-import com.programmersbox.mangaworld.utils.FirebaseDb
-import com.programmersbox.mangaworld.utils.canBubble
-import com.programmersbox.mangaworld.utils.dbAndFireMangaSync2
-import com.programmersbox.mangaworld.utils.toMangaModel
+import com.programmersbox.mangaworld.utils.*
 import com.programmersbox.rxutils.invoke
 import io.reactivex.Single
 import java.io.IOException
@@ -60,7 +57,7 @@ class UpdateCheckService : IntentService(UpdateCheckService::class.java.name) {
         update.sendRunningNotification(100, 0, getText(R.string.startingUpdateCheck))
         val dao = MangaDatabase.getInstance(this@UpdateCheckService).mangaDao()
         val listSize: Int
-        dbAndFireMangaSync2(dao)
+        dbAndFireMangaSync3(dao)
             .let {
                 it.intersect(
                     Sources.getUpdateSearches()

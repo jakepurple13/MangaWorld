@@ -41,7 +41,7 @@
                 android:drawableTop="@drawable/ic_start"
                 android:text="Read"
                 android:textColor="#ffffff"
-                app:iconTint="#ffffff"
+                android:drawableTint="#ffffff"
                 app:optionTint="@{swatch}"
                 app:strokeColor="#ffffff" />
 
@@ -54,7 +54,7 @@
                 android:drawableTop="@drawable/ic_download"
                 android:text="Download"
                 android:textColor="#ffffff"
-                app:iconTint="#ffffff"
+                android:drawableTint="#ffffff"
                 app:optionTint="@{swatch}"
                 app:strokeColor="#ffffff" />
 
@@ -67,7 +67,7 @@
                 android:drawableTop="@drawable/ic_completed"
                 android:text="Mark As..."
                 android:textColor="#ffffff"
-                app:iconTint="#ffffff"
+                android:drawableTint="#ffffff"
                 app:optionTint="@{swatch}"
                 app:strokeColor="#ffffff" />
 

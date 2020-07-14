@@ -29,12 +29,10 @@ import com.programmersbox.mangaworld.R
 import com.programmersbox.mangaworld.databinding.MangaListItemBinding
 import com.programmersbox.mangaworld.databinding.MangaListItemGalleryViewBinding
 import com.programmersbox.mangaworld.utils.FirebaseDb
-import com.programmersbox.mangaworld.utils.dbAndFireManga
 import com.programmersbox.mangaworld.utils.toMangaDbModel
 import com.programmersbox.mangaworld.utils.usePalette
 import com.programmersbox.thirdpartyutils.changeTint
 import com.programmersbox.thirdpartyutils.check
-import com.programmersbox.thirdpartyutils.checked
 import com.programmersbox.thirdpartyutils.into
 import io.reactivex.Completable
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -47,7 +45,19 @@ import kotlinx.android.synthetic.main.manga_list_item_gallery_view.view.*
 abstract class MangaViewAdapter<VH : RecyclerView.ViewHolder>(
     protected val context: Context,
     protected val disposable: CompositeDisposable = CompositeDisposable()
-) : DragSwipeAdapter<MangaModel, VH>()
+) : DragSwipeAdapter<MangaModel, VH>() {
+    protected val favoriteList = mutableListOf<MangaModel>()
+    private val previousList = mutableListOf<MangaModel>()
+    fun favoriteLoad(list: List<MangaModel>) {
+        val mapNotNull: (Int) -> Int? = { if (it == -1) null else it }
+        previousList.clear()
+        previousList.addAll(favoriteList)
+        list.map(previousList::indexOf).mapNotNull(mapNotNull).forEach(this::notifyItemChanged)
+        favoriteList.clear()
+        favoriteList.addAll(list)
+        list.map(dataList::indexOf).mapNotNull(mapNotNull).forEach(this::notifyItemChanged)
+    }
+}
 
 class MangaListAdapter(context: Context, disposable: CompositeDisposable = CompositeDisposable()) :
     MangaViewAdapter<MangaHolder>(context, disposable) {
@@ -78,19 +88,28 @@ class MangaListAdapter(context: Context, disposable: CompositeDisposable = Compo
             true
         }
 
-        context.dbAndFireManga(dao)
-            /*dao.getAllManga()*/
+        //maybe move this to MainActivity?
+        /*context.dbAndFireManga(dao)
+            *//*dao.getAllManga()*//*
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .map { it.any { model -> model.mangaUrl == item.mangaUrl } }
             .subscribe { favorite.check(it) }
-            .addTo(disposable)
+            .addTo(disposable)*/
+        favorite.progress = 0f
+        val shouldFavorite = favoriteList.any { it.mangaUrl == item.mangaUrl }
+        favorite.check(shouldFavorite)
 
+        favorite.setOnClickListener(null)
         favorite.setOnClickListener {
-            Completable.mergeArray(
+            /*Completable.mergeArray(
                 if (favorite.progress > 0.9f) FirebaseDb.removeManga(item) else if (!favorite.checked) FirebaseDb.addManga(item) else null,
                 item.toMangaDbModel()
                     .let { it1 -> if (favorite.progress > 0.9f) dao.deleteManga(it1) else if (!favorite.checked) dao.insertManga(it1) else null }
+            )*/
+            Completable.mergeArray(
+                if (shouldFavorite) FirebaseDb.removeManga2(item) else FirebaseDb.addManga2(item, 0),
+                item.toMangaDbModel().let { it1 -> if (shouldFavorite) dao.deleteManga(it1) else dao.insertManga(it1) }
             )
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -237,8 +256,8 @@ class GalleryListAdapter(context: Context, disposable: CompositeDisposable = Com
                     setOnMenuItemClickListener {
                         Completable.mergeArray(
                             when (it.itemId) {
-                                1 -> FirebaseDb.addManga(item)
-                                2 -> FirebaseDb.removeManga(item)
+                                1 -> FirebaseDb.addManga2(item, 0)
+                                2 -> FirebaseDb.removeManga2(item)
                                 else -> null
                             },
                             when (it.itemId) {
@@ -260,6 +279,18 @@ class GalleryListAdapter(context: Context, disposable: CompositeDisposable = Com
                 true
             }
 
+            val f = favoriteList.any { it.mangaUrl == item.mangaUrl }
+
+            menu.menu.clear()
+            if (f) menu.menu.removeItem(1) else menu.menu.removeItem(2)
+            menu.menu.add(
+                1,
+                if (f) 2 else 1,
+                1,
+                if (f) context.getText(R.string.removeFromFavorites) else context.getText(R.string.addToFavorites)
+            )
+
+            //favorite.check()
             /*dao.getAllManga()
                 //context.dbAndFireManga(dao)
                 .subscribeOn(Schedulers.io())
@@ -398,7 +429,7 @@ class GalleryListFavoriteAdapter(private val context: Context) : DragSwipeAdapte
     }
 
     private fun addOrRemoveManga(view: View, item: MangaModel) = Completable.mergeArray(
-        FirebaseDb.removeManga(item),
+        FirebaseDb.removeManga2(item),
         dao.deleteManga(item.toMangaDbModel())
     )
         .subscribeOn(Schedulers.io())
@@ -407,7 +438,7 @@ class GalleryListFavoriteAdapter(private val context: Context) : DragSwipeAdapte
             Snackbar.make(view, context.getString(R.string.removed, item.title), Snackbar.LENGTH_LONG)
                 .setAction(context.getText(R.string.undo)) {
                     Completable.mergeArray(
-                        FirebaseDb.addManga(item),
+                        FirebaseDb.addManga2(item, 0),
                         dao.insertManga(item.toMangaDbModel())
                     )
                         .subscribeOn(Schedulers.io())
@@ -479,8 +510,8 @@ sealed class GalleryFavoriteAdapter<T>(
                         setOnMenuItemClickListener {
                             Completable.mergeArray(
                                 when (it.itemId) {
-                                    1 -> FirebaseDb.addManga(item)
-                                    2 -> FirebaseDb.removeManga(item)
+                                    1 -> FirebaseDb.addManga2(item, 0)
+                                    2 -> FirebaseDb.removeManga2(item)
                                     else -> null
                                 },
                                 when (it.itemId) {
@@ -586,7 +617,7 @@ sealed class GalleryFavoriteAdapter<T>(
         }
 
         private fun addOrRemoveManga(view: View, item: MangaModel) = Completable.mergeArray(
-            FirebaseDb.removeManga(item),
+            FirebaseDb.removeManga2(item),
             dao.deleteManga(item.toMangaDbModel())
         )
             .subscribeOn(Schedulers.io())
@@ -595,7 +626,7 @@ sealed class GalleryFavoriteAdapter<T>(
                 Snackbar.make(view, context.getString(R.string.removed, item.title), Snackbar.LENGTH_LONG)
                     .setAction(context.getText(R.string.undo)) {
                         Completable.mergeArray(
-                            FirebaseDb.addManga(item),
+                            FirebaseDb.addManga2(item, 0),
                             dao.insertManga(item.toMangaDbModel())
                         )
                             .subscribeOn(Schedulers.io())

@@ -19,6 +19,7 @@ import com.leinardi.android.speeddial.SpeedDialActionItem
 import com.programmersbox.gsonutils.sharedPrefNotNullObjectDelegate
 import com.programmersbox.helpfulutils.requestPermissions
 import com.programmersbox.helpfulutils.setEnumSingleChoiceItems
+import com.programmersbox.manga_db.MangaDatabase
 import com.programmersbox.manga_sources.mangasources.MangaModel
 import com.programmersbox.manga_sources.mangasources.Sources
 import com.programmersbox.mangaworld.adapters.GalleryListAdapter
@@ -28,6 +29,7 @@ import com.programmersbox.mangaworld.views.AutoFitGridLayoutManager
 import com.programmersbox.mangaworld.views.EndlessScrollingListener
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.rxkotlin.Flowables
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.activity_main.*
@@ -201,6 +203,8 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private val listener: FirebaseDb.FirebaseListener = FirebaseDb.FirebaseListener()
+
     private fun rvSetup() {
 
         setMangaView(mangaViewType)
@@ -219,6 +223,18 @@ class MainActivity : AppCompatActivity() {
         mangaRV.setHasFixedSize(true)
 
         refresh.setOnRefreshListener { reset() }
+
+        Flowables.combineLatest(
+            MangaDatabase.getInstance(this).mangaDao().getAllManga(),
+            listener.getAllMangaFlowable()
+        ) { db, fire -> (db + fire).distinctBy { it.mangaUrl }.map { it.toMangaModel() } }
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe {
+                adapter2.favoriteLoad(it)
+                adapter.favoriteLoad(it)
+            }
+            .addTo(disposable)
     }
 
     private fun reset() {
@@ -254,7 +270,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
-        FirebaseDb.detachListener()
+        listener.listener?.remove()
+        //FirebaseDb.detachListener()
         if (!stayOnAdult && currentSource.isAdult) currentSource = Sources.values().filterNot(Sources::isAdult).random()
         disposable.dispose()
         super.onDestroy()

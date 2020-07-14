@@ -279,7 +279,8 @@ class SettingsActivity : AppCompatActivity() {
         pref("sync") {
             title = "Sync"
             onClicked {
-                GlobalScope.launch { FirebaseDb.uploadAllItems(MangaDatabase.getInstance(this@SettingsActivity).mangaDao()) }
+                //GlobalScope.launch { FirebaseDb.uploadAllItems(MangaDatabase.getInstance(this@SettingsActivity).mangaDao()) }
+                GlobalScope.launch { FirebaseDb.uploadAllItems2(MangaDatabase.getInstance(this@SettingsActivity).mangaDao(), this@SettingsActivity) }
                 true
             }
         }

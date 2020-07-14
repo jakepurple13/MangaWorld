@@ -12,12 +12,13 @@ import com.programmersbox.dragswipe.DragSwipeDiffUtil
 import com.programmersbox.helpfulutils.groupByCondition
 import com.programmersbox.helpfulutils.similarity
 import com.programmersbox.manga_db.MangaDatabase
+import com.programmersbox.manga_db.MangaDbModel
 import com.programmersbox.manga_sources.mangasources.MangaModel
 import com.programmersbox.manga_sources.mangasources.Sources
 import com.programmersbox.mangaworld.adapters.GalleryFavoriteAdapter
 import com.programmersbox.mangaworld.utils.FirebaseDb
-import com.programmersbox.mangaworld.utils.dbAndFireManga2
 import com.programmersbox.mangaworld.utils.groupManga
+import com.programmersbox.mangaworld.utils.toMangaModel
 import com.programmersbox.mangaworld.views.AutoFitGridLayoutManager
 import com.programmersbox.rxutils.behaviorDelegate
 import com.programmersbox.rxutils.toLatestFlowable
@@ -39,6 +40,8 @@ class FavoriteActivity : AppCompatActivity() {
     private var sourcesList by behaviorDelegate(sourcePublisher)
     private val dao by lazy { MangaDatabase.getInstance(this).mangaDao() }
 
+    private val fireListener = FirebaseDb.FirebaseListener()
+
     private val adapterType by lazy {
         if (groupManga) GalleryFavoriteAdapter.GalleryGroupAdapter(this, dao)
         else GalleryFavoriteAdapter.GalleryListingAdapter(this, disposable, false, dao)
@@ -50,8 +53,15 @@ class FavoriteActivity : AppCompatActivity() {
 
         uiSetup()
 
+        val fired = fireListener.getAllMangaFlowable()
+
+        val dbFire = Flowables.combineLatest(
+            fired,
+            dao.getAllManga()
+        ) { db, fire -> (db + fire).groupBy(MangaDbModel::mangaUrl).map { it.value.maxBy(MangaDbModel::numChapters)!! }.map { it.toMangaModel() } }
+
         Flowables.combineLatest(
-            source1 = dbAndFireManga2(dao)
+            source1 = dbFire
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread()),
             source2 = sourcePublisher.toLatestFlowable(),
@@ -64,6 +74,21 @@ class FavoriteActivity : AppCompatActivity() {
             .observeOn(AndroidSchedulers.mainThread())
             .let { if (groupManga) it.toGroup() else it.toListing() }
             .addTo(disposable)
+
+        /*Flowables.combineLatest(
+            source1 = dbAndFireManga2(dao)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread()),
+            source2 = sourcePublisher.toLatestFlowable(),
+            source3 = favorite_search_info
+                .textChanges()
+                .debounce(500, TimeUnit.MILLISECONDS)
+                .toLatestFlowable()
+        )
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .let { if (groupManga) it.toGroup() else it.toListing() }
+            .addTo(disposable)*/
     }
 
     private fun Flowable<Triple<List<MangaModel>, MutableList<Sources>, CharSequence>>.toGroup() = map { mapManga2(it) }
@@ -122,6 +147,7 @@ class FavoriteActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
+        fireListener.listener?.remove()
         FirebaseDb.detachListener()
         disposable.dispose()
         super.onDestroy()

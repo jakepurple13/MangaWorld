@@ -91,23 +91,45 @@ class MangaActivity : AppCompatActivity() {
         favoriteManga.setOnClickListener {
 
             fun addManga(mangaModel: MangaModel, count: Int) {
-                Completable.mergeArray(
-                    FirebaseDb.addManga(mangaModel, count),
-                    dao.insertManga(mangaModel.toMangaDbModel(count))
+                Completable.concatArray(
+                    FirebaseDb.addManga2(mangaModel, count),
+                    dao.insertManga(mangaModel.toMangaDbModel(count)).subscribeOn(Schedulers.io())
                 )
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe { isFavorite(true) }
+                    .addTo(disposable)
+                /*FirebaseDb.addManga2(mangaModel, count)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe { isFavorite(true) }
+                    .addTo(disposable)
+                dao.insertManga(mangaModel.toMangaDbModel(count))
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe { isFavorite(true) }
+                    .addTo(disposable)*/
             }
 
             fun removeManga(mangaModel: MangaModel) {
-                Completable.mergeArray(
-                    FirebaseDb.removeManga(mangaModel),
-                    dao.deleteManga(mangaModel.toMangaDbModel())
+                Completable.concatArray(
+                    FirebaseDb.removeManga2(mangaModel),
+                    dao.deleteManga(mangaModel.toMangaDbModel()).subscribeOn(Schedulers.io())
                 )
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe { isFavorite(false) }
+                    .addTo(disposable)
+                /* FirebaseDb.removeManga2(mangaModel)
+                     .subscribeOn(Schedulers.io())
+                     .observeOn(AndroidSchedulers.mainThread())
+                     .subscribe { isFavorite(false) }
+                     .addTo(disposable)
+                 dao.deleteManga(mangaModel.toMangaDbModel())
+                     .subscribeOn(Schedulers.io())
+                     .observeOn(AndroidSchedulers.mainThread())
+                     .subscribe { isFavorite(false) }
+                     .addTo(disposable)*/
             }
 
             manga?.let {
@@ -122,11 +144,18 @@ class MangaActivity : AppCompatActivity() {
                 .subscribeBy(onSuccess = { isFavorite(true) }, onError = { isFavorite(false) })
                 .addTo(disposable)
 
-            FirebaseDb.findMangaByUrlSingle(it)
+            /*FirebaseDb.findMangaByUrlSingle(it)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeBy(onSuccess = isFavorite::invoke, onError = { isFavorite(false) })
+                .addTo(disposable)*/
+
+            FirebaseDb.findMangaByUrlSingleTwo(it)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribeBy(onSuccess = isFavorite::invoke, onError = { isFavorite(false) })
                 .addTo(disposable)
+
         }
     }
 
