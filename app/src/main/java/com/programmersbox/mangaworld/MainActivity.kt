@@ -71,16 +71,9 @@ class MainActivity : AppCompatActivity() {
         menuSetup()
         searchSetup()
 
-        /*AppUpdater(this)
-            .setUpdateFrom(UpdateFrom.JSON)
-            .setUpdateJSON("https://github.com/jakepurple13/MangaWorld/blob/master/app/src/main/res/raw/update_changelog.json")
-            .setDisplay(Display.DIALOG)
-            .start()*/
+        GlobalScope.launch { AppUpdateChecker(this@MainActivity).checkForUpdate() }
 
-        GlobalScope.launch {
-            AppUpdateChecker(this@MainActivity)
-                .checkForUpdate()
-        }
+        //DownloadedManga().loadDownloaded()
 
     }
 

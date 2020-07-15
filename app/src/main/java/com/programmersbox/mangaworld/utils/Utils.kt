@@ -137,13 +137,13 @@ class DownloadedManga {
     }
 
     fun loadDownloaded() = fileLocation.listFiles()?.mapNotNull {
-        if (it.isDirectory)
+        if (it.isDirectory) {
             MangaDownload(
                 it.name,
                 it.path,
                 it.listFiles()?.map { c -> ChapterDownload(c.name, c.path, c.list()?.toList().orEmpty()) }.orEmpty()
             )
-        else null
+        } else null
     }
         .orEmpty()
         .also { Loged.f(it) }
@@ -167,7 +167,7 @@ class DownloadedManga {
 
 data class AppInfo(val version: String, val url: String, val releaseNotes: List<String> = emptyList())
 
-class AppUpdateChecker(private val activity: androidx.activity.ComponentActivity) {
+class AppUpdateChecker(private val activity: ComponentActivity) {
 
     private val context: Context = activity
 

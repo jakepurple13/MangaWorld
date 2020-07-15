@@ -1,5 +1,6 @@
 package com.programmersbox.mangaworld
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Color
@@ -159,6 +160,7 @@ class MangaActivity : AppCompatActivity() {
         }
     }
 
+    @SuppressLint("UseCompatLoadingForDrawables")
     private fun mangaSetup(mangaInfoModel: MangaInfoModel?, swatch: Palette.Swatch?) {
         Loged.r(mangaInfoModel)
         mangaInfoModel?.let { manga ->
@@ -170,16 +172,15 @@ class MangaActivity : AppCompatActivity() {
             ) { ChapterHistory(mangaUrl = manga.mangaUrl, imageUrl = manga.imageUrl, title = manga.title, chapterModel = it) }
 
             mangaInfoChapterList.adapter = adapter
-            mangaInfoChapterList.setItemViewCacheSize(10)
+            mangaInfoChapterList.setItemViewCacheSize(20)
+            mangaInfoChapterList.setHasFixedSize(true)
 
             dbAndFireChapter(manga.mangaUrl)
                 // dao.getReadChaptersById(manga.mangaUrl)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe {
-                    adapter?.chapters = it
-                    adapter?.notifyDataSetChanged()
-                }
+                .map { it.filter { m -> m.mangaUrl == manga.mangaUrl } }
+                .subscribe { adapter?.readLoad(it) }
                 .addTo(disposable)
 
             /*DragSwipeUtils.setDragSwipeUp(

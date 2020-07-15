@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.mikepenz.aboutlibraries.LibsBuilder
 import com.mikepenz.iconics.IconicsDrawable
 import com.mikepenz.iconics.typeface.library.googlematerial.GoogleMaterial
 import com.mikepenz.iconics.utils.colorInt
@@ -63,6 +64,7 @@ class SettingsActivity : AppCompatActivity() {
             title = "Version: ${packageManager.getPackageInfo(packageName, 0).versionName}"
 
             clickListener = object : Preference.OnClickListener {
+                @Suppress("BlockingMethodInNonBlockingContext")
                 override fun onClick(preference: Preference, holder: PreferencesAdapter.ViewHolder): Boolean {
                     GlobalScope.launch {
                         val info = try {
@@ -77,6 +79,10 @@ class SettingsActivity : AppCompatActivity() {
                                 .setTitle("Update notes for ${info.version}")
                                 .setItems(info.releaseNotes.toTypedArray(), null)
                                 .setPositiveButton("Ok") { d, _ -> d.dismiss() }
+                                .setNeutralButton("View Libraries Used") { d, _ ->
+                                    d.dismiss()
+                                    LibsBuilder().start(this@SettingsActivity)
+                                }
                                 .show()
                         }
 

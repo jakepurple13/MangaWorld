@@ -30,7 +30,10 @@ import com.programmersbox.manga_db.MangaDbModel
 import com.programmersbox.manga_sources.mangasources.MangaInfoModel
 import com.programmersbox.manga_sources.mangasources.MangaModel
 import com.programmersbox.manga_sources.mangasources.Sources
-import com.programmersbox.mangaworld.utils.*
+import com.programmersbox.mangaworld.utils.FirebaseDb
+import com.programmersbox.mangaworld.utils.canBubble
+import com.programmersbox.mangaworld.utils.dbAndFireMangaSync3
+import com.programmersbox.mangaworld.utils.toMangaModel
 import com.programmersbox.rxutils.invoke
 import io.reactivex.Single
 import java.io.IOException
@@ -126,7 +129,7 @@ class UpdateWorker(context: Context, workerParams: WorkerParameters) : RxWorker(
         Loged.f("Starting check here")
         return Single.create<List<MangaDbModel>> { emitter ->
             Loged.f("Start")
-            val list = applicationContext.dbAndFireMangaSync2(dao)
+            val list = applicationContext.dbAndFireMangaSync3(dao)
             /*val sourceList = Sources.getUpdateSearches()
                 .filter { s -> list.any { m -> m.source == s } }
                 .flatMap { m -> m.getManga() }*/

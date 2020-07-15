@@ -17,6 +17,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.perfomer.blitz.setTimeAgo
 import com.programmersbox.dragswipe.DragSwipeAdapter
 import com.programmersbox.gsonutils.putExtra
+import com.programmersbox.helpfulutils.days
 import com.programmersbox.helpfulutils.isDateBetween
 import com.programmersbox.helpfulutils.layoutInflater
 import com.programmersbox.helpfulutils.whatIfNotNull
@@ -43,8 +44,6 @@ import kotlinx.android.synthetic.main.chapter_list_item.view.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.io.File
-import kotlin.time.ExperimentalTime
-import kotlin.time.days
 
 class ChapterListAdapter(
     private val context: Context,
@@ -57,7 +56,18 @@ class ChapterListAdapter(
     private val toChapterHistory: (ChapterModel) -> ChapterHistory
 ) : DragSwipeAdapter<ChapterModel, ChapterHolder>(dataList) {
 
-    var chapters: List<MangaReadChapter>? = null
+    private var chapters: MutableList<MangaReadChapter> = mutableListOf()
+
+    private val previousList = mutableListOf<MangaReadChapter>()
+    fun readLoad(list: List<MangaReadChapter>) {
+        val mapNotNull: (Int) -> Int? = { if (it == -1) null else it }
+        previousList.clear()
+        previousList.addAll(chapters)
+        list.map(previousList::indexOf).mapNotNull(mapNotNull).forEach(this::notifyItemChanged)
+        chapters.clear()
+        chapters.addAll(list)
+        list.map { l -> dataList.indexOfFirst { it.url == l.url } }.mapNotNull(mapNotNull).forEach(this::notifyItemChanged)
+    }
 
     private val info = swatch?.let { SwatchInfo(it.rgb, it.titleTextColor, it.bodyTextColor) }
 
@@ -106,7 +116,7 @@ class ChapterListAdapter(
         readChapter.setOnCheckedChangeListener(null)
         readChapter.isChecked = false
 
-        readChapter.isChecked = chapters?.any { it.url == item.url } ?: false
+        readChapter.isChecked = chapters.any { it.url == item.url }// ?: false
         readChapter.setOnCheckedChangeListener { _, isChecked ->
             /*MangaReadChapter(item.url, item.name, mangaUrl)
                 .also { if (isChecked) FirebaseDb.addChapter(it) else FirebaseDb.removeChapter(it) }
@@ -184,7 +194,6 @@ fun buttonTint(view: CheckBox, swatchInfo: SwatchInfo?) {
     swatchInfo?.bodyColor?.let { view.buttonTintList = ColorStateList.valueOf(it) }
 }
 
-@ExperimentalTime
 @BindingAdapter("uploadedText")
 fun uploadedText(view: TextView, chapterModel: ChapterModel) {
     if (
