@@ -17,7 +17,50 @@
         android:layout_margin="5dp"
         app:cardCornerRadius="5dp">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <RelativeLayout
+            android:id="@+id/galleryListConstraintLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <ImageView
+                android:id="@+id/galleryListCover"
+                android:layout_width="360px"
+                android:layout_height="480px"
+                android:src="@mipmap/ic_launcher"
+                tools:ignore="ContentDescription,PxUsage"
+                tools:src="@tools:sample/avatars" />
+
+            <TextView
+                android:id="@+id/galleryListTitle"
+                style="@style/TextAppearance.MaterialComponents.Body1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="5dp"
+                android:gravity="center"
+                android:maxLines="3"
+                android:shadowColor="#DE000000"
+                android:text="@{model.title}"
+                android:textColor="#ffffff"
+                android:translationZ="1dp"
+                android:layout_alignBottom="@id/galleryListCover"
+                android:layout_alignStart="@id/galleryListCover"
+                android:layout_alignEnd="@id/galleryListCover"
+                tools:text="@tools:sample/full_names" />
+
+            <View
+                android:id="@+id/gradient"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_gravity="bottom"
+                android:background="@drawable/gradient_shape"
+                android:layout_alignBottom="@id/galleryListCover"
+                android:layout_alignStart="@id/galleryListCover"
+                android:layout_alignEnd="@id/galleryListCover"
+                android:layout_alignTop="@id/galleryListCover" />
+
+        </RelativeLayout>
+
+        <!--<androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/galleryListConstraintLayout"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
@@ -62,7 +105,7 @@
                 app:layout_constraintStart_toStartOf="@id/galleryListCover"
                 app:layout_constraintTop_toTopOf="@id/galleryListCover" />
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>-->
 
     </com.google.android.material.card.MaterialCardView>
 

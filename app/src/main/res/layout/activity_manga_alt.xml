@@ -24,7 +24,7 @@
             android:id="@+id/mangaInfoLayout"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_margin="5dp"
+            android:layout_marginBottom="5dp"
             app:layout_constraintBottom_toTopOf="@id/optionsBar"
             app:layout_constraintTop_toTopOf="parent"
             tools:background="@sample/sample_colors">

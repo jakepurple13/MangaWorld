@@ -10,6 +10,7 @@ import androidx.constraintlayout.widget.ConstraintSet
 import androidx.palette.graphics.Palette
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.model.GlideUrl
 import com.bumptech.glide.load.model.LazyHeaders
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
@@ -33,6 +34,7 @@ import com.programmersbox.mangaworld.utils.toMangaDbModel
 import com.programmersbox.mangaworld.utils.usePalette
 import com.programmersbox.thirdpartyutils.changeTint
 import com.programmersbox.thirdpartyutils.check
+import com.programmersbox.thirdpartyutils.getPalette
 import com.programmersbox.thirdpartyutils.into
 import io.reactivex.Completable
 import io.reactivex.android.schedulers.AndroidSchedulers
@@ -129,6 +131,7 @@ class MangaListAdapter(context: Context, disposable: CompositeDisposable = Compo
             .load(url)
             .override(360, 480)
             .transform(RoundedCorners(30))
+            .diskCacheStrategy(DiskCacheStrategy.ALL)
             .fallback(R.mipmap.ic_launcher)
             .placeholder(R.mipmap.ic_launcher)
             .error(R.mipmap.ic_launcher)
@@ -136,7 +139,7 @@ class MangaListAdapter(context: Context, disposable: CompositeDisposable = Compo
                 resourceReady { image, _ ->
                     cover.setImageBitmap(image)
                     if (context.usePalette) {
-                        val p = Palette.from(image).generate()
+                        val p = image.getPalette()
 
                         val dom = p.vibrantSwatch
                         dom?.rgb?.let { layout.setCardBackgroundColor(it) }
@@ -216,7 +219,7 @@ class BubbleListAdapter(context: Context, disposable: CompositeDisposable = Comp
                 resourceReady { image, _ ->
                     cover.setImageBitmap(image)
                     if (context.usePalette) {
-                        val p = Palette.from(image).generate()
+                        val p = image.getPalette()
 
                         val dom = p.vibrantSwatch
                         dom?.rgb?.let { layout.setCardBackgroundColor(it) }
@@ -329,7 +332,7 @@ class GalleryListAdapter(context: Context, disposable: CompositeDisposable = Com
                 resourceReady { image, _ ->
                     cover.setImageBitmap(image)
                     if (context.usePalette) {
-                        swatch = Palette.from(image).generate().vibrantSwatch
+                        swatch = image.getPalette().vibrantSwatch
                     }
                 }
             }
@@ -422,7 +425,7 @@ class GalleryListFavoriteAdapter(private val context: Context) : DragSwipeAdapte
                 resourceReady { image, _ ->
                     cover.setImageBitmap(image)
                     if (context.usePalette) {
-                        swatch = Palette.from(image).generate().vibrantSwatch
+                        swatch = image.getPalette().vibrantSwatch
                     }
                 }
             }
@@ -469,6 +472,7 @@ sealed class GalleryFavoriteAdapter<T>(
             .load(url)
             //.override(360, 480)
             .fitCenter()
+            .diskCacheStrategy(DiskCacheStrategy.ALL)
             .transform(RoundedCorners(15))
             .fallback(R.mipmap.ic_launcher)
             .placeholder(R.mipmap.ic_launcher)
@@ -477,7 +481,7 @@ sealed class GalleryFavoriteAdapter<T>(
                 resourceReady { image, _ ->
                     cover.setImageBitmap(image)
                     if (context.usePalette) {
-                        swatch.swatch = Palette.from(image).generate().vibrantSwatch
+                        swatch.swatch = image.getPalette().vibrantSwatch
                     }
                 }
             }

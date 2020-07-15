@@ -227,9 +227,8 @@ class MangaActivity : AppCompatActivity() {
                     .setTitle("Mark as Read/Unread")
                     .setMultiChoiceItems(
                         adapter.dataList.map(ChapterModel::name).toTypedArray(),
-                        BooleanArray(adapter.itemCount) { i -> read.any { it.url == adapter[i].url } }) { _, index, _ ->
-                        (mangaInfoChapterList.findViewHolderForAdapterPosition(index) as? ChapterHolder)?.readChapter?.performClick()
-                    }
+                        BooleanArray(adapter.itemCount) { i -> read.any { it.url == adapter[i].url } }
+                    ) { _, index, _ -> (mangaInfoChapterList.findViewHolderForAdapterPosition(index) as? ChapterHolder)?.readChapter?.performClick() }
                     .setPositiveButton("Done") { d, _ -> d.dismiss() }
                     .show()
             }
@@ -274,6 +273,8 @@ class MangaActivity : AppCompatActivity() {
             shareButton.iconTint = ColorStateList.valueOf(it)
         }
         favoriteManga.changeTint(swatch?.rgb ?: Color.WHITE)
+
+        swatch?.rgb?.let { window.statusBarColor = it }
     }
 
     private class ConstraintRangeSet(private val rootLayout: ConstraintLayout, vararg items: ConstraintRanges) : Range<ConstraintRanges>() {

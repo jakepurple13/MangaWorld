@@ -111,13 +111,7 @@ class MangaWorldApp : Application() {
                                     .setRequiresStorageNotLow(false)
                                     .build()
                             )
-                            .also {
-                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                                    it.setInitialDelay(timeToNextHour(), TimeUnit.MILLISECONDS)
-                                } else {
-                                    it.setInitialDelay(10, TimeUnit.SECONDS)
-                                }
-                            }
+                            .setInitialDelay(10, TimeUnit.SECONDS)
                             .build()
                     ).state.observeForever { println(it) }
                 } else work.cancelAllWork()
