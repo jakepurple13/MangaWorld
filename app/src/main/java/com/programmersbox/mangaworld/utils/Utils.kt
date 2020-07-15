@@ -5,6 +5,8 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Environment
+import android.widget.Toast
+import androidx.activity.ComponentActivity
 import androidx.core.content.FileProvider
 import androidx.lifecycle.ViewModel
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -21,6 +23,8 @@ import com.programmersbox.manga_sources.mangasources.MangaInfoModel
 import com.programmersbox.manga_sources.mangasources.MangaModel
 import com.programmersbox.manga_sources.mangasources.Sources
 import com.programmersbox.mangaworld.R
+import com.programmersbox.rxutils.invoke
+import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
 import io.reactivex.rxkotlin.subscribeBy
@@ -114,6 +118,50 @@ fun moveFile(file: File, dir: File) {
     } finally {
         inputChannel?.close()
         outputChannel?.close()
+    }
+}
+
+class DownloadedManga {
+
+    data class ChapterDownload(val title: String, val path: String, val pages: List<String>)
+    data class MangaDownload(val title: String, val path: String, val pages: List<ChapterDownload>)
+
+    private val fileLocation by lazy {
+        File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES).toString() + "/MangaWorld/")
+    }
+
+    fun permissionCheck(activity: ComponentActivity) {
+        activity.requestPermissions(Manifest.permission.READ_EXTERNAL_STORAGE) {
+            if (!it.isGranted) Toast.makeText(activity, "Need Permission", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    fun loadDownloaded() = fileLocation.listFiles()?.mapNotNull {
+        if (it.isDirectory)
+            MangaDownload(
+                it.name,
+                it.path,
+                it.listFiles()?.map { c -> ChapterDownload(c.name, c.path, c.list()?.toList().orEmpty()) }.orEmpty()
+            )
+        else null
+    }
+        .orEmpty()
+        .also { Loged.f(it) }
+
+    fun rxLoad() = Single.create<List<MangaDownload>> { emitter ->
+        try {
+            val list = fileLocation.listFiles()?.map {
+                MangaDownload(
+                    it.name,
+                    it.path,
+                    it.listFiles()?.map { c -> ChapterDownload(c.name, c.path, c.list()?.toList() ?: emptyList()) } ?: emptyList()
+                )
+            }
+                .orEmpty()
+            emitter(list)
+        } catch (e: Exception) {
+            emitter(e)
+        }
     }
 }
 
