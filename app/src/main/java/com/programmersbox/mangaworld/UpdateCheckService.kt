@@ -46,7 +46,7 @@ class UpdateCheckService : IntentService(UpdateCheckService::class.java.name) {
 
     override fun onHandleIntent(intent: Intent?) {
         //FirebaseAnalytics.getInstance(this).logEvent("Start_update_check_UpdateCheckService", null)
-        startForeground(13, NotificationDslBuilder.builder(this, "updateCheckChannel", R.mipmap.ic_launcher) {
+        startForeground(13, NotificationDslBuilder.builder(this, "updateCheckChannel", R.drawable.manga_world_round_logo) {
             onlyAlertOnce = true
             ongoing = true
             progress {
@@ -197,7 +197,7 @@ class UpdateNotification(private val context: Context) {
         pair.second.hashCode() to NotificationDslBuilder.builder(
             context,
             "mangaChannel",
-            R.mipmap.ic_launcher
+            R.drawable.manga_world_round_logo
         ) {
             title = pair.second.title
             subText = pair.second.source.name
@@ -235,7 +235,7 @@ class UpdateNotification(private val context: Context) {
         list.first.forEach { pair -> n.notify(pair.first, pair.second) }
         if (list.first.isNotEmpty()) n.notify(
             42,
-            NotificationDslBuilder.builder(context, "mangaChannel", R.mipmap.ic_launcher) {
+            NotificationDslBuilder.builder(context, "mangaChannel", R.drawable.manga_world_round_logo) {
                 title = context.getText(R.string.app_name)
                 val size = list.first.size + currentNotificationSize
                 subText = context.resources.getQuantityString(R.plurals.updateAmount, size, size)
@@ -252,7 +252,7 @@ class UpdateNotification(private val context: Context) {
                             )
                         )
                         desiredHeight = 600
-                        icon = Icon.createWithResource(context, R.mipmap.ic_launcher)
+                        icon = Icon.createWithResource(context, R.drawable.manga_world_round_logo)
                     }
                     messageStyle {
                         setMainPerson {
@@ -288,7 +288,7 @@ class UpdateNotification(private val context: Context) {
     }
 
     fun sendRunningNotification(max: Int, progress: Int, contextText: CharSequence = "") {
-        val notification = NotificationDslBuilder.builder(context, "updateCheckChannel", R.mipmap.ic_launcher) {
+        val notification = NotificationDslBuilder.builder(context, "updateCheckChannel", R.drawable.manga_world_round_logo) {
             onlyAlertOnce = true
             ongoing = true
             progress {
@@ -304,7 +304,7 @@ class UpdateNotification(private val context: Context) {
     }
 
     fun sendFinishedNotification() {
-        val notification = NotificationDslBuilder.builder(context, "updateCheckChannel", R.mipmap.ic_launcher) {
+        val notification = NotificationDslBuilder.builder(context, "updateCheckChannel", R.drawable.manga_world_round_logo) {
             onlyAlertOnce = true
             subText = context.getText(R.string.finishedChecking)
             timeoutAfter = 750L
