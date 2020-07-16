@@ -23,7 +23,7 @@
 
     <item
         android:id="@+id/checkForUpdates"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@drawable/manga_world_round_logo"
         android:title="Check For Updates" />
 
     <!--<item

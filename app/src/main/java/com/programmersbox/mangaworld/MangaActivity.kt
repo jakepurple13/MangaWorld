@@ -324,9 +324,9 @@ fun loadImage(view: ImageView, imageUrl: String?) {
     Glide.with(view)
         .load(imageUrl)
         .override(360, 480)
-        .placeholder(R.mipmap.ic_launcher)
-        .error(R.mipmap.ic_launcher)
-        .fallback(R.mipmap.ic_launcher)
+        .placeholder(R.drawable.manga_world_round_logo)
+        .error(R.drawable.manga_world_round_logo)
+        .fallback(R.drawable.manga_world_round_logo)
         .transform(RoundedCorners(15))
         .into(view)
 }

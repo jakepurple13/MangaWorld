@@ -211,7 +211,7 @@ class SettingsActivity : AppCompatActivity() {
                     }.requireNoNulls()
                     notificationManager.notify(
                         12,
-                        NotificationDslBuilder.builder(this@SettingsActivity, "mangaChannel", R.mipmap.ic_launcher) {
+                        NotificationDslBuilder.builder(this@SettingsActivity, "mangaChannel", R.drawable.manga_world_round_logo) {
                             title = getText(R.string.app_name)
                             subText = "Here are ${manga.size} random manga"
                             if (canBubble) {
@@ -224,7 +224,7 @@ class SettingsActivity : AppCompatActivity() {
                                         )
                                     )
                                     desiredHeight = 600
-                                    icon = Icon.createWithResource(this@SettingsActivity, R.mipmap.ic_launcher)
+                                    icon = Icon.createWithResource(this@SettingsActivity, R.drawable.manga_world_round_logo)
                                 }
                                 messageStyle {
                                     setMainPerson {

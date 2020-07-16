@@ -67,9 +67,9 @@ class HistoryActivity : AppCompatActivity() {
                 }.build()))
                 .override(360, 480)
                 .transform(RoundedCorners(30))
-                .fallback(R.mipmap.ic_launcher)
-                .placeholder(R.mipmap.ic_launcher)
-                .error(R.mipmap.ic_launcher)
+                .fallback(R.drawable.manga_world_round_logo)
+                .placeholder(R.drawable.manga_world_round_logo)
+                .error(R.drawable.manga_world_round_logo)
                 .into<Bitmap> {
                     resourceReady { image, _ ->
                         cover.setImageBitmap(image)

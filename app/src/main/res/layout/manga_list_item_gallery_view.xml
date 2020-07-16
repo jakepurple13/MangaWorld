@@ -26,7 +26,7 @@
                 android:id="@+id/galleryListCover"
                 android:layout_width="360px"
                 android:layout_height="480px"
-                android:src="@mipmap/ic_launcher"
+                android:src="@drawable/manga_world_round_logo"
                 tools:ignore="ContentDescription,PxUsage"
                 tools:src="@tools:sample/avatars" />
 

@@ -132,9 +132,9 @@ class MangaListAdapter(context: Context, disposable: CompositeDisposable = Compo
             .override(360, 480)
             .transform(RoundedCorners(30))
             .diskCacheStrategy(DiskCacheStrategy.ALL)
-            .fallback(R.mipmap.ic_launcher)
-            .placeholder(R.mipmap.ic_launcher)
-            .error(R.mipmap.ic_launcher)
+            .fallback(R.drawable.manga_world_round_logo)
+            .placeholder(R.drawable.manga_world_round_logo)
+            .error(R.drawable.manga_world_round_logo)
             .into<Bitmap> {
                 resourceReady { image, _ ->
                     cover.setImageBitmap(image)
@@ -212,9 +212,9 @@ class BubbleListAdapter(context: Context, disposable: CompositeDisposable = Comp
             .load(url)
             .override(360, 480)
             .transform(RoundedCorners(30))
-            .fallback(R.mipmap.ic_launcher)
-            .placeholder(R.mipmap.ic_launcher)
-            .error(R.mipmap.ic_launcher)
+            .fallback(R.drawable.manga_world_round_logo)
+            .placeholder(R.drawable.manga_world_round_logo)
+            .error(R.drawable.manga_world_round_logo)
             .into<Bitmap> {
                 resourceReady { image, _ ->
                     cover.setImageBitmap(image)
@@ -325,9 +325,9 @@ class GalleryListAdapter(context: Context, disposable: CompositeDisposable = Com
             //.override(360, 480)
             .fitCenter()
             .transform(RoundedCorners(15))
-            .fallback(R.mipmap.ic_launcher)
-            .placeholder(R.mipmap.ic_launcher)
-            .error(R.mipmap.ic_launcher)
+            .fallback(R.drawable.manga_world_round_logo)
+            .placeholder(R.drawable.manga_world_round_logo)
+            .error(R.drawable.manga_world_round_logo)
             .into<Bitmap> {
                 resourceReady { image, _ ->
                     cover.setImageBitmap(image)
@@ -418,9 +418,9 @@ class GalleryListFavoriteAdapter(private val context: Context) : DragSwipeAdapte
             //.override(360, 480)
             .fitCenter()
             .transform(RoundedCorners(15))
-            .fallback(R.mipmap.ic_launcher)
-            .placeholder(R.mipmap.ic_launcher)
-            .error(R.mipmap.ic_launcher)
+            .fallback(R.drawable.manga_world_round_logo)
+            .placeholder(R.drawable.manga_world_round_logo)
+            .error(R.drawable.manga_world_round_logo)
             .into<Bitmap> {
                 resourceReady { image, _ ->
                     cover.setImageBitmap(image)
@@ -474,9 +474,9 @@ sealed class GalleryFavoriteAdapter<T>(
             .fitCenter()
             .diskCacheStrategy(DiskCacheStrategy.ALL)
             .transform(RoundedCorners(15))
-            .fallback(R.mipmap.ic_launcher)
-            .placeholder(R.mipmap.ic_launcher)
-            .error(R.mipmap.ic_launcher)
+            .fallback(R.drawable.manga_world_round_logo)
+            .placeholder(R.drawable.manga_world_round_logo)
+            .error(R.drawable.manga_world_round_logo)
             .into<Bitmap> {
                 resourceReady { image, _ ->
                     cover.setImageBitmap(image)

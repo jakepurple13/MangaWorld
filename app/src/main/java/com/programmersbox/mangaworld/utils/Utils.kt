@@ -246,7 +246,7 @@ class AppUpdateChecker(private val activity: ComponentActivity) {
     private fun download(info: AppInfo) {
         val n = context.notificationManager
 
-        val finished = NotificationDslBuilder.builder(context, "appUpdate", R.mipmap.ic_launcher) {
+        val finished = NotificationDslBuilder.builder(context, "appUpdate", R.drawable.manga_world_round_logo) {
             subText = "Downloaded Update ${info.version}"
             timeoutAfter = 750L
             onlyAlertOnce = true
@@ -256,7 +256,7 @@ class AppUpdateChecker(private val activity: ComponentActivity) {
             .subscribeOn(Schedulers.io())
             .observeOn(Schedulers.io())
             .doOnSubscribe {
-                n.notify(2, NotificationDslBuilder.builder(context, "appUpdate", R.mipmap.ic_launcher) {
+                n.notify(2, NotificationDslBuilder.builder(context, "appUpdate", R.drawable.manga_world_round_logo) {
                     subText = "Downloading Update ${info.version}"
                     ongoing = true
                     onlyAlertOnce = true
@@ -272,7 +272,7 @@ class AppUpdateChecker(private val activity: ComponentActivity) {
                     //download progress
                     n.notify(
                         2,
-                        NotificationDslBuilder.builder(context, "appUpdate", R.mipmap.ic_launcher) {
+                        NotificationDslBuilder.builder(context, "appUpdate", R.drawable.manga_world_round_logo) {
                             message = "Downloading Update ${info.version}"
                             subText = "Downloading...${progress.percentStr()}"
                             ongoing = true
