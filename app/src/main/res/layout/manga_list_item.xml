@@ -28,6 +28,7 @@
                 android:id="@+id/mangaListCover"
                 android:layout_width="360px"
                 android:layout_height="480px"
+                android:src="@drawable/manga_world_round_logo"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"

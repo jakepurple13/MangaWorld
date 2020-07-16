@@ -11,6 +11,7 @@
         android:id="@+id/mangaInfoCover"
         android:layout_width="360px"
         android:layout_height="480px"
+        android:src="@drawable/manga_world_round_logo"
         android:layout_margin="5dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"

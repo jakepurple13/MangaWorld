@@ -53,7 +53,6 @@ class MangaActivity : AppCompatActivity() {
     private val dao by lazy { MangaDatabase.getInstance(this).mangaDao() }
     private var range: MutableItemRange<String> = MutableItemRange()
     private val disposable = CompositeDisposable()
-    private var adapter: ChapterListAdapter? = null
     private var mangaModel: MangaModel? = null
     private val listener = FirebaseDb.FirebaseListener()
 
@@ -166,7 +165,7 @@ class MangaActivity : AppCompatActivity() {
         mangaInfoModel?.let { manga ->
             range.itemList.addAll(listOf(manga.title, *manga.alternativeNames.toTypedArray()).filter(String::isNotEmpty))
             swatch?.rgb?.let { mangaInfoLayout.setBackgroundColor(it) }
-            adapter = ChapterListAdapter(
+            val adapter = ChapterListAdapter(
                 dataList = manga.chapters.toMutableList(), context = this@MangaActivity, swatch = swatch,
                 mangaTitle = manga.title, mangaUrl = manga.mangaUrl, dao = dao, isAdult = mangaModel?.source?.isAdult == true
             ) { ChapterHistory(mangaUrl = manga.mangaUrl, imageUrl = manga.imageUrl, title = manga.title, chapterModel = it) }
@@ -180,7 +179,7 @@ class MangaActivity : AppCompatActivity() {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .map { it.filter { m -> m.mangaUrl == manga.mangaUrl } }
-                .subscribe { adapter?.readLoad(it) }
+                .subscribe { adapter.readLoad(it) }
                 .addTo(disposable)
 
             /*DragSwipeUtils.setDragSwipeUp(
