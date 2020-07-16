@@ -55,6 +55,7 @@ class MangaActivity : AppCompatActivity() {
     private val disposable = CompositeDisposable()
     private var adapter: ChapterListAdapter? = null
     private var mangaModel: MangaModel? = null
+    private val listener = FirebaseDb.FirebaseListener()
 
     @Suppress("EXPERIMENTAL_API_USAGE")
     private var isFavorite = MutableStateFlow(false)
@@ -151,12 +152,11 @@ class MangaActivity : AppCompatActivity() {
                 .subscribeBy(onSuccess = isFavorite::invoke, onError = { isFavorite(false) })
                 .addTo(disposable)*/
 
-            FirebaseDb.findMangaByUrlSingleTwo(it)
+            listener.findMangaByUrlFlowable(it)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribeBy(onSuccess = isFavorite::invoke, onError = { isFavorite(false) })
+                .subscribe(isFavorite::invoke)
                 .addTo(disposable)
-
         }
     }
 
@@ -312,6 +312,7 @@ class MangaActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
+        listener.listener?.remove()
         FirebaseDb.detachChapterListener()
         disposable.dispose()
         super.onDestroy()

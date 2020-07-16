@@ -23,7 +23,7 @@ enum class Sources(
     MANGA_PARK(domain = "mangapark", source = MangaPark, filterOutOfUpdate = true);
 
     companion object {
-        fun getSourceByUrl(url: String) = values().find { url.contains(it.domain) }
+        fun getSourceByUrl(url: String) = values().find { url.contains(it.domain, true) }
 
         fun getUpdateSearches() = values().filterNot(Sources::isAdult).filterNot(Sources::filterOutOfUpdate)
     }

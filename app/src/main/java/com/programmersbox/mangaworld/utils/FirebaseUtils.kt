@@ -470,6 +470,13 @@ object FirebaseDb {
             ?.toObjects<FirebaseManga>()
             ?.map { it.toMangaDbModel() }
 
+        fun findMangaByUrlFlowable(url: String) = PublishSubject.create<Boolean> { emitter ->
+            listener = mangaDoc2
+                ?.whereEqualTo("mangaUrl", url)
+                ?.addSnapshotListener { value, error -> emitter(value?.toObjects<FirebaseManga>()?.isNotEmpty()) }
+            if (listener == null) emitter()
+        }.toLatestFlowable()
+
     }
 
     fun getAllMangaFlowable2() = mangaDoc2
