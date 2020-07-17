@@ -166,7 +166,7 @@ class MangaActivity : AppCompatActivity() {
             range.itemList.addAll(listOf(manga.title, *manga.alternativeNames.toTypedArray()).filter(String::isNotEmpty))
             swatch?.rgb?.let { mangaInfoLayout.setBackgroundColor(it) }
             val adapter = ChapterListAdapter(
-                dataList = manga.chapters.toMutableList(), context = this@MangaActivity, swatch = swatch,
+                dataList = manga.chapters.toMutableList(), context = this@MangaActivity, swatch = swatch, rv = mangaInfoChapterList,
                 mangaTitle = manga.title, mangaUrl = manga.mangaUrl, dao = dao, isAdult = mangaModel?.source?.isAdult == true
             ) { ChapterHistory(mangaUrl = manga.mangaUrl, imageUrl = manga.imageUrl, title = manga.title, chapterModel = it) }
 

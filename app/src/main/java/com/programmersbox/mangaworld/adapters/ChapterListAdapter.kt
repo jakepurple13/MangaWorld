@@ -41,6 +41,7 @@ import com.tonyodev.fetch2.NetworkType
 import com.tonyodev.fetch2.Priority
 import com.tonyodev.fetch2.Request
 import io.reactivex.Completable
+import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import kotlinx.android.synthetic.main.chapter_list_item.view.*
 import kotlinx.coroutines.GlobalScope
@@ -50,12 +51,8 @@ import java.io.File
 class ChapterListAdapter(
     private val context: Context,
     dataList: MutableList<ChapterModel>,
-    swatch: Palette.Swatch?,
-    private val mangaTitle: String,
-    private val mangaUrl: String,
-    private val dao: MangaDao,
-    private val isAdult: Boolean,
-    check: CheckAdapter<ChapterModel, MangaReadChapter> = CheckAdapter(),
+    swatch: Palette.Swatch?, private val mangaTitle: String, private val mangaUrl: String, private val dao: MangaDao, private val isAdult: Boolean,
+    check: CheckAdapter<ChapterModel, MangaReadChapter> = CheckAdapter(), private val rv: RecyclerView,
     private val toChapterHistory: (ChapterModel) -> ChapterHistory
 ) : DragSwipeAdapter<ChapterModel, ChapterHolder>(dataList), CheckAdapterInterface<ChapterModel, MangaReadChapter> by check {
 
@@ -136,10 +133,10 @@ class ChapterListAdapter(
                     )
                 }
                 .subscribeOn(Schedulers.io())
-                .observeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe {
                     Snackbar.make(
-                        itemView,
+                        rv,
                         context.getString(if (isChecked) R.string.addChapter else R.string.removeChapter, item.name),
                         Snackbar.LENGTH_SHORT
                     )
