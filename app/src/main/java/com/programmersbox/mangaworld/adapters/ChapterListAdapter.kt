@@ -15,6 +15,8 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.perfomer.blitz.setTimeAgo
+import com.programmersbox.dragswipe.CheckAdapter
+import com.programmersbox.dragswipe.CheckAdapterInterface
 import com.programmersbox.dragswipe.DragSwipeAdapter
 import com.programmersbox.gsonutils.putExtra
 import com.programmersbox.helpfulutils.days
@@ -53,10 +55,15 @@ class ChapterListAdapter(
     private val mangaUrl: String,
     private val dao: MangaDao,
     private val isAdult: Boolean,
+    check: CheckAdapter<ChapterModel, MangaReadChapter> = CheckAdapter(),
     private val toChapterHistory: (ChapterModel) -> ChapterHistory
-) : DragSwipeAdapter<ChapterModel, ChapterHolder>(dataList) {
+) : DragSwipeAdapter<ChapterModel, ChapterHolder>(dataList), CheckAdapterInterface<ChapterModel, MangaReadChapter> by check {
 
-    private var chapters: MutableList<MangaReadChapter> = mutableListOf()
+    init {
+        check.adapter = this
+    }
+
+    /*private val chapters: MutableList<MangaReadChapter> = mutableListOf()
 
     private val previousList = mutableListOf<MangaReadChapter>()
     fun readLoad(list: List<MangaReadChapter>) {
@@ -67,7 +74,7 @@ class ChapterListAdapter(
         chapters.clear()
         chapters.addAll(list)
         list.map { l -> dataList.indexOfFirst { it.url == l.url } }.mapNotNull(mapNotNull).forEach(this::notifyItemChanged)
-    }
+    }*/
 
     private val info = swatch?.let { SwatchInfo(it.rgb, it.titleTextColor, it.bodyTextColor) }
 
@@ -116,8 +123,8 @@ class ChapterListAdapter(
         readChapter.setOnCheckedChangeListener(null)
         readChapter.isChecked = false
 
-        readChapter.isChecked = chapters.any { it.url == item.url }// ?: false
-        readChapter.setOnCheckedChangeListener { _, isChecked ->
+        readChapter.isChecked = currentList.any { it.url == item.url }// ?: false
+        readChapter.setOnCheckedChangeListener { v, isChecked ->
             /*MangaReadChapter(item.url, item.name, mangaUrl)
                 .also { if (isChecked) FirebaseDb.addChapter(it) else FirebaseDb.removeChapter(it) }
                 .let { if (isChecked) dao.insertChapter(it) else dao.deleteChapter(it) }*/
@@ -132,7 +139,7 @@ class ChapterListAdapter(
                 .observeOn(Schedulers.io())
                 .subscribe {
                     Snackbar.make(
-                        itemView,
+                        v,
                         context.getString(if (isChecked) R.string.addChapter else R.string.removeChapter, item.name),
                         Snackbar.LENGTH_SHORT
                     )

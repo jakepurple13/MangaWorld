@@ -185,7 +185,7 @@ class MangaActivity : AppCompatActivity() {
                 .observeOn(AndroidSchedulers.mainThread())
                 .map { it.filter { m -> m.mangaUrl == manga.mangaUrl } }
                 .distinct { it }
-                .subscribe { adapter.readLoad(it) }
+                .subscribe { adapter.update(it) { c, m -> c.url == m.url } }//readLoad(it) }
                 .addTo(disposable)
 
             /*DragSwipeUtils.setDragSwipeUp(
