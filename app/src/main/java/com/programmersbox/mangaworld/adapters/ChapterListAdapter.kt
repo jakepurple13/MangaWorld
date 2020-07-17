@@ -124,7 +124,7 @@ class ChapterListAdapter(
         readChapter.isChecked = false
 
         readChapter.isChecked = currentList.any { it.url == item.url }// ?: false
-        readChapter.setOnCheckedChangeListener { v, isChecked ->
+        readChapter.setOnCheckedChangeListener { _, isChecked ->
             /*MangaReadChapter(item.url, item.name, mangaUrl)
                 .also { if (isChecked) FirebaseDb.addChapter(it) else FirebaseDb.removeChapter(it) }
                 .let { if (isChecked) dao.insertChapter(it) else dao.deleteChapter(it) }*/
@@ -139,7 +139,7 @@ class ChapterListAdapter(
                 .observeOn(Schedulers.io())
                 .subscribe {
                     Snackbar.make(
-                        v,
+                        itemView,
                         context.getString(if (isChecked) R.string.addChapter else R.string.removeChapter, item.name),
                         Snackbar.LENGTH_SHORT
                     )
