@@ -95,7 +95,7 @@ class UpdateCheckService : IntentService(UpdateCheckService::class.java.name) {
                     val manga = triple.second
                     manga.numChapters = triple.first.chapters.size
                     dao.updateMangaById(manga).subscribe()
-                    FirebaseDb.updateManga(manga).subscribe()
+                    FirebaseDb.updateManga2(manga).subscribe()
                 }
             }
             .let { update.mapDbModel(it) }
@@ -170,14 +170,11 @@ class UpdateWorker(context: Context, workerParams: WorkerParameters) : RxWorker(
                     val manga = triple.second
                     manga.numChapters = triple.first.chapters.size
                     dao.updateMangaById(manga).subscribe()
-                    FirebaseDb.updateManga(manga).subscribe()
+                    FirebaseDb.updateManga2(manga).subscribe()
                 }
                 update.mapDbModel(it)
             }
-            .map {
-                update.onEnd(it)
-                Loged.f("Finished!")
-            }
+            .map { update.onEnd(it).also { Loged.f("Finished!") } }
             .map {
                 update.sendFinishedNotification()
                 Result.success()

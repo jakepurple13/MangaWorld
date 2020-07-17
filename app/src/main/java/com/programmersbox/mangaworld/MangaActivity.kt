@@ -174,11 +174,17 @@ class MangaActivity : AppCompatActivity() {
             mangaInfoChapterList.setItemViewCacheSize(20)
             mangaInfoChapterList.setHasFixedSize(true)
 
+            /*GlobalScope.launch {
+                val f = FirebaseDb.getChapters(manga)
+                Loged.f(f?.joinToString("\n"))
+            }*/
+
             dbAndFireChapter(manga.mangaUrl)
                 // dao.getReadChaptersById(manga.mangaUrl)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .map { it.filter { m -> m.mangaUrl == manga.mangaUrl } }
+                .distinct { it }
                 .subscribe { adapter.readLoad(it) }
                 .addTo(disposable)
 

@@ -15,6 +15,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.*
+import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.firestore.ktx.toObjects
 import com.programmersbox.helpfulutils.runOnUIThread
 import com.programmersbox.loggingutils.Loged
@@ -23,6 +24,7 @@ import com.programmersbox.manga_db.MangaDao
 import com.programmersbox.manga_db.MangaDatabase
 import com.programmersbox.manga_db.MangaDbModel
 import com.programmersbox.manga_db.MangaReadChapter
+import com.programmersbox.manga_sources.mangasources.MangaInfoModel
 import com.programmersbox.manga_sources.mangasources.MangaModel
 import com.programmersbox.manga_sources.mangasources.Sources
 import com.programmersbox.mangaworld.R
@@ -185,7 +187,7 @@ object FirebaseDb {
         var cCount = 0
         c
             .forEach {
-                it.url?.replace("/", "<")?.let { it1 -> chapterDoc2?.document(it1)?.set(it) }
+                it.mangaUrl?.replace("/", "<")?.let { it1 -> it.url?.let { it2 -> chapterDoc2?.document(it1)?.collection(it2)?.add(it } }
                     ?.addOnSuccessListener {
                         cCount++
                         if (cCount >= m.size) {
@@ -210,6 +212,54 @@ object FirebaseDb {
             }?.addOnCompleteListener {
                 Loged.d("All done!")
             }*/
+    }
+
+    private data class FirebaseChapterList(val first: String, val second: List<FirebaseChapter>)
+
+    /*fun addChapter(model: MangaReadChapter) {
+        *//*chapterDoc2
+            ?.document(model.mangaUrl.replace("/", "<"))
+            ?.set()*//*
+            //?.update("second", FieldValue.arrayUnion(mangaModel.toFirebaseChapter()))
+    }*/
+
+    fun getChapters(model: MangaInfoModel) = chapterDoc2
+        ?.document(model.mangaUrl.replace("/", "<"))
+        ?.get()
+        ?.await()
+        ?.toObject<FirebaseChapterList>()
+        ?.second
+        ?.map { it.toMangaChapter() }
+    /*?.toObject<FirebaseAllChapter>()
+    ?.second?.map { it.toMangaChapter() }*/
+    /*?.whereEqualTo("mangaUrl", model.mangaUrl)
+    ?.get()
+    ?.await()
+    ?.toObjects<FirebaseChapter>()
+    ?.map { it.toMangaChapter() }*/
+
+    suspend fun uploadChapters(dao: MangaDao, context: Context) {
+        val c = listOfNotNull(getAllChapters(), dao.getAllChapters()).flatten().distinctBy { it.url }.map { it.toFirebaseChapter() }
+            .groupBy { it.mangaUrl }
+        var cCount = 0
+        c
+            .forEach {
+                it.key?.replace("/", "<")
+                    ?.let { it1 -> chapterDoc2?.document(it1)?.set("chapters" to it.value) }
+                    ?.addOnSuccessListener {
+                        cCount++
+                        if (cCount >= c.size - 1) {
+                            runOnUIThread {
+                                Toast.makeText(context, "Finished Chapters", Toast.LENGTH_LONG).show()
+                            }
+                        }
+                        Loged.d("Success!")
+                    }?.addOnFailureListener {
+                        Loged.wtf("Failure!")
+                    }?.addOnCompleteListener {
+                        Loged.d("All done!")
+                    }
+            }
     }
 
     suspend fun uploadAllItems(dao: MangaDao) {
