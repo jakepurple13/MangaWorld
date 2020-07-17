@@ -1,8 +1,7 @@
 {
-  "version": "2.5",
-  "url": "https://github.com/jakepurple13/MangaWorld/releases/download/v24/app-debug.apk",
+  "version": "2.6",
+  "url": "https://github.com/jakepurple13/MangaWorld/releases/download/v25/app-debug.apk",
   "releaseNotes": [
-    "- Expanded Manga details slightly so it all looks uniform with the status bar now being colored",
     "- Small optimizations",
     "- Small ui changes",
     "- New icons!"
