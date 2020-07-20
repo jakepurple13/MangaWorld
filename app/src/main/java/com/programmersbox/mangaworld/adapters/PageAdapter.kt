@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.RequestBuilder
 import com.github.piasy.biv.indicator.progresspie.ProgressPieIndicator
+import com.google.android.gms.ads.AdRequest
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.programmersbox.helpfulutils.layoutInflater
 import com.programmersbox.helpfulutils.runOnUIThread
@@ -143,6 +144,7 @@ sealed class Page2Holder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     class LastChapterHolder(itemView: View) : Page2Holder(itemView) {
         private val returnButton = itemView.goBackFromReading!!
         fun render(activity: AppCompatActivity) {
+            itemView.adViewEnd.loadAd(AdRequest.Builder().build())
             returnButton.setOnClickListener { activity.finish() }
         }
     }
@@ -171,6 +173,7 @@ sealed class Page2Holder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val loadButton = itemView.loadNextChapter!!
 
         fun render(load: suspend () -> Unit) {
+            itemView.adViewNext.loadAd(AdRequest.Builder().build())
             loadButton.setOnClickListener { GlobalScope.launch { load() } }
         }
     }

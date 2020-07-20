@@ -23,4 +23,12 @@
         android:layout_below="@id/lastRead"
         android:text="Go Back" />
 
+    <com.google.android.gms.ads.AdView xmlns:ads="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/adViewEnd"
+        android:layout_below="@id/goBackFromReading"
+        ads:adSize="BANNER"
+        ads:adUnitId="@string/ad_unit_id"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
 </RelativeLayout>
