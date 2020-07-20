@@ -87,7 +87,7 @@ dependencies {
     implementation 'com.github.anzaizai:EasySwipeMenuLayout:1.1.4'
     implementation 'com.github.piasy:BigImageViewer:1.6.5'
     implementation 'me.zhanghai.android.fastscroll:library:1.1.4'
-    implementation 'de.Maxr1998.android:modernpreferences:0.5.8'
+    implementation 'de.Maxr1998.android:modernpreferences:0.5.10'
     implementation "com.leinardi.android:speed-dial:3.1.1"
     implementation "com.mikepenz:iconics-core:5.0.3"
     implementation 'com.mikepenz:google-material-typeface:3.0.1.4.original-kotlin@aar'
