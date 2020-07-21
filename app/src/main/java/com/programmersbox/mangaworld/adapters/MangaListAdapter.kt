@@ -121,7 +121,7 @@ class MangaListAdapter(context: Context, disposable: CompositeDisposable = Compo
 
         bind(item)
         val url = GlideUrl(
-            item.imageUrl, LazyHeaders.Builder()
+            item.imageUrl.let { if (it.isEmpty()) "null" else it }, LazyHeaders.Builder()
                 .apply { item.source.headers.forEach { addHeader(it.first, it.second) } }
                 .build()
         )
@@ -201,7 +201,7 @@ class BubbleListAdapter(context: Context, disposable: CompositeDisposable = Comp
         bind(item)
 
         val url = GlideUrl(
-            item.imageUrl, LazyHeaders.Builder()
+            item.imageUrl.let { if (it.isEmpty()) "null" else it }, LazyHeaders.Builder()
                 .apply { item.source.headers.forEach { addHeader(it.first, it.second) } }
                 .build()
         )
