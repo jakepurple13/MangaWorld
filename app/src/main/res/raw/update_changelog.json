@@ -1,9 +1,8 @@
 {
-  "version": "2.6",
-  "url": "https://github.com/jakepurple13/MangaWorld/releases/download/v25/app-debug.apk",
+  "version": "2.7",
+  "url": "https://github.com/jakepurple13/MangaWorld/releases/download/v26/app-release.apk",
   "releaseNotes": [
     "- Small optimizations",
-    "- Small ui changes",
-    "- New icons!"
+    "- Ads! They should be super out of the way so dont worry too much about them."
   ]
 }
