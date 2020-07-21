@@ -19,7 +19,8 @@ import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.firestore.ktx.toObjects
 import com.programmersbox.helpfulutils.runOnUIThread
 import com.programmersbox.loggingutils.Loged
-import com.programmersbox.loggingutils.f
+import com.programmersbox.loggingutils.fa
+import com.programmersbox.loggingutils.fd
 import com.programmersbox.manga_db.MangaDao
 import com.programmersbox.manga_db.MangaDatabase
 import com.programmersbox.manga_db.MangaDbModel
@@ -69,6 +70,7 @@ class FirebaseAuthentication(private val context: Context, private val activity:
             AuthUI.getInstance()
                 .createSignInIntentBuilder()
                 .setTheme(R.style.AppTheme)
+                .setLogo(R.drawable.manga_world_logo)
                 .setAvailableProviders(providers)
                 .build(),
             RC_SIGN_IN
@@ -88,7 +90,7 @@ class FirebaseAuthentication(private val context: Context, private val activity:
             if (resultCode == Activity.RESULT_OK) {
                 // Successfully signed in
                 //currentUser = auth.currentUser//FirebaseAuth.getInstance().currentUser
-                Loged.f(currentUser)
+                Loged.fd(currentUser)
                 // ...
                 //val task = GoogleSignIn.getSignedInAccountFromIntent(data)
                 //val account = task.getResult(ApiException::class.java)!!
@@ -101,6 +103,7 @@ class FirebaseAuthentication(private val context: Context, private val activity:
                 // sign-in flow using the back button. Otherwise check
                 // response.getError().getErrorCode() and handle the error.
                 // ...
+                Loged.fa(response?.error?.errorCode)
                 Toast.makeText(context, "Signed in Unsuccessfully", Toast.LENGTH_SHORT).show()
             }
         }
