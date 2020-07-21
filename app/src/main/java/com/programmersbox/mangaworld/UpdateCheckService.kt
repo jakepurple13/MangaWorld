@@ -203,6 +203,7 @@ class UpdateNotification(private val context: Context) {
                 pictureStyle {
                     bigPicture = it
                     largeIcon = it
+                    contentTitle = pair.first.chapters.firstOrNull()?.name ?: ""
                     summaryText = context.getString(
                         R.string.hadAnUpdate,
                         pair.second.title,
@@ -210,6 +211,7 @@ class UpdateNotification(private val context: Context) {
                     )
                 }
             } ?: bigTextStyle {
+                contentTitle = pair.first.chapters.firstOrNull()?.name ?: ""
                 bigText = context.getString(
                     R.string.hadAnUpdate,
                     pair.second.title,

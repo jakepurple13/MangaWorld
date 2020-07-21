@@ -19,6 +19,8 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions.withCrossFade
 import com.bumptech.glide.util.ViewPreloadSizeProvider
 import com.github.piasy.biv.BigImageViewer
+import com.google.android.gms.ads.MobileAds
+import com.google.android.gms.ads.RequestConfiguration
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.analytics.ktx.logEvent
@@ -123,7 +125,12 @@ class ReadActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_read)
 
+        MobileAds.initialize(this) {}
+        MobileAds.setRequestConfiguration(RequestConfiguration.Builder().setTestDeviceIds(listOf("BCF3E346AED658CDCCB1DDAEE8D84845")).build())
+
         hideSystemUI()
+
+        //adViewing.loadAd(AdRequest.Builder().build())
 
         /*window.decorView.setOnSystemUiVisibilityChangeListener { visibility ->
             if (visibility and View.SYSTEM_UI_FLAG_FULLSCREEN == 0) {
@@ -305,6 +312,7 @@ class ReadActivity : AppCompatActivity() {
 
     override fun onPause() {
         saveCurrentChapterSpot()
+        //adViewing.pause()
         super.onPause()
     }
 
@@ -313,6 +321,14 @@ class ReadActivity : AppCompatActivity() {
         unregisterReceiver(timeTicker)
         saveCurrentChapterSpot()
         disposable.dispose()
+        //adViewing.destroy()
         super.onDestroy()
     }
+
+    /*// Called when returning to the activity
+    override fun onResume() {
+        super.onResume()
+        adViewing.resume()
+    }*/
+
 }

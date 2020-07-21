@@ -314,7 +314,7 @@ class GalleryListAdapter(context: Context, disposable: CompositeDisposable = Com
 
         bind(item)
         val url = GlideUrl(
-            item.imageUrl, LazyHeaders.Builder()
+            item.imageUrl.let { if (it.isEmpty()) "null" else it }, LazyHeaders.Builder()
                 .apply { item.source.headers.forEach { addHeader(it.first, it.second) } }
                 .build()
         )

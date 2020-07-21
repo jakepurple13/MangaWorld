@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.RequestBuilder
 import com.github.piasy.biv.indicator.progresspie.ProgressPieIndicator
+import com.google.android.gms.ads.AdRequest
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.programmersbox.helpfulutils.layoutInflater
 import com.programmersbox.helpfulutils.runOnUIThread
@@ -83,6 +84,8 @@ class PageAdapter2(
 
     override val itemToModel: (String) -> String = { it }
 
+    private val ad by lazy { AdRequest.Builder().build() }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): Page2Holder = context.layoutInflater.inflate(viewType, parent, false).let {
         when (viewType) {
             R.layout.page_end_chapter_item -> Page2Holder.LastChapterHolder(it)
@@ -104,7 +107,7 @@ class PageAdapter2(
         when (holder) {
             is Page2Holder.ReadingHolder -> holder.render(dataList[position], canDownload)
             is Page2Holder.LoadNextChapterHolder -> {
-                holder.render {
+                holder.render(ad) {
                     runOnUIThread {
                         chapterModels.getOrNull(--currentChapter)?.let(loadNewPages)
                         chapterModels.getOrNull(currentChapter)?.let { item ->
@@ -122,7 +125,7 @@ class PageAdapter2(
                     }
                 }
             }
-            is Page2Holder.LastChapterHolder -> holder.render(activity)
+            is Page2Holder.LastChapterHolder -> holder.render(activity, ad)
         }
     }
 
@@ -142,7 +145,8 @@ sealed class Page2Holder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
     class LastChapterHolder(itemView: View) : Page2Holder(itemView) {
         private val returnButton = itemView.goBackFromReading!!
-        fun render(activity: AppCompatActivity) {
+        fun render(activity: AppCompatActivity, request: AdRequest) {
+            itemView.adViewEnd.loadAd(request)
             returnButton.setOnClickListener { activity.finish() }
         }
     }
@@ -170,7 +174,8 @@ sealed class Page2Holder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     class LoadNextChapterHolder(itemView: View) : Page2Holder(itemView) {
         private val loadButton = itemView.loadNextChapter!!
 
-        fun render(load: suspend () -> Unit) {
+        fun render(request: AdRequest, load: suspend () -> Unit) {
+            itemView.adViewNext.loadAd(request)
             loadButton.setOnClickListener { GlobalScope.launch { load() } }
         }
     }
