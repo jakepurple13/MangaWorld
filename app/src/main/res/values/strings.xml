@@ -28,7 +28,9 @@
     <string name="selectSource">Select %s Source</string>
     <string name="downloadPage">Download Page?</string>
 
-    <string name="ad_unit_id">ca-app-pub-8950844463555971/3160740646</string>
+    <!--ca-app-pub-8950844463555971~2613945738-->
+    <string name="ad_id">ca-app-pub-4987825622505192~4498529586</string>
+    <string name="ad_unit_id">ca-app-pub-4987825622505192/5651829158</string>
     <!--test ca-app-pub-3940256099942544/6300978111-->
     <!--real ca-app-pub-8950844463555971/3160740646-->
 
