@@ -4,27 +4,27 @@
     <item
         android:id="@+id/viewFavoritesMenu"
         android:icon="@android:drawable/star_on"
-        android:title="View Favorites" />
+        android:title="@string/viewFavoritesMenu" />
 
     <item
         android:id="@+id/viewHistoryMenu"
         android:icon="@android:drawable/ic_menu_recent_history"
-        android:title="View History" />
+        android:title="@string/viewHistoryMenu" />
 
     <item
         android:id="@+id/changeSourcesMenu"
         android:icon="@android:drawable/ic_input_add"
-        android:title="Change Source" />
+        android:title="@string/changeSourcesMenu" />
 
     <item
         android:id="@+id/viewSettingsMenu"
         android:icon="@android:drawable/ic_menu_preferences"
-        android:title="View Settings" />
+        android:title="@string/viewSettingsMenu" />
 
     <item
         android:id="@+id/checkForUpdates"
         android:icon="@drawable/manga_world_round_logo"
-        android:title="Check For Updates" />
+        android:title="@string/checkForUpdates" />
 
     <!--<item
         android:id="@+id/signIn"

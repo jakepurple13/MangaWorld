@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name" translatable="false">Manga World</string>
 
     <string name="removed">Removed %s</string>
@@ -28,10 +28,39 @@
     <string name="selectSource">Select %s Source</string>
     <string name="downloadPage">Download Page?</string>
 
-    <!--ca-app-pub-8950844463555971~2613945738-->
-    <string name="ad_id">ca-app-pub-4987825622505192~4498529586</string>
-    <string name="ad_unit_id">ca-app-pub-4987825622505192/5651829158</string>
-    <!--test ca-app-pub-3940256099942544/6300978111-->
-    <!--real ca-app-pub-8950844463555971/3160740646-->
+    <string name="moreInfo">More Info</string>
+    <string name="read">Read</string>
+    <string name="download">Download</string>
+    <string name="markAs" tools:ignore="TypographyEllipsis">Mark As...</string>
+    <string name="loadNextChapter">Load Next Chapter</string>
+    <string name="reachedLastChapter">Reached Last Chapter</string>
+    <string name="goBack">Go Back</string>
+
+    <string name="searchFavorites">Search Favorites</string>
+
+    <string name="mangaWorldUpdate">Manga World Update %s</string>
+    <string name="notNow">Not Now</string>
+    <string name="gotoBrowser">Go to Browser</string>
+    <string name="update">Update</string>
+    <string name="updateTitle">There\'s an update! %s</string>
+
+    <string name="viewFavoritesMenu">View Favorites</string>
+    <string name="viewHistoryMenu">View History</string>
+    <string name="changeSourcesMenu">Change Source</string>
+    <string name="viewSettingsMenu">View Settings</string>
+    <string name="checkForUpdates">Check For Updates</string>
+
+    <string name="areYouSureSignOut">"Are you sure you want to sign out?"</string>
+    <string name="signIn">Sign in</string>
+    <string name="signOut">Sign out</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+
+    <string name="ok">OK</string>
+    <string name="wentWrong">Something Went Wrong!</string>
+    <string name="wentWrongInfo">Something happened while trying to load %s. Please try again or use a different source, but please report this to the developer.</string>
+
+    <string name="ad_id" translatable="false">ca-app-pub-4987825622505192~4498529586</string>
+    <string name="ad_unit_id" translatable="false">ca-app-pub-4987825622505192/5651829158</string>
 
 </resources>

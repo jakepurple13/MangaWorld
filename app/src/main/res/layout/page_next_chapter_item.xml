@@ -16,6 +16,6 @@
         android:layout_below="@id/adViewNext"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Load Next Chapter" />
+        android:text="@string/loadNextChapter" />
 
 </RelativeLayout>

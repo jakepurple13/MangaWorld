@@ -203,17 +203,17 @@ class AppUpdateChecker(private val activity: ComponentActivity) {
             if (it.isGranted) {
                 runOnUIThread {
                     MaterialAlertDialogBuilder(context)
-                        .setTitle("There's an update! ${info.version}")
+                        .setTitle(context.getString(R.string.updateTitle, info.version))
                         .setItems(info.releaseNotes.toTypedArray(), null)
-                        .setPositiveButton("Update") { d, _ ->
+                        .setPositiveButton(R.string.update) { d, _ ->
                             download2(info)
                             d.dismiss()
                         }
-                        .setNeutralButton("Go to browser") { d, _ ->
+                        .setNeutralButton(R.string.gotoBrowser) { d, _ ->
                             context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(info.url)))
                             d.dismiss()
                         }
-                        .setNegativeButton("Not now") { d, _ -> d.dismiss() }
+                        .setNegativeButton(R.string.notNow) { d, _ -> d.dismiss() }
                         .show()
                 }
             }
@@ -232,7 +232,7 @@ class AppUpdateChecker(private val activity: ComponentActivity) {
             downloadUri = Uri.parse(info.url)
             allowOverRoaming = true
             networkType = DownloadDslManager.NetworkType.WIFI_MOBILE
-            title = "Manga World Update ${info.version}"
+            title = context.getString(R.string.mangaWorldUpdate, info.version)
             mimeType = "application/vnd.android.package-archive"
             visibility = DownloadDslManager.NotificationVisibility.COMPLETED
             destinationInExternalPublicDir(

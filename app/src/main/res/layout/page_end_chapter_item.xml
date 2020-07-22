@@ -20,7 +20,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/adViewEnd"
         android:gravity="center"
-        android:text="Reached Last Chapter" />
+        android:text="@string/reachedLastChapter" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/goBackFromReading"
@@ -28,7 +28,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/lastRead"
-        android:text="Go Back"
+        android:text="@string/goBack"
         app:strokeColor="@color/colorPrimary" />
 
 </RelativeLayout>

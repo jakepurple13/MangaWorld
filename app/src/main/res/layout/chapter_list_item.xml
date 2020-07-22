@@ -29,8 +29,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="5dp"
-            android:orientation="horizontal"
-            tools:ignore="HardcodedText">
+            android:orientation="horizontal">
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/readChapterButton"
@@ -39,9 +38,9 @@
                 android:layout_height="match_parent"
                 android:layout_marginHorizontal="5dp"
                 android:drawableTop="@drawable/ic_start"
-                android:text="Read"
-                android:textColor="#ffffff"
                 android:drawableTint="#ffffff"
+                android:text="@string/read"
+                android:textColor="#ffffff"
                 app:optionTint="@{swatch}"
                 app:strokeColor="#ffffff" />
 
@@ -52,9 +51,9 @@
                 android:layout_height="match_parent"
                 android:layout_marginHorizontal="5dp"
                 android:drawableTop="@drawable/ic_download"
-                android:text="Download"
-                android:textColor="#ffffff"
                 android:drawableTint="#ffffff"
+                android:text="@string/download"
+                android:textColor="#ffffff"
                 app:optionTint="@{swatch}"
                 app:strokeColor="#ffffff" />
 
@@ -65,9 +64,9 @@
                 android:layout_height="match_parent"
                 android:layout_marginHorizontal="5dp"
                 android:drawableTop="@drawable/ic_completed"
-                android:text="Mark As..."
-                android:textColor="#ffffff"
                 android:drawableTint="#ffffff"
+                android:text="@string/markAs"
+                android:textColor="#ffffff"
                 app:optionTint="@{swatch}"
                 app:strokeColor="#ffffff" />
 
@@ -136,6 +135,5 @@
         </com.google.android.material.card.MaterialCardView>
 
     </com.guanaj.easyswipemenulibrary.EasySwipeMenuLayout>
-
 
 </layout>
