@@ -8,9 +8,12 @@ import androidx.work.*
 import com.facebook.stetho.Stetho
 import com.github.piasy.biv.BigImageViewer
 import com.github.piasy.biv.loader.glide.GlideImageLoader
+import com.google.android.gms.ads.MobileAds
+import com.google.android.gms.ads.RequestConfiguration
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.programmersbox.helpfulutils.*
 import com.programmersbox.loggingutils.Loged
+import com.programmersbox.loggingutils.f
 import com.programmersbox.mangaworld.utils.MangaInfoCache
 import com.programmersbox.mangaworld.utils.useUpdate
 import com.tonyodev.fetch2.DefaultFetchNotificationManager
@@ -61,6 +64,9 @@ class MangaWorldApp : Application() {
             }
         }
         setAlarmUp()
+
+        MobileAds.initialize(this) { s -> Loged.f(s.adapterStatusMap.entries.joinToString { "${it.key}=(${it.value.initializationState}, ${it.value.description})" }) }
+        MobileAds.setRequestConfiguration(RequestConfiguration.Builder().setTestDeviceIds(listOf("BCF3E346AED658CDCCB1DDAEE8D84845")).build())
     }
 
     private fun setAlarmUp() {

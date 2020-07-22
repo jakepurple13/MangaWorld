@@ -16,6 +16,8 @@ import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.firebase.ktx.Firebase
 import com.jakewharton.rxbinding2.widget.textChanges
 import com.leinardi.android.speeddial.SpeedDialActionItem
+import com.mikepenz.iconics.IconicsDrawable
+import com.mikepenz.iconics.typeface.library.googlematerial.GoogleMaterial
 import com.programmersbox.gsonutils.sharedPrefNotNullObjectDelegate
 import com.programmersbox.helpfulutils.requestPermissions
 import com.programmersbox.helpfulutils.setEnumSingleChoiceItems
@@ -78,7 +80,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun menuSetup() {
-        val signDial = SpeedDialActionItem.Builder(R.id.signInId, R.drawable.common_google_signin_btn_icon_dark)
+        val signDial = SpeedDialActionItem.Builder(R.id.signInId, IconicsDrawable(this, GoogleMaterial.Icon.gmd_person))
             .setLabel(if (FirebaseAuthentication.currentUser != null) "Sign out" else "Sign in")
 
         menuOptions.inflate(R.menu.main_menu_items)
