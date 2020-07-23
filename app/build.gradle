@@ -108,7 +108,7 @@ dependencies {
     implementation 'com.facebook.stetho:stetho:1.5.1'
 
     //Work Manager
-    def work_version = "2.3.4"
+    def work_version = "2.4.0"
     // Kotlin + coroutines
     implementation "androidx.work:work-runtime-ktx:$work_version"
     // optional - RxJava2 support
