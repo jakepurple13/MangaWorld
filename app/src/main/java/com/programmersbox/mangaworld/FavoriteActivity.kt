@@ -148,7 +148,7 @@ class FavoriteActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         fireListener.listener?.remove()
-        FirebaseDb.detachListener()
+        //FirebaseDb.detachListener()
         disposable.dispose()
         super.onDestroy()
     }
