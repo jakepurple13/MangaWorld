@@ -58,7 +58,7 @@ class FavoriteActivity : AppCompatActivity() {
         val dbFire = Flowables.combineLatest(
             fired,
             dao.getAllManga()
-        ) { db, fire -> (db + fire).groupBy(MangaDbModel::mangaUrl).map { it.value.maxBy(MangaDbModel::numChapters)!! }.map { it.toMangaModel() } }
+        ) { fire, db -> (db + fire).groupBy(MangaDbModel::mangaUrl).map { it.value.maxBy(MangaDbModel::numChapters)!! }.map { it.toMangaModel() } }
 
         Flowables.combineLatest(
             source1 = dbFire

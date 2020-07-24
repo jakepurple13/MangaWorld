@@ -514,7 +514,7 @@ object FirebaseDb {
             listener = mangaDoc2?.addSnapshotListener { value, error ->
                 value?.toObjects<FirebaseManga>()?.map { it.toMangaDbModel() }?.let { emitter(it) }
             }
-            if (listener == null) emitter()
+            if (listener == null) emitter(emptyList())
         }.toLatestFlowable()
 
         fun getAllManga() = mangaDoc2
@@ -527,7 +527,7 @@ object FirebaseDb {
             listener = mangaDoc2
                 ?.whereEqualTo("mangaUrl", url)
                 ?.addSnapshotListener { value, error -> emitter(value?.toObjects<FirebaseManga>()?.isNotEmpty()) }
-            if (listener == null) emitter()
+            if (listener == null) emitter(false)
         }.toLatestFlowable()
 
     }
@@ -570,7 +570,7 @@ object FirebaseDb {
                 ?.second
                 ?.map { it.toMangaChapter() }?.let { emitter(it) }
         }
-        if (allChapterFlowableListener == null) emitter()
+        if (allChapterFlowableListener == null) emitter(emptyList())
     }.toLatestFlowable().subscribeOn(Schedulers.io())
 
     fun addChapter(mangaModel: MangaReadChapter) = Completable.create { emitter ->
