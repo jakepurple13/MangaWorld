@@ -16,6 +16,7 @@ import com.mikepenz.iconics.utils.colorInt
 import com.mikepenz.iconics.utils.sizeDp
 import com.programmersbox.gsonutils.fromJson
 import com.programmersbox.gsonutils.putExtra
+import com.programmersbox.helpfulutils.GroupBehavior
 import com.programmersbox.helpfulutils.NotificationDslBuilder
 import com.programmersbox.helpfulutils.notificationManager
 import com.programmersbox.helpfulutils.sizedListOf
@@ -201,42 +202,47 @@ class SettingsActivity : AppCompatActivity() {
             title = "Show 10 Random Favorites"
             onClicked {
                 GlobalScope.launch {
-                    val mangaList = dbAndFireMangaSync().map { it.toMangaModel() }
-                    val manga = sizedListOf(10) {
+                    val db = MangaDatabase.getInstance(this@SettingsActivity).mangaDao().getAllMangaSync()
+                    val fire = FirebaseDb.FirebaseListener().getAllManga()?.requireNoNulls().orEmpty()
+                    val mangaList = listOf(db, fire).flatten().distinctBy { it.mangaUrl }.map { it.toMangaModel() }
+                    val manga = sizedListOf(mangaList.size.takeIf { it < 10 } ?: 10) {
                         try {
                             mangaList.random()
                         } catch (e: Exception) {
                             null
                         }
-                    }.requireNoNulls()
+                    }.requireNoNulls().also { println(it) }
+
                     notificationManager.notify(
                         12,
                         NotificationDslBuilder.builder(this@SettingsActivity, "mangaChannel", R.drawable.manga_world_round_logo) {
                             title = getText(R.string.app_name)
                             subText = "Here are ${manga.size} random manga"
-                            if (canBubble) {
-                                addBubble {
-                                    bubbleIntent(
-                                        PendingIntent.getActivity(
-                                            this@SettingsActivity, 12,
-                                            Intent(this@SettingsActivity, BubbleActivity::class.java).apply { putExtra("mangaList", manga) },
-                                            0
-                                        )
+                            groupSummary = true
+                            groupAlertBehavior = GroupBehavior.ALL
+                            groupId = "random10"
+                            addBubble {
+                                bubbleIntent(
+                                    PendingIntent.getActivity(
+                                        this@SettingsActivity, 12,
+                                        Intent(this@SettingsActivity, BubbleActivity::class.java).apply { putExtra("mangaList", manga) },
+                                        0
                                     )
-                                    desiredHeight = 600
-                                    icon = Icon.createWithResource(this@SettingsActivity, R.drawable.manga_world_round_logo)
+                                )
+                                desiredHeight = 600
+                                icon = Icon.createWithResource(this@SettingsActivity, R.drawable.manga_world_round_logo)
+                                autoExpandBubble = true
+                            }
+                            messageStyle {
+                                setMainPerson {
+                                    name = "MangaBot"
+                                    isBot = true
                                 }
-                                messageStyle {
-                                    setMainPerson {
+                                message {
+                                    message = "Here are ${manga.size} random manga"
+                                    setPerson {
                                         name = "MangaBot"
                                         isBot = true
-                                    }
-                                    message {
-                                        message = "Here are ${manga.size} random manga"
-                                        setPerson {
-                                            name = "MangaBot"
-                                            isBot = true
-                                        }
                                     }
                                 }
                             }

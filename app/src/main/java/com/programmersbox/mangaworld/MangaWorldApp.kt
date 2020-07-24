@@ -36,6 +36,7 @@ class MangaWorldApp : Application() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             createNotificationChannel("mangaChannel", importance = NotificationChannelImportance.HIGH)
             createNotificationGroup("mangaGroup")
+            createNotificationGroup("random10")
             createNotificationChannel("updateCheckChannel", importance = NotificationChannelImportance.MIN)
             createNotificationChannel("appUpdate", importance = NotificationChannelImportance.HIGH)
         }
