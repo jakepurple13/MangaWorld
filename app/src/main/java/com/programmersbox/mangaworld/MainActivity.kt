@@ -247,6 +247,10 @@ class MainActivity : AppCompatActivity() {
             .addTo(disposable)
     }
 
+    override fun onBackPressed() {
+        if (search_info.text?.isNotEmpty() == true) search_info.text?.clear() else super.onBackPressed()
+    }
+
     override fun onDestroy() {
         listener.listener?.remove()
         //FirebaseDb.detachListener()
