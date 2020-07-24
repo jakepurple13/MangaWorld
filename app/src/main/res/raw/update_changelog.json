@@ -1,8 +1,9 @@
 {
-  "version": "2.7",
-  "url": "https://github.com/jakepurple13/MangaWorld/releases/download/v26/app-release.apk",
+  "version": "2.8",
+  "url": "https://github.com/jakepurple13/MangaWorld/releases/download/v27/app-release.apk",
   "releaseNotes": [
     "- Small optimizations",
-    "- Ads! They should be super out of the way so dont worry too much about them."
+    "- Changed sign in/out icon",
+    "- Back button will clear text before exiting app"
   ]
 }
