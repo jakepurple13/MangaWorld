@@ -59,6 +59,7 @@
     <string name="ok">OK</string>
     <string name="wentWrong">Something Went Wrong!</string>
     <string name="wentWrongInfo">Something happened while trying to load %s. Please try again or use a different source, but please report this to the developer.</string>
+    <string name="wentWrongManga">Something happened while trying to load %s. Please try again, but please report this to the developer.</string>
 
     <string name="ad_id" translatable="false">ca-app-pub-4987825622505192~4498529586</string>
     <string name="ad_unit_id" translatable="false">ca-app-pub-4987825622505192/5651829158</string>

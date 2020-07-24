@@ -19,6 +19,7 @@ import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.programmersbox.dragswipe.DragSwipeAdapter
 import com.programmersbox.dragswipe.get
 import com.programmersbox.flowutils.collectOnUi
@@ -75,15 +76,29 @@ class MangaActivity : AppCompatActivity() {
 
     private fun loadMangaInfo(binding: ActivityMangaBinding, manga: MangaModel?) {
         GlobalScope.launch {
-            val model = MangaInfoCache.getInfo()?.find { it.mangaUrl == manga?.mangaUrl } ?: manga?.toInfoModel()?.also(MangaInfoCache::newInfo)
-            runOnUiThread {
-                val swatch = if (usePalette) intent.getObjectExtra<Palette.Swatch>("swatch", null) else null
-                moreInfoSetup(swatch)
-                binding.info = model
-                binding.swatch = swatch?.let { SwatchInfo(it.rgb, it.titleTextColor, it.bodyTextColor) }
-                binding.presenter = this@MangaActivity
-                mangaSetup(model, swatch)
-                dbLoad(manga)
+            try {
+                val model = MangaInfoCache.getInfo()?.find { it.mangaUrl == manga?.mangaUrl } ?: manga?.toInfoModel()?.also(MangaInfoCache::newInfo)
+                runOnUiThread {
+                    val swatch = if (usePalette) intent.getObjectExtra<Palette.Swatch>("swatch", null) else null
+                    moreInfoSetup(swatch)
+                    binding.info = model
+                    binding.swatch = swatch?.let { SwatchInfo(it.rgb, it.titleTextColor, it.bodyTextColor) }
+                    binding.presenter = this@MangaActivity
+                    mangaSetup(model, swatch)
+                    dbLoad(manga)
+                }
+            } catch (e: Exception) {
+                FirebaseCrashlytics.getInstance().recordException(e)
+                runOnUiThread {
+                    MaterialAlertDialogBuilder(this@MangaActivity)
+                        .setTitle(R.string.wentWrong)
+                        .setMessage(getString(R.string.wentWrongManga, manga?.title))
+                        .setPositiveButton(R.string.ok) { d, _ ->
+                            d.dismiss()
+                            finish()
+                        }
+                        .show()
+                }
             }
         }
     }
