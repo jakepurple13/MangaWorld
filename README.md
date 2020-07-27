@@ -7,10 +7,10 @@ Download and install app-release.apk
 
 # Screenshots
 <p align="center">
-  <img src="/ss/Screen%20Shot%202020-07-24%20at%209.18.46%20AM.png" width="32%"/>
-  <img src="/ss/Screen%20Shot%202020-07-24%20at%209.18.53%20AM.png" width="32%"/>
-  <img src="/ss/Screen%20Shot%202020-07-24%20at%209.19.11%20AM.png" width="32%"/>
-  <img src="/ss/Screen%20Shot%202020-07-24%20at%209.19.18%20AM.png" width="32%"/>
-  <img src="/ss/Screen%20Shot%202020-07-24%20at%209.19.25%20AM.png" width="32%"/>
-  <img src="/ss/Screen%20Shot%202020-07-24%20at%209.42.38%20AM.png" width="32%"/>
+  <img src="/ss/main.png" width="32%"/>
+  <img src="/ss/sources.png" width="32%"/>
+  <img src="/ss/search.png" width="32%"/>
+  <img src="/ss/favorites.png" width="32%"/>
+  <img src="/ss/mangaInfo.png" width="32%"/>
+  <img src="/ss/moreInfo.png" width="32%"/>
 </p>
