@@ -1,9 +1,10 @@
 {
-  "version": "2.8",
-  "url": "https://github.com/jakepurple13/MangaWorld/releases/download/v27/app-release.apk",
+  "version": "2.9",
+  "url": "https://github.com/jakepurple13/MangaWorld/releases/download/v28/app-release.apk",
   "releaseNotes": [
     "- Small optimizations",
-    "- Changed sign in/out icon",
-    "- Back button will clear text before exiting app"
+    "- Fixed trying to check MangaPark Manga Info (Sorry, it's still not working) - (Might have gotten it working now)",
+    "- Added a when to the notifications",
+    "- still looking into some pages not loading"
   ]
 }
