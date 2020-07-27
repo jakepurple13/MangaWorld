@@ -16,11 +16,11 @@ enum class Sources(
     NINE_ANIME(domain = "nineanime", source = NineAnime),
     MANGAKAKALOT(domain = "mangakakalot", source = Mangakakalot),
     MANGAMUTINY(domain = "mangamutiny", source = Mangamutiny),
+    MANGA_PARK(domain = "mangapark", source = MangaPark, filterOutOfUpdate = true),
 
     //MANGA_DOG(domain = "mangadog", source = MangaDog),
     INKR(domain = "mangarock", source = com.programmersbox.manga_sources.mangasources.manga.INKR),
-    TSUMINO(domain = "tsumino", isAdult = true, source = Tsumino),
-    MANGA_PARK(domain = "mangapark", source = MangaPark, filterOutOfUpdate = true);
+    TSUMINO(domain = "tsumino", isAdult = true, source = Tsumino);
 
     companion object {
         fun getSourceByUrl(url: String) = values().find { url.contains(it.domain, true) }

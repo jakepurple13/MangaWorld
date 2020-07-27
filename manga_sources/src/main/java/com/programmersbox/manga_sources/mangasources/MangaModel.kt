@@ -1,5 +1,6 @@
 package com.programmersbox.manga_sources.mangasources
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 
 interface MangaSource {
@@ -47,3 +48,7 @@ data class ChapterModel(
 }
 
 data class PageModel(val pages: List<String>)
+
+object MangaContext {
+    lateinit var context: Context
+}

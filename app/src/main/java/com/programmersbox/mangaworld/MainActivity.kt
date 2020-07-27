@@ -145,6 +145,7 @@ class MainActivity : AppCompatActivity() {
                     search_layout.suffixText = "${mangaList.size}"
                 }
             } catch (e: Exception) {
+                e.printStackTrace()
                 FirebaseCrashlytics.getInstance().log("$currentSource had an error")
                 FirebaseCrashlytics.getInstance().recordException(e)
                 Firebase.analytics.logEvent("manga_load_error") {

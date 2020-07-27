@@ -3,7 +3,8 @@ package com.programmersbox.manga_sources.mangasources.manga
 import android.annotation.SuppressLint
 import com.programmersbox.gsonutils.fromJson
 import com.programmersbox.manga_sources.mangasources.*
-import org.jsoup.Jsoup
+import com.programmersbox.manga_sources.mangasources.utilities.asJsoup
+import com.programmersbox.manga_sources.mangasources.utilities.cloudflare
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import java.text.SimpleDateFormat
@@ -15,7 +16,7 @@ object MangaPark : MangaSource {
 
     override fun searchManga(searchText: CharSequence, pageNumber: Int, mangaList: List<MangaModel>): List<MangaModel> = try {
         if (searchText.isBlank()) throw Exception("No search necessary")
-        Jsoup.connect("$baseUrl/search?q=$searchText&page=$pageNumber&st-ss=1").get()
+        cloudflare("$baseUrl/search?q=$searchText&page=$pageNumber&st-ss=1").execute().asJsoup()
             .select("div.item").map {
                 val title = it.select("a.cover")
                 MangaModel(
@@ -30,7 +31,7 @@ object MangaPark : MangaSource {
         super.searchManga(searchText, pageNumber, mangaList)
     }
 
-    override fun getManga(pageNumber: Int): List<MangaModel> = Jsoup.connect("$baseUrl/latest/$pageNumber").get()
+    override fun getManga(pageNumber: Int): List<MangaModel> = cloudflare("$baseUrl/latest/$pageNumber").execute().asJsoup()
         .select("div.ls1").select("div.d-flex, div.flex-row, div.item")
         .map {
             MangaModel(
@@ -43,7 +44,7 @@ object MangaPark : MangaSource {
         }
 
     override fun toInfoModel(model: MangaModel): MangaInfoModel {
-        val doc = Jsoup.connect(model.mangaUrl).get()
+        val doc = cloudflare(model.mangaUrl).execute().asJsoup()//Jsoup.connect(model.mangaUrl).get()
         val genres = mutableListOf<String>()
         val alternateNames = mutableListOf<String>()
         doc.select(".attr > tbody > tr").forEach {
@@ -204,7 +205,7 @@ object MangaPark : MangaSource {
     }
 
     override fun getMangaModelByUrl(url: String): MangaModel {
-        val doc = Jsoup.connect(url).get()
+        val doc = cloudflare(url).execute().asJsoup()
         val titleAndImg = doc.select("div.w-100, div.cover").select("img")
         return MangaModel(
             title = titleAndImg.attr("title"),
@@ -216,7 +217,7 @@ object MangaPark : MangaSource {
     }
 
     override fun getPageInfo(chapterModel: ChapterModel): PageModel = PageModel(
-        Jsoup.connect(chapterModel.url).get().toString()
+        cloudflare(chapterModel.url).execute().asJsoup().toString()
             .substringAfter("var _load_pages = ").substringBefore(";").fromJson<List<Pages>>().orEmpty()
             .map { if (it.u.orEmpty().startsWith("//")) "https:${it.u}" else it.u.orEmpty() }
     )

@@ -73,11 +73,14 @@ object Manganelo : MangaSource {
         )
     }
 
-    override fun getPageInfo(chapterModel: ChapterModel): PageModel =
-        PageModel(
-            Jsoup.connect(chapterModel.url).get()
-                .select("div.container-chapter-reader").select("img")
-                .map { it.select("img[src^=http]").attr("abs:src") }
-        )
+    override fun getPageInfo(chapterModel: ChapterModel): PageModel = PageModel(
+        pages = Jsoup.connect(chapterModel.url).header("Referer", baseUrl).get()
+            .select("div.container-chapter-reader").select("img")
+            .map { it.select("img[src^=http]").attr("abs:src") }
+    )
+
+    override val headers: List<Pair<String, String>> = listOf(
+        "Referer" to "https://manganelo.com"
+    )
 
 }

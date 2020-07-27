@@ -12,9 +12,14 @@ object NineAnime : MangaSource {
 
     private const val url = "https://www.nineanime.com"
 
+    override val headers: List<Pair<String, String>> = listOf(
+        "User-Agent" to "Mozilla/5.0 (Windows NT 10.0; WOW64) Gecko/20100101 Firefox/77",
+        "Accept-Language" to "en-US,en;q=0.5"
+    )
+
     override fun searchManga(searchText: CharSequence, pageNumber: Int, mangaList: List<MangaModel>): List<MangaModel> = try {
         if (searchText.isBlank()) throw Exception("No search necessary")
-        Jsoup.connect("$url/search/?name=$searchText&page=$pageNumber.html").get()
+        Jsoup.connect("$url/search/?name=$searchText&page=$pageNumber.html").followRedirects(true).get()
             .select("div.post").map {
                 MangaModel(
                     title = it.select("p.title a").text(),
@@ -28,19 +33,20 @@ object NineAnime : MangaSource {
         super.searchManga(searchText, pageNumber, mangaList)
     }
 
-    override fun getManga(pageNumber: Int): List<MangaModel> = Jsoup.connect("$url/category/index_$pageNumber.html?sort=updated").get()
-        .select("div.post").map {
-            MangaModel(
-                title = it.select("p.title a").text(),
-                description = "",
-                mangaUrl = it.select("p.title a").attr("href"),
-                imageUrl = it.select("img").attr("abs:src"),
-                source = Sources.NINE_ANIME
-            )
-        }
+    override fun getManga(pageNumber: Int): List<MangaModel> =
+        Jsoup.connect("$url/category/index_$pageNumber.html?sort=updated").followRedirects(true).get()
+            .select("div.post").map {
+                MangaModel(
+                    title = it.select("p.title a").text(),
+                    description = "",
+                    mangaUrl = it.select("p.title a").attr("href"),
+                    imageUrl = it.select("img").attr("abs:src"),
+                    source = Sources.NINE_ANIME
+                )
+            }
 
     override fun toInfoModel(model: MangaModel): MangaInfoModel {
-        val doc = Jsoup.connect("${model.mangaUrl}?waring=1").get()
+        val doc = Jsoup.connect("${model.mangaUrl}?waring=1").followRedirects(true).get()
         val genreAndDescription = doc.select("div.manga-detailmiddle")
         return MangaInfoModel(
             title = model.title,
@@ -74,7 +80,7 @@ object NineAnime : MangaSource {
     }
 
     override fun getPageInfo(chapterModel: ChapterModel): PageModel {
-        val doc = Jsoup.connect(chapterModel.url).header("Referer", "$url/manga.").get()
+        val doc = Jsoup.connect(chapterModel.url).header("Referer", "$url/manga.").followRedirects(true).get()
         val script = doc.select("script:containsData(all_imgs_url)").firstOrNull()?.data() ?: return PageModel(emptyList())
         return PageModel(Regex(""""(http.*)",""").findAll(script).map { it.groupValues[1] }.toList())
     }

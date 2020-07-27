@@ -14,6 +14,7 @@ import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.programmersbox.helpfulutils.*
 import com.programmersbox.loggingutils.Loged
 import com.programmersbox.loggingutils.f
+import com.programmersbox.manga_sources.mangasources.MangaContext
 import com.programmersbox.mangaworld.utils.MangaInfoCache
 import com.programmersbox.mangaworld.utils.useUpdate
 import com.tonyodev.fetch2.DefaultFetchNotificationManager
@@ -28,6 +29,7 @@ class MangaWorldApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        MangaContext.context = this
         Stetho.initializeWithDefaults(this)
         MangaInfoCache.init(this)
         Loged.FILTER_BY_PACKAGE_NAME = "programmersbox"
