@@ -218,6 +218,7 @@ class UpdateNotification(private val context: Context) {
                     pair.first.chapters.firstOrNull()?.name.orEmpty()
                 )
             }
+            showWhen = true
             groupId = "mangaGroup"
             pendingIntent { context ->
                 TaskStackBuilder.create(context)
@@ -238,6 +239,7 @@ class UpdateNotification(private val context: Context) {
                 title = context.getText(R.string.app_name)
                 val size = list.first.size + currentNotificationSize
                 subText = context.resources.getQuantityString(R.plurals.updateAmount, size, size)
+                showWhen = true
                 groupSummary = true
                 groupAlertBehavior = GroupBehavior.ALL
                 groupId = "mangaGroup"
@@ -295,6 +297,7 @@ class UpdateNotification(private val context: Context) {
                 this.progress = progress
                 indeterminate = progress == 0
             }
+            showWhen = true
             message = contextText
             subText = context.getText(R.string.checkingUpdate)
         }
