@@ -27,3 +27,12 @@ If you run into any issues, please create an issue request with the following de
 - Actual behavior
 - If the issue is a breaking issue or not
 - Any other additional information you might think will help
+
+# Pull Requests
+
+If you want to add a new source or have a change that might make the app better
+
+- Make a new branch
+- Make changes
+- Push and create a new PR
+- Add me (jakepurple13) as a reviewer
