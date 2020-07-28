@@ -12,6 +12,8 @@ object MangaEden : MangaSource {
     private const val baseUrl = "http://www.mangaeden.com"
     private const val imageUrl = "http://cdn.mangaeden.com/mangasimg/"
 
+    override val websiteUrl: String = baseUrl
+
     override val hasMorePages: Boolean = false
 
     override fun getManga(pageNumber: Int): List<MangaModel> = getJsonApi<Eden?>("$baseUrl/api/list/0/", header)?.manga

@@ -14,6 +14,8 @@ object MangaPark : MangaSource {
 
     private const val baseUrl = "https://mangapark.net"
 
+    override val websiteUrl: String = baseUrl
+
     override fun searchManga(searchText: CharSequence, pageNumber: Int, mangaList: List<MangaModel>): List<MangaModel> = try {
         if (searchText.isBlank()) throw Exception("No search necessary")
         cloudflare("$baseUrl/search?q=$searchText&page=$pageNumber&st-ss=1").execute().asJsoup()

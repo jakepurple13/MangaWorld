@@ -11,6 +11,8 @@ object Mangamutiny : MangaSource {
     private const val mangaApiPath = "/v1/public/manga"
     private const val chapterApiPath = "/v1/public/chapter"
 
+    override val websiteUrl: String = "https://mangamutiny.org"
+
     override val headers: List<Pair<String, String>>
         get() = listOf(
             "Accept" to "application/json",

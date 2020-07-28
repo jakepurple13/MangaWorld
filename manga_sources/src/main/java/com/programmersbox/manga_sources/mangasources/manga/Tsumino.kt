@@ -9,6 +9,8 @@ object Tsumino : MangaSource {
 
     private const val baseUrl = "https://www.tsumino.com"
 
+    override val websiteUrl: String = baseUrl
+
     override fun getManga(pageNumber: Int): List<MangaModel> = getJsonApi<Base>("$baseUrl/Search/Operate/?PageNumber=$pageNumber&Sort=Newest")
         ?.data
         ?.map {

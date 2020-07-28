@@ -19,6 +19,8 @@ object INKR : MangaSource {
 
     private const val apiUrl = "https://api.mangarockhd.com/query/android500"
 
+    override val websiteUrl: String = "https://www.inkr.com"
+
     //TODO: Work in progress
     private fun searchMangaTest(searchText: CharSequence, pageNumber: Int, mangaList: List<MangaModel>): List<MangaModel> = try {
         if (searchText.isBlank()) throw Exception("No search necessary")

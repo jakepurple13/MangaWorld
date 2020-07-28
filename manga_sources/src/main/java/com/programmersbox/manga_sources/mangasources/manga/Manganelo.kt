@@ -11,6 +11,7 @@ object Manganelo : MangaSource {
     override val hasMorePages: Boolean = true
 
     private const val baseUrl = "https://m.manganelo.com"
+    override val websiteUrl: String = "https://manganelo.com"
 
     override fun searchManga(searchText: CharSequence, pageNumber: Int, mangaList: List<MangaModel>): List<MangaModel> = try {
         if (searchText.isBlank()) throw Exception("No search necessary")

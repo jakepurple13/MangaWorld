@@ -12,6 +12,8 @@ object MangaDog : MangaSource {
     private const val baseUrl = "https://mangadog.club"
     private const val cdn = "https://cdn.mangadog.club"
 
+    override val websiteUrl: String = baseUrl
+
     override fun getManga(pageNumber: Int): List<MangaModel> = getJsonApi<Base>("$baseUrl/index/latestupdate/getUpdateResult?page=$pageNumber")
         ?.data
         ?.map {

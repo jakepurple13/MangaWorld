@@ -8,6 +8,7 @@ import java.util.*
 
 object Mangakakalot : MangaSource {
     private const val url = "https://mangakakalot.com"
+    override val websiteUrl: String = url
 
     override fun searchManga(searchText: CharSequence, pageNumber: Int, mangaList: List<MangaModel>): List<MangaModel> = try {
         if (searchText.isBlank()) throw Exception("No search necessary")

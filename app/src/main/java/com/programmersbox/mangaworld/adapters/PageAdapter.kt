@@ -107,7 +107,7 @@ class PageAdapter2(
         when (holder) {
             is Page2Holder.ReadingHolder -> holder.render(dataList[position], canDownload)
             is Page2Holder.LoadNextChapterHolder -> {
-                holder.render(ad) {
+                holder.render(activity, ad) {
                     runOnUIThread {
                         chapterModels.getOrNull(--currentChapter)?.let(loadNewPages)
                         chapterModels.getOrNull(currentChapter)?.let { item ->
@@ -173,10 +173,11 @@ sealed class Page2Holder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
     class LoadNextChapterHolder(itemView: View) : Page2Holder(itemView) {
         private val loadButton = itemView.loadNextChapter!!
-
-        fun render(request: AdRequest, load: suspend () -> Unit) {
+        private val returnButton = itemView.goBackFromReadingLoad!!
+        fun render(activity: AppCompatActivity, request: AdRequest, load: suspend () -> Unit) {
             itemView.adViewNext.loadAd(request)
             loadButton.setOnClickListener { GlobalScope.launch { load() } }
+            returnButton.setOnClickListener { activity.finish() }
         }
     }
 

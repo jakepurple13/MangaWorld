@@ -3,14 +3,16 @@ package com.programmersbox.mangaworld
 import com.programmersbox.gsonutils.fromJson
 import com.programmersbox.gsonutils.toJson
 import com.programmersbox.gsonutils.toPrettyJson
-import com.programmersbox.helpfulutils.similarity
-import com.programmersbox.helpfulutils.toHexString
+import com.programmersbox.helpfulutils.*
 import com.programmersbox.manga_sources.mangasources.MangaModel
 import com.programmersbox.manga_sources.mangasources.MangaSource
 import com.programmersbox.manga_sources.mangasources.Sources
 import com.programmersbox.manga_sources.mangasources.manga.MangaEden
 import com.programmersbox.manga_sources.mangasources.manga.Manganelo
+import org.junit.After
 import org.junit.Test
+import java.text.DateFormat
+import java.text.SimpleDateFormat
 import java.time.Duration
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
@@ -30,6 +32,26 @@ class ExampleUnitTest {
         println(list.joinToString("\n"))
         println("-".repeat(100))
         println(list2.joinToString("\n"))
+    }
+
+    @After
+    fun finished() {
+        Runtime.getRuntime().exec("say finished").waitFor()
+    }
+
+    operator fun DateFormat.invoke(date: Any): String = format(date)
+
+    @Test
+    fun quickTimeTest() {
+        val format = SimpleDateFormat("MM/dd/yyyy hh:mm:ss a")
+        val f = nextTime(30.minutes.inMilliseconds.toLong())
+        println(format.format(f))
+        println(format(f))
+        println(format(nextTime(1.5.hours.inMilliseconds.toLong())))
+        println(format(nextTime(12.hours.inMilliseconds.toLong())))
+        println(1.days.inMilliseconds.toLong())
+        println(nextTimeInMs(1.days.inMilliseconds.toLong()))
+        println(format(nextTime(1.days.inMilliseconds.toLong())))
     }
 
     @Test

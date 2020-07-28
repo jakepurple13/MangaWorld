@@ -2,6 +2,7 @@ package com.programmersbox.mangaworld
 
 import android.Manifest
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -105,6 +106,7 @@ class MainActivity : AppCompatActivity() {
                             .show()
                     else firebaseAuthentication.signIn()
                 }
+                R.id.gotoSource -> startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(currentSource.websiteUrl)))
                 R.id.viewFavoritesMenu -> startActivity(Intent(this, FavoriteActivity::class.java))
                 R.id.viewSettingsMenu -> startActivity(Intent(this, SettingsActivity::class.java))
                 R.id.viewHistoryMenu -> startActivity(Intent(this, HistoryActivity::class.java))

@@ -48,6 +48,7 @@
     <string name="viewHistoryMenu">View History</string>
     <string name="changeSourcesMenu">Change Source</string>
     <string name="viewSettingsMenu">View Settings</string>
+    <string name="gotoSource">Go to Source in Browser</string>
     <string name="checkForUpdates">Check For Updates</string>
 
     <string name="areYouSureSignOut">"Are you sure you want to sign out?"</string>

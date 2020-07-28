@@ -16,7 +16,7 @@ fun Connection.headers(vararg pair: Pair<String, String>) = apply { headers(pair
 
 fun Response.asJsoup(html: String? = null): Document = Jsoup.parse(html ?: body!!.string(), request.url.toString())
 
-internal fun cloudflare(url: String, vararg headers: Pair<String, String>) = MangaContext.helper.cloudflareClient.newCall(
+internal fun cloudflare(url: String, vararg headers: Pair<String, String>) = MangaContext.getInstance(MangaContext.context).cloudflareClient.newCall(
     Request.Builder()
         .url(url)
         .header(*headers)

@@ -12,6 +12,8 @@ object NineAnime : MangaSource {
 
     private const val url = "https://www.nineanime.com"
 
+    override val websiteUrl: String = url
+
     override val headers: List<Pair<String, String>> = listOf(
         "User-Agent" to "Mozilla/5.0 (Windows NT 10.0; WOW64) Gecko/20100101 Firefox/77",
         "Accept-Language" to "en-US,en;q=0.5"

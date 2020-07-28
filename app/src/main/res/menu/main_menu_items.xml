@@ -22,6 +22,11 @@
         android:title="@string/viewSettingsMenu" />
 
     <item
+        android:id="@+id/gotoSource"
+        android:icon="@drawable/ic_baseline_desktop_windows_24"
+        android:title="@string/gotoSource" />
+
+    <item
         android:id="@+id/checkForUpdates"
         android:icon="@drawable/manga_world_round_logo"
         android:title="@string/checkForUpdates" />

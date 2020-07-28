@@ -7,6 +7,8 @@ object MangaFox : MangaSource {
 
     private const val url = "http://mangafox.me"
 
+    override val websiteUrl: String = url
+
     override fun searchManga(searchText: CharSequence, pageNumber: Int, mangaList: List<MangaModel>): List<MangaModel> = try {
         if (searchText.isBlank()) throw Exception("No search necessary")
         emptyList()

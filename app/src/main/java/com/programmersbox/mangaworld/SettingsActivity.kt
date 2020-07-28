@@ -5,6 +5,7 @@ import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.Icon
 import android.os.Bundle
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -21,6 +22,7 @@ import com.programmersbox.helpfulutils.NotificationDslBuilder
 import com.programmersbox.helpfulutils.notificationManager
 import com.programmersbox.helpfulutils.sizedListOf
 import com.programmersbox.manga_db.MangaDatabase
+import com.programmersbox.manga_sources.mangasources.MangaContext
 import com.programmersbox.mangaworld.utils.*
 import com.programmersbox.rxutils.invoke
 import de.Maxr1998.modernpreferences.Preference
@@ -186,6 +188,15 @@ class SettingsActivity : AppCompatActivity() {
             }
         }
 
+        pref("clearCookies") {
+            title = "Clear Cookies"
+            onClicked {
+                MangaContext.getInstance(this@SettingsActivity).cookieManager.removeAll()
+                Toast.makeText(this@SettingsActivity, "Cleared", Toast.LENGTH_SHORT).show()
+                true
+            }
+        }
+
         switch("useAgo") {
             title = "Use Time Ago"
             summary = "See how long ago a chapter was updated"
@@ -297,14 +308,14 @@ class SettingsActivity : AppCompatActivity() {
             }
         }*/
 
-        pref("sync") {
+        /*pref("sync") {
             title = "Sync"
             onClicked {
                 //GlobalScope.launch { FirebaseDb.uploadAllItems(MangaDatabase.getInstance(this@SettingsActivity).mangaDao()) }
                 GlobalScope.launch { FirebaseDb.uploadAllItems2(MangaDatabase.getInstance(this@SettingsActivity).mangaDao(), this@SettingsActivity) }
                 true
             }
-        }
+        }*/
 
     }
 

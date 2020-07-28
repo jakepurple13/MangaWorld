@@ -15,6 +15,8 @@ object MangaFourLife : MangaSource {
 
     private val mangaList = mutableListOf<MangaModel>()
 
+    override val websiteUrl: String = "https://manga4life.com"
+
     override val headers: List<Pair<String, String>> = listOf(
         "User-Agent" to "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:71.0) Gecko/20100101 Firefox/71.0"
     )

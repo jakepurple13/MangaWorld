@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit
 object MangaHere : MangaSource {
 
     private const val baseUrl = "https://www.mangahere.cc"
-    //http://www.mangahere.cc/mangalist/
+    override val websiteUrl: String = baseUrl
 
     override fun getManga(pageNumber: Int): List<MangaModel> = Jsoup.connect("$baseUrl/directory/$pageNumber.htm?latest")
         .cookie("isAdult", "1").get()
