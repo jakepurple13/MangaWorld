@@ -7,6 +7,7 @@ import android.graphics.Color
 import android.os.Bundle
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
@@ -56,6 +57,7 @@ class MangaActivity : AppCompatActivity() {
     private val disposable = CompositeDisposable()
     private var mangaModel: MangaModel? = null
     private val listener = FirebaseDb.FirebaseListener()
+    private var dialog: AlertDialog? = null
 
     @Suppress("EXPERIMENTAL_API_USAGE")
     private var isFavorite = MutableStateFlow(false)
@@ -90,14 +92,15 @@ class MangaActivity : AppCompatActivity() {
             } catch (e: Exception) {
                 FirebaseCrashlytics.getInstance().recordException(e)
                 runOnUiThread {
-                    MaterialAlertDialogBuilder(this@MangaActivity)
+                    dialog = MaterialAlertDialogBuilder(this@MangaActivity)
                         .setTitle(R.string.wentWrong)
                         .setMessage(getString(R.string.wentWrongManga, manga?.title))
                         .setPositiveButton(R.string.ok) { d, _ ->
                             d.dismiss()
                             finish()
                         }
-                        .show()
+                        .create()
+                    dialog?.show()
                 }
             }
         }
@@ -332,6 +335,7 @@ class MangaActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
+        dialog?.dismiss()
         listener.listener?.remove()
         FirebaseDb.detachChapterListener()
         disposable.dispose()

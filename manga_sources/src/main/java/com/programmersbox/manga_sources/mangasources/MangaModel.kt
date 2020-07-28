@@ -2,6 +2,7 @@ package com.programmersbox.manga_sources.mangasources
 
 import android.content.Context
 import androidx.lifecycle.ViewModel
+import com.programmersbox.manga_sources.mangasources.utilities.NetworkHelper
 
 interface MangaSource {
     fun getManga(pageNumber: Int = 1): List<MangaModel>
@@ -51,4 +52,6 @@ data class PageModel(val pages: List<String>)
 
 object MangaContext {
     lateinit var context: Context
+
+    internal val helper by lazy { NetworkHelper(context) }
 }

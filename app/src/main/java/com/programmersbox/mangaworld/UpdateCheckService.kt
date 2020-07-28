@@ -14,10 +14,6 @@ import androidx.work.RxWorker
 import androidx.work.WorkerParameters
 import com.google.common.util.concurrent.ListenableFuture
 import com.google.firebase.analytics.FirebaseAnalytics
-import com.google.firebase.analytics.ktx.analytics
-import com.google.firebase.analytics.ktx.logEvent
-import com.google.firebase.crashlytics.FirebaseCrashlytics
-import com.google.firebase.ktx.Firebase
 import com.programmersbox.gsonutils.putExtra
 import com.programmersbox.helpfulutils.GroupBehavior
 import com.programmersbox.helpfulutils.NotificationDslBuilder
@@ -25,15 +21,13 @@ import com.programmersbox.helpfulutils.intersect
 import com.programmersbox.helpfulutils.notificationManager
 import com.programmersbox.loggingutils.Loged
 import com.programmersbox.loggingutils.f
+import com.programmersbox.manga_db.MangaDao
 import com.programmersbox.manga_db.MangaDatabase
 import com.programmersbox.manga_db.MangaDbModel
 import com.programmersbox.manga_sources.mangasources.MangaInfoModel
 import com.programmersbox.manga_sources.mangasources.MangaModel
 import com.programmersbox.manga_sources.mangasources.Sources
-import com.programmersbox.mangaworld.utils.FirebaseDb
-import com.programmersbox.mangaworld.utils.canBubble
-import com.programmersbox.mangaworld.utils.dbAndFireMangaSync3
-import com.programmersbox.mangaworld.utils.toMangaModel
+import com.programmersbox.mangaworld.utils.*
 import com.programmersbox.rxutils.invoke
 import io.reactivex.Single
 import java.io.IOException
@@ -69,9 +63,7 @@ class UpdateCheckService : IntentService(UpdateCheckService::class.java.name) {
                             try {
                                 m.getManga()
                             } catch (e: Exception) {
-                                FirebaseCrashlytics.getInstance().log("$m had an error")
-                                FirebaseCrashlytics.getInstance().recordException(e)
-                                Firebase.analytics.logEvent("manga_load_error") { param(FirebaseAnalytics.Param.ITEM_NAME, m.name) }
+                                e.crashlyticsLog(m.name, "manga_load_error")
                                 null
                             }
                         }.flatten()
@@ -86,18 +78,11 @@ class UpdateCheckService : IntentService(UpdateCheckService::class.java.name) {
                     if (model.numChapters >= newData.chapters.size) null
                     else Pair(newData, model)
                 } catch (e: Exception) {
-                    println(e.localizedMessage)
+                    e.crashlyticsLog(model.title, "manga_load_error")
                     null
                 }
             }
-            .also {
-                it.forEach { triple ->
-                    val manga = triple.second
-                    manga.numChapters = triple.first.chapters.size
-                    dao.updateMangaById(manga).subscribe()
-                    FirebaseDb.updateManga2(manga).subscribe()
-                }
-            }
+            .also { update.updateManga(dao, it) }
             .let { update.mapDbModel(it) }
             .let { update.onEnd(it) }
         update.sendFinishedNotification()
@@ -140,9 +125,7 @@ class UpdateWorker(context: Context, workerParams: WorkerParameters) : RxWorker(
                         try {
                             m.getManga()
                         } catch (e: Exception) {
-                            FirebaseCrashlytics.getInstance().log("$m had an error")
-                            FirebaseCrashlytics.getInstance().recordException(e)
-                            Firebase.analytics.logEvent("manga_load_error") { param(FirebaseAnalytics.Param.ITEM_NAME, m.name) }
+                            e.crashlyticsLog(m.name, "manga_load_error")
                             null
                         }
                     }.flatten()
@@ -159,19 +142,13 @@ class UpdateWorker(context: Context, workerParams: WorkerParameters) : RxWorker(
                         if (model.numChapters >= newData.chapters.size) null
                         else Pair(newData, model)
                     } catch (e: Exception) {
-                        println(e.localizedMessage)
+                        e.crashlyticsLog(model.title, "manga_load_error")
                         null
                     }
                 }
             }
             .map {
-                Loged.f("Map2")
-                it.forEach { triple ->
-                    val manga = triple.second
-                    manga.numChapters = triple.first.chapters.size
-                    dao.updateMangaById(manga).subscribe()
-                    FirebaseDb.updateManga2(manga).subscribe()
-                }
+                update.updateManga(dao, it)
                 update.mapDbModel(it)
             }
             .map { update.onEnd(it).also { Loged.f("Finished!") } }
@@ -189,8 +166,18 @@ class UpdateWorker(context: Context, workerParams: WorkerParameters) : RxWorker(
 
 class UpdateNotification(private val context: Context) {
 
+    fun updateManga(dao: MangaDao, triple: List<Pair<MangaInfoModel, MangaDbModel>>) {
+        triple.forEach {
+            val manga = it.second
+            manga.numChapters = it.first.chapters.size
+            dao.updateMangaById(manga).subscribe()
+            FirebaseDb.updateManga2(manga).subscribe()
+        }
+    }
+
     fun mapDbModel(list: List<Pair<MangaInfoModel, MangaDbModel>>) = list.mapIndexed { index, pair ->
         sendRunningNotification(list.size, index, pair.second.title)
+        //index + 3 + (Math.random() * 50).toInt() //for a possible new notification value
         pair.second.hashCode() to NotificationDslBuilder.builder(
             context,
             "mangaChannel",

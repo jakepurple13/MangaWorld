@@ -1,5 +1,6 @@
 package com.programmersbox.manga_sources.mangasources.manga
 
+import android.annotation.SuppressLint
 import com.github.salomonbrys.kotson.get
 import com.github.salomonbrys.kotson.string
 import com.google.gson.JsonElement
@@ -13,6 +14,10 @@ import java.util.*
 object MangaFourLife : MangaSource {
 
     private val mangaList = mutableListOf<MangaModel>()
+
+    override val headers: List<Pair<String, String>> = listOf(
+        "User-Agent" to "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:71.0) Gecko/20100101 Firefox/71.0"
+    )
 
     override fun getManga(pageNumber: Int): List<MangaModel> = try {
         if (mangaList.isEmpty()) {
@@ -45,11 +50,12 @@ object MangaFourLife : MangaSource {
             title = it.s.toString(),
             description = "Last updated: ${it.ls}",
             mangaUrl = "https://manga4life.com/manga/${it.i}",
-            imageUrl = "https://static.mangaboss.net/cover/${it.i}.jpg",
+            imageUrl = "https://cover.mangabeast01.com/cover/${it.i}.jpg",
             source = Sources.MANGA_4_LIFE
         )
     }
 
+    @SuppressLint("ConstantLocale")
     private val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
 
     override fun toInfoModel(model: MangaModel): MangaInfoModel {

@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.os.Handler
 import android.os.Looper
 import android.webkit.*
+import android.widget.Toast
 import androidx.webkit.WebViewFeature
 import okhttp3.*
 import okhttp3.HttpUrl.Companion.toHttpUrl
@@ -54,7 +55,7 @@ class CloudflareInterceptor(private val context: Context) : Interceptor {
         } catch (e: Exception) {
             // Because OkHttp's enqueue only handles IOExceptions, wrap the exception so that
             // we don't crash the entire app
-            throw IOException(e)
+            throw IOException(e.localizedMessage)
         }
     }
 
@@ -142,9 +143,10 @@ class CloudflareInterceptor(private val context: Context) : Interceptor {
             // Prompt user to update WebView if it seems too outdated
             if (isWebViewOutdated) {
                 //context.toast(R.string.information_webview_outdated, Toast.LENGTH_LONG)
+                Toast.makeText(context, "Update WebView", Toast.LENGTH_SHORT).show()
             }
 
-            throw Exception("")
+            throw Exception("Failed to bypass Cloudflare")
         }
     }
 

@@ -11,12 +11,17 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.Tasks
+import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.analytics.ktx.analytics
+import com.google.firebase.analytics.ktx.logEvent
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.firebase.firestore.*
 import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.firestore.ktx.toObjects
+import com.google.firebase.ktx.Firebase
 import com.programmersbox.helpfulutils.runOnUIThread
 import com.programmersbox.loggingutils.Loged
 import com.programmersbox.loggingutils.fa
@@ -35,6 +40,7 @@ import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Maybe
 import io.reactivex.Single
+import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.Flowables
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.PublishSubject
@@ -643,3 +649,69 @@ fun Context.dbAndFireChapterNonFlow(
     dao.getReadChaptersByIdNonFlow(url),
     FirebaseDb.getAllChapters()
 ).flatten().distinctBy { it.url }
+
+fun Exception.crashlyticsLog(errorMsg: String, event: String = "manga_load_error") {
+    println(localizedMessage)
+    FirebaseCrashlytics.getInstance().log("$errorMsg had an error")
+    FirebaseCrashlytics.getInstance().recordException(this)
+    Firebase.analytics.logEvent(event) { param(FirebaseAnalytics.Param.ITEM_NAME, errorMsg) }
+}
+
+class FirebaseDisposable(
+    private val context: Context,
+    private val disposable: CompositeDisposable = CompositeDisposable()
+) {
+
+    private val db = FirebaseFirestore.getInstance().apply {
+        firestoreSettings = FirebaseFirestoreSettings.Builder()
+            .setPersistenceEnabled(true)
+            //.setCacheSizeBytes(FirebaseFirestoreSettings.CACHE_SIZE_UNLIMITED)
+            //.setCacheSizeBytes()
+            .build()
+    }
+
+    private val mangaDoc2 get() = FirebaseAuthentication.currentUser?.let { db.collection("mangaworld").document(DOCUMENT_ID).collection(it.uid) }
+    private val chapterDoc get() = FirebaseAuthentication.currentUser?.let { db.collection(it.uid).document(CHAPTERS_ID) }
+
+    private var allChapterFlowableListener: ListenerRegistration? = null
+
+    fun dispose() {
+        disposable.dispose()
+        allChapterFlowableListener?.remove()
+    }
+
+    fun dbAndFireChapter(
+        url: String,
+        dao: MangaDao = MangaDatabase.getInstance(context).mangaDao()
+    ) = Flowables.combineLatest(
+        dao.getReadChaptersById(url),
+        getAllChapterFlowable()
+    ) { db, fire -> (db + fire).distinctBy { it.url } }
+
+    private data class FirebaseChapter(
+        val url: String? = null,
+        val name: String? = null,
+        val mangaUrl: String? = null
+    )
+
+    private data class FirebaseAllChapter(val first: String = CHAPTERS_ID, val second: List<FirebaseChapter> = emptyList())
+
+    private fun MangaReadChapter.toFirebaseChapter() = FirebaseChapter(url, name, mangaUrl)
+    private fun FirebaseChapter.toMangaChapter() = MangaReadChapter(url!!, name!!, mangaUrl!!)
+
+    private fun getAllChapterFlowable(): Flowable<List<MangaReadChapter>> = PublishSubject.create<List<MangaReadChapter>> { emitter ->
+        allChapterFlowableListener?.remove()
+        allChapterFlowableListener = chapterDoc?.addSnapshotListener { documentSnapshot, _ ->
+            documentSnapshot?.toObject(FirebaseAllChapter::class.java)
+                ?.second
+                ?.map { it.toMangaChapter() }?.let { emitter(it) }
+        }
+        if (allChapterFlowableListener == null) emitter(emptyList())
+    }.toLatestFlowable().subscribeOn(Schedulers.io())
+
+    companion object {
+        private const val CHAPTERS_ID = "chaptersRead"
+        private const val DOCUMENT_ID = "favoriteManga"
+    }
+
+}

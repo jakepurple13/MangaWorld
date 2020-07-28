@@ -1,5 +1,6 @@
 package com.programmersbox.mangaworld
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.children
@@ -47,9 +48,12 @@ class FavoriteActivity : AppCompatActivity() {
         else GalleryFavoriteAdapter.GalleryListingAdapter(this, disposable, false, dao)
     }
 
+    @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_favorite)
+
+        //TODO: Work on getting things smoother no matter how many favorites there are
 
         uiSetup()
 
@@ -75,20 +79,14 @@ class FavoriteActivity : AppCompatActivity() {
             .let { if (groupManga) it.toGroup() else it.toListing() }
             .addTo(disposable)
 
-        /*Flowables.combineLatest(
-            source1 = dbAndFireManga2(dao)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread()),
-            source2 = sourcePublisher.toLatestFlowable(),
-            source3 = favorite_search_info
-                .textChanges()
-                .debounce(500, TimeUnit.MILLISECONDS)
-                .toLatestFlowable()
-        )
+        dbFire
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .let { if (groupManga) it.toGroup() else it.toListing() }
-            .addTo(disposable)*/
+            .map { it.groupBy { it.source } }
+            .subscribe { s ->
+                s.forEach { m -> sourceFilter.children.filterIsInstance<Chip>().find { it.text == m.key.name }?.text = "${m.key}: ${m.value.size}" }
+            }
+            .addTo(disposable)
     }
 
     private fun Flowable<Triple<List<MangaModel>, MutableList<Sources>, CharSequence>>.toGroup() = map { mapManga2(it) }

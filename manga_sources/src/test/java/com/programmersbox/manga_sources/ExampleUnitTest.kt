@@ -90,6 +90,13 @@ class ExampleUnitTest {
     }
 
     @Test
+    fun lifeFour() {
+        val f = MangaFourLife.getManga(1)
+        println(f.size)
+        println(f)
+    }
+
+    @Test
     fun lifeTwo() {
         val regex = "vm\\.Directory = (.*?);".toRegex()
         val f = regex.find(Jsoup.connect("https://manga4life.com/search/?sort=lt&desc=true").get().html())
