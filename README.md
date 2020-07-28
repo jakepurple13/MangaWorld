@@ -14,3 +14,16 @@ Download and install app-release.apk
   <img src="/ss/mangaInfo.png" width="32%"/>
   <img src="/ss/moreInfo.png" width="32%"/>
 </p>
+
+# Issues
+
+If you run into any issues, please create an issue request with the following details:
+
+- Small description
+- Steps taken
+- Device
+- Version of Android
+- Expected behavior
+- Actual behavior
+- If the issue is a breaking issue or not
+- Any other additional information you might think will help
