@@ -1,10 +1,11 @@
 {
-  "version": "2.9",
-  "url": "https://github.com/jakepurple13/MangaWorld/releases/download/v28/app-release.apk",
+  "version": "3.0",
+  "url": "https://github.com/jakepurple13/MangaWorld/releases/download/v29/app-release.apk",
   "releaseNotes": [
     "- Small optimizations",
-    "- Fixed trying to check MangaPark Manga Info (Sorry, it's still not working) - (Might have gotten it working now) [maybe]",
-    "- Added a when to the notifications",
-    "- still looking into some pages not loading"
+    "- MangaPark is kind of working",
+    "- still looking into some pages not loading",
+    "- Added number of favorites to each source in favorites",
+    "- Fixed Manga4Life covers not loading"
   ]
 }
