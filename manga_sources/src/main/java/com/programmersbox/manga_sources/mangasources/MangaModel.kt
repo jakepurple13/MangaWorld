@@ -56,5 +56,5 @@ object MangaContext {
     private var INSTANCE: NetworkHelper? = null
 
     fun getInstance(context: Context): NetworkHelper =
-        INSTANCE ?: synchronized(this) { INSTANCE ?: NetworkHelper(context) }
+        INSTANCE ?: synchronized(this) { INSTANCE ?: NetworkHelper(context).also { INSTANCE = it } }
 }

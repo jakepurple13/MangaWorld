@@ -52,6 +52,7 @@ class ExampleUnitTest {
         println(1.days.inMilliseconds.toLong())
         println(nextTimeInMs(1.days.inMilliseconds.toLong()))
         println(format(nextTime(1.days.inMilliseconds.toLong())))
+        println(format(nextTime(3.days.inMilliseconds.toLong())))
     }
 
     @Test
