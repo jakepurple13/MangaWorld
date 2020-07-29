@@ -65,7 +65,7 @@ class SettingsActivity : AppCompatActivity() {
 
         pref("appInfo") {
             title = "Version: ${packageManager.getPackageInfo(packageName, 0).versionName}"
-
+            iconRes = R.drawable.manga_world_round_logo
             clickListener = object : Preference.OnClickListener {
                 @Suppress("BlockingMethodInNonBlockingContext")
                 override fun onClick(preference: Preference, holder: PreferencesAdapter.ViewHolder): Boolean {
@@ -95,10 +95,16 @@ class SettingsActivity : AppCompatActivity() {
             }
         }
 
+        pref("accountInfo") {
+            val user = FirebaseAuthentication.currentUser
+            title = "Current User: ${user?.displayName}"
+            summary = "Email: ${user?.email}"
+        }
+
         switch("stayOnAdult") {
             title = "Leave app while adult manga visible"
             summary = "When you leave the app, we can choose a different source if you are on a source that's for adults"
-            iconRes = android.R.drawable.sym_def_app_icon
+            //iconRes = R.drawable.manga_world_round_logo
             defaultValue = stayOnAdult
             checkedChangeListener = object : TwoStatePreference.OnCheckedChangeListener {
                 override fun onCheckedChanged(preference: TwoStatePreference, holder: PreferencesAdapter.ViewHolder?, checked: Boolean): Boolean {
@@ -111,7 +117,7 @@ class SettingsActivity : AppCompatActivity() {
         switch("groupManga") {
             title = "Group Favorite Manga by Title"
             summary = "If true, favorites will be grouped together by title"
-            iconRes = android.R.drawable.sym_def_app_icon
+            iconRes = R.drawable.ic_baseline_group_24
             defaultValue = groupManga
             checkedChangeListener = object : TwoStatePreference.OnCheckedChangeListener {
                 override fun onCheckedChanged(preference: TwoStatePreference, holder: PreferencesAdapter.ViewHolder?, checked: Boolean): Boolean {
@@ -123,7 +129,7 @@ class SettingsActivity : AppCompatActivity() {
 
         switch("usePalette") {
             title = "Use Palette"
-            iconRes = android.R.drawable.sym_def_app_icon
+            iconRes = R.drawable.ic_baseline_palette_24
             defaultValue = usePalette
             checkedChangeListener = object : TwoStatePreference.OnCheckedChangeListener {
                 override fun onCheckedChanged(preference: TwoStatePreference, holder: PreferencesAdapter.ViewHolder?, checked: Boolean): Boolean {
@@ -135,7 +141,7 @@ class SettingsActivity : AppCompatActivity() {
 
         switch("updateCheck") {
             title = "Allow Update Checking"
-            iconRes = android.R.drawable.sym_def_app_icon
+            iconRes = R.drawable.ic_baseline_update_24
             defaultValue = useUpdate
             checkedChangeListener = object : TwoStatePreference.OnCheckedChangeListener {
                 override fun onCheckedChanged(preference: TwoStatePreference, holder: PreferencesAdapter.ViewHolder?, checked: Boolean): Boolean {
@@ -190,6 +196,7 @@ class SettingsActivity : AppCompatActivity() {
 
         pref("clearCookies") {
             title = "Clear Cookies"
+            iconRes = R.drawable.ic_baseline_cached_24
             onClicked {
                 MangaContext.getInstance(this@SettingsActivity).cookieManager.removeAll()
                 Toast.makeText(this@SettingsActivity, "Cleared", Toast.LENGTH_SHORT).show()
@@ -200,6 +207,7 @@ class SettingsActivity : AppCompatActivity() {
         switch("useAgo") {
             title = "Use Time Ago"
             summary = "See how long ago a chapter was updated"
+            visible = false
             defaultValue = useAgo
             checkedChangeListener = object : TwoStatePreference.OnCheckedChangeListener {
                 override fun onCheckedChanged(preference: TwoStatePreference, holder: PreferencesAdapter.ViewHolder?, checked: Boolean): Boolean {
@@ -211,6 +219,7 @@ class SettingsActivity : AppCompatActivity() {
 
         pref("show10Random") {
             title = "Show 10 Random Favorites"
+            visible = false
             onClicked {
                 GlobalScope.launch {
                     val db = MangaDatabase.getInstance(this@SettingsActivity).mangaDao().getAllMangaSync()
@@ -267,6 +276,7 @@ class SettingsActivity : AppCompatActivity() {
         switch("canBubble") {
             title = "Can Bubble"
             defaultValue = canBubble
+            iconRes = R.drawable.ic_baseline_bubble_chart_24
             checkedChangeListener = object : TwoStatePreference.OnCheckedChangeListener {
                 override fun onCheckedChanged(preference: TwoStatePreference, holder: PreferencesAdapter.ViewHolder?, checked: Boolean): Boolean {
                     canBubble = checked
@@ -278,6 +288,7 @@ class SettingsActivity : AppCompatActivity() {
         switch("useCache") {
             title = "Use Cache"
             defaultValue = useCache
+            iconRes = R.drawable.ic_baseline_cached_24
             checkedChangeListener = object : TwoStatePreference.OnCheckedChangeListener {
                 override fun onCheckedChanged(preference: TwoStatePreference, holder: PreferencesAdapter.ViewHolder?, checked: Boolean): Boolean {
                     useCache = checked
@@ -288,6 +299,7 @@ class SettingsActivity : AppCompatActivity() {
 
         seekBar("cacheSize") {
             dependency = "useCache"
+            iconRes = R.drawable.ic_baseline_cached_24
             title = "Cache Size"
             min = 1
             max = 100
