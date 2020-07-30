@@ -16,7 +16,7 @@ android {
         minSdkVersion 23
         targetSdkVersion 30
         versionCode 1
-        versionName "3.1"
+        versionName "3.2"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -92,6 +92,7 @@ dependencies {
     implementation "com.mikepenz:iconics-core:5.0.3"
     implementation 'com.mikepenz:google-material-typeface:3.0.1.4.original-kotlin@aar'
     implementation "com.github.perfomer:blitz:1.0.4"
+    implementation 'me.everything:overscroll-decor-android:1.1.0'
 
     //Firebase
     implementation 'com.google.firebase:firebase-analytics-ktx:17.4.4'

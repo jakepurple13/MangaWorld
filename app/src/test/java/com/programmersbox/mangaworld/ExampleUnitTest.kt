@@ -17,6 +17,8 @@ import java.time.Duration
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
 import java.util.*
+import kotlin.random.Random
+import kotlin.system.measureTimeMillis
 
 /**
  * Example local unit test, which will execute on the development machine (host).
@@ -64,6 +66,73 @@ class ExampleUnitTest {
         //println("-".repeat(100))
         //println(list2.joinToString("\n"))
         println(list2.random().toPrettyJson())
+    }
+
+    data class GroupStudent(
+        val name: String = listOf("Jacob", "Jack", "Jordan", "Jakob", "Jach", "Jordyn").random(),
+        val age: Int = Random.nextInt(1, 100)
+    )
+
+    @Test
+    fun groupByConditionTest() {
+        groupList()
+        println("-".repeat(50))
+        groupSequence()
+    }
+
+    private fun groupSequence() {
+        val students = sizedListOf(1000) { GroupStudent() }.asSequence()
+        println(students)
+        fun measure(block: () -> Unit) {
+            val m = measureTimeMillis(block)
+            println(m)
+        }
+        measure {
+            println("Group By Condition")
+            val f = students.groupByCondition(GroupStudent::name) { s, name -> s.name.similarity(name.name) >= .8f }
+            println(f)
+        }
+
+        measure {
+            println("Group By Condition to Map")
+            val f = students.groupByCondition(GroupStudent::name) { s, name -> s.name.similarity(name.name) >= .8f }
+            println(f)
+            val f1 = students
+                .groupByCondition(GroupStudent::name) { s, name -> s.name.similarity(name.name) >= .8f }.toJson()
+            println(f1)
+        }
+
+        measure {
+            println("Group By")
+            val f = students.groupBy(GroupStudent::name)
+            println(f)
+        }
+    }
+
+    private fun groupList() {
+        val students = sizedListOf(1000) { GroupStudent() }
+        println(students)
+        fun measure(block: () -> Unit) {
+            val m = measureTimeMillis(block)
+            println(m)
+        }
+        measure {
+            println("Group By Condition")
+            val f = students.groupByCondition(GroupStudent::name) { s, name -> s.name.similarity(name.name) >= .8f }
+            println(f)
+        }
+
+        measure {
+            println("Group By")
+            val f = students.groupBy(GroupStudent::name)
+            println(f)
+        }
+
+        measure {
+            println("Group By Manual")
+            val f = students.groupBy(GroupStudent::name)
+            println(f)
+        }
     }
 
     @Test

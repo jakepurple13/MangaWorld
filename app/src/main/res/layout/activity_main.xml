@@ -18,7 +18,6 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/mangaRV"
                 android:layout_width="match_parent"
@@ -123,10 +122,10 @@
         android:layout_gravity="bottom|end"
         app:layout_behavior="@string/speeddial_scrolling_view_snackbar_behavior"
         app:sdExpansionMode="top"
-        app:sdOverlayLayout="@id/overlay"
         app:sdMainFabClosedBackgroundColor="@color/colorPrimary"
         app:sdMainFabClosedSrc="@drawable/baseline_menu_black_18dp"
         app:sdMainFabOpenedBackgroundColor="@color/colorPrimary"
+        app:sdOverlayLayout="@id/overlay"
         app:sdUseReverseAnimationOnClose="true" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

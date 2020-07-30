@@ -51,6 +51,8 @@
     <string name="gotoSource">Go to Source in Browser</string>
     <string name="checkForUpdates">Check For Updates</string>
 
+    <string name="all">All</string>
+
     <string name="areYouSureSignOut">"Are you sure you want to sign out?"</string>
     <string name="signIn">Sign in</string>
     <string name="signOut">Sign out</string>

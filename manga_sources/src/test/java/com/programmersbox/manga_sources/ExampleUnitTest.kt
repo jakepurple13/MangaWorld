@@ -162,6 +162,18 @@ class ExampleUnitTest {
     }
 
     @Test
+    fun getAllManga() {
+        val f = Sources.values().flatMap {
+            try {
+                it.getManga()
+            } catch (e: Exception) {
+                emptyList<MangaModel>()
+            }
+        }
+        println(f.joinToString("\n"))
+    }
+
+    @Test
     fun alot() {
         val f = Mangakakalot.getManga()
         println(f.size)

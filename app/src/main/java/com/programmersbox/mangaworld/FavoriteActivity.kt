@@ -10,8 +10,6 @@ import com.google.android.material.chip.Chip
 import com.jakewharton.rxbinding2.widget.textChanges
 import com.programmersbox.dragswipe.DragSwipeAdapter
 import com.programmersbox.dragswipe.DragSwipeDiffUtil
-import com.programmersbox.helpfulutils.groupByCondition
-import com.programmersbox.helpfulutils.similarity
 import com.programmersbox.manga_db.MangaDatabase
 import com.programmersbox.manga_db.MangaDbModel
 import com.programmersbox.manga_sources.mangasources.MangaModel
@@ -31,6 +29,7 @@ import io.reactivex.rxkotlin.addTo
 import io.reactivex.schedulers.Schedulers
 import io.reactivex.subjects.BehaviorSubject
 import kotlinx.android.synthetic.main.activity_favorite.*
+import me.everything.android.ui.overscroll.OverScrollDecoratorHelper
 import java.util.concurrent.TimeUnit
 
 class FavoriteActivity : AppCompatActivity() {
@@ -53,8 +52,6 @@ class FavoriteActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_favorite)
 
-        //TODO: Work on getting things smoother no matter how many favorites there are
-
         uiSetup()
 
         val fired = fireListener.getAllMangaFlowable()
@@ -76,30 +73,30 @@ class FavoriteActivity : AppCompatActivity() {
         )
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
+            .map { pair -> pair.first.sortedBy(MangaModel::title).filter { it.source in pair.second && it.title.contains(pair.third, true) } }
             .let { if (groupManga) it.toGroup() else it.toListing() }
             .addTo(disposable)
 
         dbFire
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .map { it.groupBy { it.source } }
+            .map { it.groupBy { s -> s.source } }
             .subscribe { s ->
                 s.forEach { m -> sourceFilter.children.filterIsInstance<Chip>().find { it.text == m.key.name }?.text = "${m.key}: ${m.value.size}" }
             }
             .addTo(disposable)
     }
 
-    private fun Flowable<Triple<List<MangaModel>, MutableList<Sources>, CharSequence>>.toGroup() = map { mapManga2(it) }
+    private fun Flowable<List<MangaModel>>.toGroup() = map { mapToGroup(it) }
         .subscribe { list ->
             (adapterType as GalleryFavoriteAdapter.GalleryGroupAdapter).setData2(list.toList())
             setNewDataUi(list.flatMap(Map.Entry<String, List<MangaModel>>::value).size)
         }
 
-    private fun Flowable<Triple<List<MangaModel>, MutableList<Sources>, CharSequence>>.toListing() = map { mapManga(it) }
-        .subscribe { list ->
-            (adapterType as GalleryFavoriteAdapter.GalleryListingAdapter).setData(list)
-            setNewDataUi(list.size)
-        }
+    private fun Flowable<List<MangaModel>>.toListing() = subscribe { list ->
+        (adapterType as GalleryFavoriteAdapter.GalleryListingAdapter).setData(list)
+        setNewDataUi(list.size)
+    }
 
     private fun setNewDataUi(size: Int) {
         favorite_search_layout.hint = resources.getQuantityString(R.plurals.numFavorites, size, size)
@@ -112,6 +109,17 @@ class FavoriteActivity : AppCompatActivity() {
         favoriteMangaRV.setItemViewCacheSize(20)
         favoriteMangaRV.setHasFixedSize(true)
 
+        OverScrollDecoratorHelper.setUpOverScroll(favoriteMangaRV, OverScrollDecoratorHelper.ORIENTATION_VERTICAL)
+        OverScrollDecoratorHelper.setUpOverScroll(sourceFilterScroll)
+
+        sourceFilter.addView(Chip(this).apply {
+            text = getString(R.string.all)
+            isCheckable = true
+            isClickable = true
+            isChecked = true
+            setOnClickListener { sourceFilter.children.filterIsInstance<Chip>().forEach { it.isChecked = true } }
+        })
+
         Sources.values().forEach {
             sourceFilter.addView(Chip(this).apply {
                 text = it.name
@@ -120,24 +128,17 @@ class FavoriteActivity : AppCompatActivity() {
                 isChecked = true
                 setOnCheckedChangeListener { _, isChecked -> addOrRemoveSource(isChecked, it) }
                 setOnLongClickListener {
-                    sourceFilter.children.filterIsInstance<Chip>().forEach { it.isChecked = false }
+                    sourceFilter.clearCheck()
                     isChecked = true
                     true
                 }
             })
         }
-
     }
 
-    private val mapManga: (Triple<List<MangaModel>, List<Sources>, CharSequence>) -> List<MangaModel> = { pair ->
-        pair.first.sortedBy(MangaModel::title).filter { it.source in pair.second && it.title.contains(pair.third, true) }
-    }
-
-    private val mapManga2: (Triple<List<MangaModel>, List<Sources>, CharSequence>) -> Map<String, List<MangaModel>> = { pair ->
-        pair.first
-            .sortedBy(MangaModel::title)
-            .filter { it.source in pair.second && it.title.contains(pair.third, true) }
-            .groupByCondition(MangaModel::title) { s, name -> s.title.similarity(name.title) >= .8f }
+    private val mapToGroup: (List<MangaModel>) -> Map<String, List<MangaModel>> = { pair ->
+        //pair.asSequence().groupByCondition(MangaModel::title) { s, name -> s.title.similarity(name.title) >= .8f }.toMap()
+        pair.groupBy(MangaModel::title)
     }
 
     private fun addOrRemoveSource(isChecked: Boolean, sources: Sources) {
@@ -165,11 +166,17 @@ fun DragSwipeAdapter<MangaModel, *>.setData(newList: List<MangaModel>) {
 
 fun DragSwipeAdapter<Pair<String, List<MangaModel>>, *>.setData2(newList: List<Pair<String, List<MangaModel>>>) {
     val diffCallback = object : DragSwipeDiffUtil<Pair<String, List<MangaModel>>>(dataList, newList) {
+        /* override fun areContentsTheSame(oldItem: Pair<String, List<MangaModel>>, newItem: Pair<String, List<MangaModel>>): Boolean =
+             oldItem.second == newItem.second
+
+         override fun areItemsTheSame(oldItem: Pair<String, List<MangaModel>>, newItem: Pair<String, List<MangaModel>>): Boolean =
+             oldItem.second == newItem.second*/
+
         override fun areContentsTheSame(oldItem: Pair<String, List<MangaModel>>, newItem: Pair<String, List<MangaModel>>): Boolean =
-            oldItem.first == newItem.first
+            oldItem.second.any { it in newItem.second }
 
         override fun areItemsTheSame(oldItem: Pair<String, List<MangaModel>>, newItem: Pair<String, List<MangaModel>>): Boolean =
-            oldItem.first === newItem.first
+            oldItem.second.any { it in newItem.second }
     }
     val diffResult = DiffUtil.calculateDiff(diffCallback)
     dataList.clear()
