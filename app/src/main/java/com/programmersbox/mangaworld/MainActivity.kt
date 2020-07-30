@@ -109,6 +109,7 @@ class MainActivity : AppCompatActivity() {
                 //R.id.gotoSource -> startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(currentSource.websiteUrl)))
                 R.id.gotoSource -> openInCustomChromeBrowser(currentSource.websiteUrl) {
                     setStartAnimations(this@MainActivity, R.anim.slide_in_right, R.anim.slide_out_left)
+                    addDefaultShareMenuItem()
                 }
                 R.id.viewFavoritesMenu -> startActivity(Intent(this, FavoriteActivity::class.java))
                 R.id.viewSettingsMenu -> startActivity(Intent(this, SettingsActivity::class.java))
