@@ -2,7 +2,6 @@ package com.programmersbox.mangaworld
 
 import android.Manifest
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -30,6 +29,7 @@ import com.programmersbox.mangaworld.adapters.MangaListAdapter
 import com.programmersbox.mangaworld.utils.*
 import com.programmersbox.mangaworld.views.AutoFitGridLayoutManager
 import com.programmersbox.mangaworld.views.EndlessScrollingListener
+import com.programmersbox.thirdpartyutils.openInCustomChromeBrowser
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.Flowables
@@ -106,7 +106,10 @@ class MainActivity : AppCompatActivity() {
                             .show()
                     else firebaseAuthentication.signIn()
                 }
-                R.id.gotoSource -> startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(currentSource.websiteUrl)))
+                //R.id.gotoSource -> startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(currentSource.websiteUrl)))
+                R.id.gotoSource -> openInCustomChromeBrowser(currentSource.websiteUrl) {
+                    setStartAnimations(this@MainActivity, R.anim.slide_in_right, R.anim.slide_out_left)
+                }
                 R.id.viewFavoritesMenu -> startActivity(Intent(this, FavoriteActivity::class.java))
                 R.id.viewSettingsMenu -> startActivity(Intent(this, SettingsActivity::class.java))
                 R.id.viewHistoryMenu -> startActivity(Intent(this, HistoryActivity::class.java))

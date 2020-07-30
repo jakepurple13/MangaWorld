@@ -24,6 +24,7 @@ import com.programmersbox.manga_sources.mangasources.MangaModel
 import com.programmersbox.manga_sources.mangasources.Sources
 import com.programmersbox.mangaworld.R
 import com.programmersbox.rxutils.invoke
+import com.programmersbox.thirdpartyutils.openInCustomChromeBrowser
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
@@ -210,7 +211,9 @@ class AppUpdateChecker(private val activity: ComponentActivity) {
                             d.dismiss()
                         }
                         .setNeutralButton(R.string.gotoBrowser) { d, _ ->
-                            context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(info.url)))
+                            context.openInCustomChromeBrowser("https://github.com/jakepurple13/MangaWorld/releases/latest") {
+                                setStartAnimations(context, R.anim.slide_in_right, R.anim.slide_out_left)
+                            }
                             d.dismiss()
                         }
                         .setNegativeButton(R.string.notNow) { d, _ -> d.dismiss() }

@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
+import android.text.method.LinkMovementMethod
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AlertDialog
@@ -36,6 +37,7 @@ import com.programmersbox.mangaworld.adapters.ChapterHolder
 import com.programmersbox.mangaworld.adapters.ChapterListAdapter
 import com.programmersbox.mangaworld.databinding.ActivityMangaBinding
 import com.programmersbox.mangaworld.utils.*
+import com.programmersbox.thirdpartyutils.ChromeCustomTabTransformationMethod
 import com.programmersbox.thirdpartyutils.changeTint
 import com.programmersbox.thirdpartyutils.check
 import io.reactivex.Completable
@@ -236,6 +238,11 @@ class MangaActivity : AppCompatActivity() {
                     setThumbDrawable(drawable)
                 }
                 .build()
+
+            mangaUrl.transformationMethod = ChromeCustomTabTransformationMethod(this) {
+                setStartAnimations(this@MangaActivity, R.anim.slide_in_right, R.anim.slide_out_left)
+            }
+            mangaUrl.movementMethod = LinkMovementMethod.getInstance()
         }
     }
 
