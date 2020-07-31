@@ -1,11 +1,10 @@
 {
-  "version": "3.2",
-  "url": "https://github.com/jakepurple13/MangaWorld/releases/download/v31/app-release.apk",
+  "version": "3.3",
+  "url": "https://github.com/jakepurple13/MangaWorld/releases/download/v32/app-release.apk",
   "releaseNotes": [
     "- Small optimizations",
     "- MangaPark is kind of working",
     "- Still looking into some pages not loading",
-    "- Made Favorites a LOT smoother and faster! Unfortunately, it means that we can't have the same functionality. Before favorites were grouped by how similar the title was to one another, now, its just if the title is the same to another",
-    "- Added some overscroll bounce to some views"
+    "- Added custom chrome view so you stay in app when you click on links"
   ]
 }
