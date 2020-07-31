@@ -4,6 +4,7 @@ Lets you read, favorite, and download manga from multiple different sources.
 
 # [Latest Release](https://github.com/jakepurple13/MangaWorld/releases/latest)
 Download and install app-release.apk
+
 View [Changelog](https://github.com/jakepurple13/MangaWorld/blob/master/app/src/main/res/raw/update_changelog.json)
 
 # Screenshots
