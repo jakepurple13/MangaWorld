@@ -16,7 +16,7 @@ enum class Sources(
     NINE_ANIME(domain = "nineanime", source = NineAnime),
     MANGAKAKALOT(domain = "mangakakalot", source = Mangakakalot),
     MANGAMUTINY(domain = "mangamutiny", source = Mangamutiny),
-    MANGA_PARK(domain = "mangapark", source = MangaPark),
+    MANGA_PARK(domain = "mangapark", source = MangaPark, filterOutOfUpdate = true),
 
     //MANGA_DOG(domain = "mangadog", source = MangaDog),
     INKR(domain = "mangarock", source = com.programmersbox.manga_sources.mangasources.manga.INKR),

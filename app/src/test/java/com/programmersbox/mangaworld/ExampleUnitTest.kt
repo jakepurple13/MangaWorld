@@ -9,6 +9,7 @@ import com.programmersbox.manga_sources.mangasources.MangaSource
 import com.programmersbox.manga_sources.mangasources.Sources
 import com.programmersbox.manga_sources.mangasources.manga.MangaEden
 import com.programmersbox.manga_sources.mangasources.manga.Manganelo
+import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Test
 import java.text.DateFormat
@@ -73,20 +74,25 @@ class ExampleUnitTest {
         val age: Int = Random.nextInt(1, 100)
     )
 
-    @Test
-    fun groupByConditionTest() {
-        groupList()
-        println("-".repeat(50))
-        groupSequence()
+    private fun measure(block: () -> Unit) {
+        val m = measureTimeMillis(block)
+        println(m)
     }
 
-    private fun groupSequence() {
-        val students = sizedListOf(1000) { GroupStudent() }.asSequence()
-        println(students)
-        fun measure(block: () -> Unit) {
-            val m = measureTimeMillis(block)
-            println(m)
+    @Test
+    fun groupByConditionTest() = runBlocking {
+        measure {
+            val list = sizedListOf(1500) { GroupStudent() }
+            println(list)
+            println("-".repeat(50))
+            groupList(list)
+            println("-".repeat(50))
+            groupSequence(list)
         }
+    }
+
+    private fun groupSequence(list: List<GroupStudent>) {
+        val students = list.asSequence()
         measure {
             println("Group By Condition")
             val f = students.groupByCondition(GroupStudent::name) { s, name -> s.name.similarity(name.name) >= .8f }
@@ -97,9 +103,6 @@ class ExampleUnitTest {
             println("Group By Condition to Map")
             val f = students.groupByCondition(GroupStudent::name) { s, name -> s.name.similarity(name.name) >= .8f }
             println(f)
-            val f1 = students
-                .groupByCondition(GroupStudent::name) { s, name -> s.name.similarity(name.name) >= .8f }.toJson()
-            println(f1)
         }
 
         measure {
@@ -109,13 +112,7 @@ class ExampleUnitTest {
         }
     }
 
-    private fun groupList() {
-        val students = sizedListOf(1000) { GroupStudent() }
-        println(students)
-        fun measure(block: () -> Unit) {
-            val m = measureTimeMillis(block)
-            println(m)
-        }
+    private fun groupList(students: List<GroupStudent>) {
         measure {
             println("Group By Condition")
             val f = students.groupByCondition(GroupStudent::name) { s, name -> s.name.similarity(name.name) >= .8f }
