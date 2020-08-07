@@ -241,6 +241,7 @@ class MangaActivity : AppCompatActivity() {
 
             mangaUrl.transformationMethod = ChromeCustomTabTransformationMethod(this) {
                 setStartAnimations(this@MangaActivity, R.anim.slide_in_right, R.anim.slide_out_left)
+                swatch?.rgb?.let { setToolbarColor(it) }
                 addDefaultShareMenuItem()
             }
             mangaUrl.movementMethod = LinkMovementMethod.getInstance()
