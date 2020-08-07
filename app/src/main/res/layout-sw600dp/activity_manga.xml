@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".MangaActivity">
+
+    <data>
+
+        <variable
+            name="info"
+            type="com.programmersbox.manga_sources.mangasources.MangaInfoModel" />
+
+        <variable
+            name="swatch"
+            type="com.programmersbox.mangaworld.SwatchInfo" />
+
+        <variable
+            name="presenter"
+            type="com.programmersbox.mangaworld.MangaActivity" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/mangaInfoFullLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/mangaInfoLayout"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginBottom="5dp"
+            app:layout_constraintBottom_toTopOf="@id/optionsBar"
+            app:layout_constraintEnd_toStartOf="@id/mangaInfoChapterList"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:background="@sample/sample_colors">
+
+            <ImageView
+                android:id="@+id/mangaInfoCover"
+                android:layout_width="360px"
+                android:layout_height="480px"
+                android:layout_margin="5dp"
+                app:coverImage="@{info.imageUrl}"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:ignore="ContentDescription,PxUsage"
+                tools:src="@tools:sample/avatars" />
+
+            <LinearLayout
+                android:id="@+id/moreInfoLayout"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_margin="5dp"
+                android:orientation="vertical"
+                app:layout_constraintEnd_toEndOf="@id/mangaInfoCover"
+                app:layout_constraintStart_toStartOf="@id/mangaInfoCover"
+                app:layout_constraintTop_toBottomOf="@id/mangaInfoCover">
+
+                <TextView
+                    android:id="@+id/mangaUrl"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:autoLink="web"
+                    android:linksClickable="true"
+                    android:text="@{info.mangaUrl}"
+                    app:linkColor="@{swatch}"
+                    tools:text="@tools:sample/cities"
+                    tools:textColorLink="@sample/sample_colors" />
+
+                <TextView
+                    android:id="@+id/alternateNames"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:bodyColor="@{swatch}"
+                    app:otherNames="@{info.alternativeNames}"
+                    tools:text="@tools:sample/full_names"
+                    tools:textColor="@sample/sample_colors" />
+
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/mangaInfoTitle"
+                style="@style/TextAppearance.MaterialComponents.Headline5"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:ellipsize="marquee"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:freezesText="true"
+                android:gravity="center"
+                android:marqueeRepeatLimit="marquee_forever"
+                android:onClick="@{() -> presenter.titles()}"
+                android:scrollHorizontally="true"
+                android:singleLine="true"
+                android:text="@{info.title}"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/mangaInfoCover"
+                app:layout_constraintTop_toTopOf="@id/mangaInfoCover"
+                app:titleColor="@{swatch}"
+                tools:text="@tools:sample/full_names"
+                tools:textColor="@sample/sample_colors" />
+
+            <HorizontalScrollView
+                android:id="@+id/genreListLayout"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="5dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/mangaInfoCover"
+                app:layout_constraintTop_toBottomOf="@id/mangaInfoTitle">
+
+                <com.google.android.material.chip.ChipGroup
+                    android:id="@+id/genreList"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    app:genreList="@{info.genres}"
+                    app:singleLine="true"
+                    app:swatch="@{swatch}">
+
+                    <com.google.android.material.chip.Chip
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:visibility="gone"
+                        tools:chipBackgroundColor="@sample/sample_colors"
+                        tools:text="Comedy"
+                        tools:textColor="@sample/sample_colors"
+                        tools:visibility="visible" />
+
+                </com.google.android.material.chip.ChipGroup>
+
+            </HorizontalScrollView>
+
+            <ScrollView
+                android:id="@+id/descriptionLayout"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_margin="5dp"
+                app:layout_constraintBottom_toBottomOf="@id/mangaInfoCover"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/mangaInfoCover"
+                app:layout_constraintTop_toBottomOf="@id/genreListLayout">
+
+                <TextView
+                    android:id="@+id/mangaInfoDescription"
+                    style="@style/TextAppearance.MaterialComponents.Body2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="@{info.description}"
+                    app:bodyColor="@{swatch}"
+                    tools:text="@tools:sample/lorem/random"
+                    tools:textColor="@sample/sample_colors" />
+
+            </ScrollView>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/optionsBar"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_below="@id/mangaInfoLayout"
+            android:layout_marginHorizontal="5dp"
+
+            android:orientation="horizontal"
+            app:layout_constraintBottom_toTopOf="@id/moreInfo">
+
+            <com.airbnb.lottie.LottieAnimationView
+                android:id="@+id/favoriteManga"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginEnd="5dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:lottie_loop="true"
+                app:lottie_rawRes="@raw/heart"
+                app:tint="#ffffff" />
+
+            <TextView
+                android:id="@+id/favoriteInfo"
+                style="@style/TextAppearance.MaterialComponents.Headline6"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginStart="5dp"
+                android:gravity="center_vertical"
+                android:minLines="2"
+                android:onClick="@{() -> favoriteManga.performClick()}"
+                app:layout_constraintBottom_toBottomOf="@id/favoriteManga"
+                app:layout_constraintEnd_toStartOf="@id/markChapters"
+                app:layout_constraintStart_toEndOf="@id/favoriteManga"
+                app:layout_constraintTop_toTopOf="@id/favoriteManga"
+                tools:ignore="HardcodedText"
+                tools:text="@string/addToFavorites" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/markChapters"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginEnd="5dp"
+                android:onClick="@{() -> presenter.markRead(info)}"
+                android:text="@string/markAs"
+                android:textColor="#ffffff"
+                app:layout_constraintBottom_toBottomOf="@id/favoriteManga"
+                app:layout_constraintEnd_toStartOf="@id/shareButton"
+                app:layout_constraintTop_toTopOf="@id/favoriteManga"
+                app:strokeColor="#ffffff"
+                tools:ignore="HardcodedText" />
+
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/shareButton"
+                style="@style/Widget.App.Button.OutlinedButton.IconOnly"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginEnd="5dp"
+                android:onClick="@{() -> presenter.shareManga(info)}"
+                android:textColor="#ffffff"
+                app:icon="@android:drawable/ic_menu_share"
+                app:iconTint="#ffffff"
+                app:layout_constraintBottom_toBottomOf="@id/favoriteManga"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@id/favoriteManga"
+                app:strokeColor="#ffffff"
+                tools:ignore="HardcodedText" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/mangaInfoChapterList"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:orientation="vertical"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            app:layout_constraintBottom_toTopOf="@id/optionsBar"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/mangaInfoLayout"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:listitem="@layout/chapter_list_item" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/moreInfo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_margin="0dp"
+            android:insetBottom="0dp"
+            android:padding="0dp"
+            android:text="@string/moreInfo"
+            app:cornerRadius="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            tools:backgroundTint="@sample/sample_colors"
+            tools:textColor="@sample/sample_colors" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>
