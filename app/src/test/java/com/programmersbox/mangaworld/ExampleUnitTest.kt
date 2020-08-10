@@ -10,6 +10,7 @@ import com.programmersbox.manga_sources.mangasources.Sources
 import com.programmersbox.manga_sources.mangasources.manga.MangaEden
 import com.programmersbox.manga_sources.mangasources.manga.Manganelo
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeoutOrNull
 import org.junit.After
 import org.junit.Test
 import java.text.DateFormat
@@ -43,6 +44,19 @@ class ExampleUnitTest {
     }
 
     operator fun DateFormat.invoke(date: Any): String = format(date)
+
+    @Test
+    fun timeout() = runBlocking {
+
+        val m = Sources.values().filterNot(Sources::isAdult)
+
+        val m1 = m.map { withTimeoutOrNull(5000) { it.getManga() } }
+
+        m1.forEach {
+            println(it)
+        }
+
+    }
 
     @Test
     fun quickTimeTest() {

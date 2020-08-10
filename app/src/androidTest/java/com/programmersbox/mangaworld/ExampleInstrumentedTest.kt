@@ -4,6 +4,10 @@ import androidx.core.app.TaskStackBuilder
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.programmersbox.gsonutils.toJson
+import com.programmersbox.manga_sources.mangasources.MangaContext
+import com.programmersbox.manga_sources.mangasources.Sources
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeoutOrNull
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -23,5 +27,28 @@ class ExampleInstrumentedTest {
             .addParentStack(SettingsActivity::class.java)
             .toJson()
         println(f)
+    }
+
+    @Test
+    fun timeout() = runBlocking {
+        val appContext = InstrumentationRegistry.getInstrumentation().targetContext
+        MangaContext.context = appContext
+
+        val m = Sources.values().filterNot(Sources::isAdult)
+
+        val m1 = m.map {
+            it to withTimeoutOrNull(5000) {
+                try {
+                    it.getManga()
+                } catch (e: Exception) {
+                    null
+                }
+            }
+        }
+
+        m1.forEach {
+            println(it)
+        }
+
     }
 }

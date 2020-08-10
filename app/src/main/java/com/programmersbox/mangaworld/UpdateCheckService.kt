@@ -30,6 +30,9 @@ import com.programmersbox.manga_sources.mangasources.Sources
 import com.programmersbox.mangaworld.utils.*
 import com.programmersbox.rxutils.invoke
 import io.reactivex.Single
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
@@ -53,39 +56,51 @@ class UpdateCheckService : IntentService(UpdateCheckService::class.java.name) {
         })
         update.sendRunningNotification(100, 0, getText(R.string.startingUpdateCheck))
         val dao = MangaDatabase.getInstance(this@UpdateCheckService).mangaDao()
-        val listSize: Int
-        dbAndFireMangaSync3(dao)
-            .let {
-                it.intersect(
-                    Sources.getUpdateSearches()
-                        .filter { s -> it.any { m -> m.source == s } }
-                        .mapNotNull { m ->
+        GlobalScope.launch {
+            val listSize: Int
+            dbAndFireMangaSync3(dao)
+                .let {
+                    it.intersect(
+                        Sources.getUpdateSearches()
+                            .filter { s -> it.any { m -> m.source == s } }
+                            .mapNotNull { m ->
+                                withTimeoutOrNull(30000) {
+                                    try {
+                                        m.getManga()
+                                    } catch (e: Exception) {
+                                        e.crashlyticsLog(m.name, "manga_load_error")
+                                        null
+                                    }
+                                }
+                            }.flatten()
+                    ) { o, n -> o.mangaUrl == n.mangaUrl }
+                }
+                .distinctBy { m -> m.mangaUrl }
+                .also { listSize = it.lastIndex }
+                .mapIndexedNotNull { index, model ->
+                    update.sendRunningNotification(listSize, index, model.title)
+                    try {
+                        val newData = withTimeoutOrNull(10000) {
                             try {
-                                m.getManga()
+                                model.toMangaModel().toInfoModel()
                             } catch (e: Exception) {
-                                e.crashlyticsLog(m.name, "manga_load_error")
                                 null
                             }
-                        }.flatten()
-                ) { o, n -> o.mangaUrl == n.mangaUrl }
-            }
-            .distinctBy { m -> m.mangaUrl }
-            .also { listSize = it.lastIndex }
-            .mapIndexedNotNull { index, model ->
-                update.sendRunningNotification(listSize, index, model.title)
-                try {
-                    val newData = model.toMangaModel().toInfoModel()
-                    if (model.numChapters >= newData.chapters.size) null
-                    else Pair(newData, model)
-                } catch (e: Exception) {
-                    e.crashlyticsLog(model.title, "manga_load_error")
-                    null
+                        }
+                        newData?.let {
+                            if (model.numChapters >= it.chapters.size) null
+                            else Pair(it, model)
+                        }
+                    } catch (e: Exception) {
+                        e.crashlyticsLog(model.title, "manga_load_error")
+                        null
+                    }
                 }
-            }
-            .also { update.updateManga(dao, it) }
-            .let { update.mapDbModel(it) }
-            .let { update.onEnd(it) }
-        update.sendFinishedNotification()
+                .also { update.updateManga(dao, it) }
+                .let { update.mapDbModel(it) }
+                .let { update.onEnd(it) }
+            update.sendFinishedNotification()
+        }
     }
 
 }

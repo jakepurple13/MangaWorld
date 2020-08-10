@@ -1,10 +1,14 @@
 package com.programmersbox.manga_sources.mangasources.manga
 
 import com.programmersbox.manga_sources.mangasources.*
+import com.programmersbox.manga_sources.mangasources.utilities.asJsoup
+import okhttp3.CacheControl
+import okhttp3.Request
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.concurrent.TimeUnit
 
 object Manganelo : MangaSource {
 
@@ -74,8 +78,23 @@ object Manganelo : MangaSource {
         )
     }
 
-    override fun getPageInfo(chapterModel: ChapterModel): PageModel = PageModel(
+    /*override fun getPageInfo(chapterModel: ChapterModel): PageModel = PageModel(
         pages = Jsoup.connect(chapterModel.url).header("Referer", baseUrl).get()
+            .select("div.container-chapter-reader").select("img")
+            .map { it.select("img[src^=http]").attr("abs:src") }
+    )*/
+
+    private val cloudflareBuilder = MangaContext.getInstance(MangaContext.context).cloudflareClient.newBuilder()
+        .build()
+
+    override fun getPageInfo(chapterModel: ChapterModel): PageModel = PageModel(
+        pages = cloudflareBuilder.newCall(
+            Request.Builder()
+                .url(chapterModel.url)
+                .header("Referer", baseUrl)
+                .cacheControl(CacheControl.Builder().maxAge(10, TimeUnit.MINUTES).build())
+                .build()
+        ).execute().asJsoup()
             .select("div.container-chapter-reader").select("img")
             .map { it.select("img[src^=http]").attr("abs:src") }
     )

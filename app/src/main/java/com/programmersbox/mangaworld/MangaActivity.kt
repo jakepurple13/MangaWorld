@@ -3,6 +3,8 @@ package com.programmersbox.mangaworld
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.res.ColorStateList
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.os.Bundle
 import android.text.method.LinkMovementMethod
@@ -40,6 +42,7 @@ import com.programmersbox.mangaworld.utils.*
 import com.programmersbox.thirdpartyutils.ChromeCustomTabTransformationMethod
 import com.programmersbox.thirdpartyutils.changeTint
 import com.programmersbox.thirdpartyutils.check
+import com.programmersbox.thirdpartyutils.getPalette
 import io.reactivex.Completable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
@@ -51,6 +54,9 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import me.zhanghai.android.fastscroll.FastScrollerBuilder
+import java.io.IOException
+import java.net.HttpURLConnection
+import java.net.URL
 
 class MangaActivity : AppCompatActivity() {
 
@@ -82,8 +88,11 @@ class MangaActivity : AppCompatActivity() {
         GlobalScope.launch {
             try {
                 val model = MangaInfoCache.getInfo()?.find { it.mangaUrl == manga?.mangaUrl } ?: manga?.toInfoModel()?.also(MangaInfoCache::newInfo)
+                val swatch = if (usePalette)
+                    intent.getObjectExtra<Palette.Swatch>("swatch", null) ?: model?.imageUrl?.let(this@MangaActivity::getBitmapFromURL)
+                        ?.getPalette()?.vibrantSwatch
+                else null
                 runOnUiThread {
-                    val swatch = if (usePalette) intent.getObjectExtra<Palette.Swatch>("swatch", null) else null
                     moreInfoSetup(swatch)
                     binding.info = model
                     binding.swatch = swatch?.let { SwatchInfo(it.rgb, it.titleTextColor, it.bodyTextColor) }
@@ -106,6 +115,17 @@ class MangaActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    private fun getBitmapFromURL(strURL: String?): Bitmap? = try {
+        val url = URL(strURL)
+        val connection: HttpURLConnection = url.openConnection() as HttpURLConnection
+        connection.doInput = true
+        connection.connect()
+        BitmapFactory.decodeStream(connection.inputStream)
+    } catch (e: IOException) {
+        e.printStackTrace()
+        null
     }
 
     private fun dbLoad(manga: MangaModel?) {
