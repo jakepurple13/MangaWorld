@@ -2,13 +2,11 @@ package com.programmersbox.manga_sources.mangasources.manga
 
 import com.programmersbox.manga_sources.mangasources.*
 import com.programmersbox.manga_sources.mangasources.utilities.asJsoup
-import okhttp3.CacheControl
-import okhttp3.Request
+import com.programmersbox.manga_sources.mangasources.utilities.cloudflare
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import java.text.SimpleDateFormat
 import java.util.*
-import java.util.concurrent.TimeUnit
 
 object Manganelo : MangaSource {
 
@@ -88,13 +86,7 @@ object Manganelo : MangaSource {
         .build()
 
     override fun getPageInfo(chapterModel: ChapterModel): PageModel = PageModel(
-        pages = cloudflareBuilder.newCall(
-            Request.Builder()
-                .url(chapterModel.url)
-                .header("Referer", baseUrl)
-                .cacheControl(CacheControl.Builder().maxAge(10, TimeUnit.MINUTES).build())
-                .build()
-        ).execute().asJsoup()
+        pages = cloudflare(chapterModel.url, *headers.toTypedArray()).execute().asJsoup()
             .select("div.container-chapter-reader").select("img")
             .map { it.select("img[src^=http]").attr("abs:src") }
     )

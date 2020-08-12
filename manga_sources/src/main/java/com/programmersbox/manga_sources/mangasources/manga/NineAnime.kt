@@ -116,7 +116,7 @@ object NineAnime : MangaSource {
                     else -> 0
                 }
             } else {
-                SimpleDateFormat("MMM dd, yyyy", Locale.ENGLISH).parse(this).time
+                SimpleDateFormat("MMM dd, yyyy", Locale.ENGLISH).parse(this)?.time ?: 0
             }
         } catch (_: ParseException) {
             0
