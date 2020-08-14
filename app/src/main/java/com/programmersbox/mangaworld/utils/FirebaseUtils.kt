@@ -159,6 +159,9 @@ object FirebaseDb {
     private val db = FirebaseFirestore.getInstance().apply {
         firestoreSettings = FirebaseFirestoreSettings.Builder()
             .setPersistenceEnabled(true)
+            /*.setHost("10.0.2.2:8080")
+            .setSslEnabled(false)
+            .setPersistenceEnabled(false)*/
             //.setCacheSizeBytes(FirebaseFirestoreSettings.CACHE_SIZE_UNLIMITED)
             //.setCacheSizeBytes()
             .build()

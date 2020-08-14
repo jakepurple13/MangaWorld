@@ -242,7 +242,7 @@
                 android:layout_height="match_parent"
                 android:layout_above="@id/moreInfo"
                 android:layout_below="@id/optionsBar"
-                app:layout_behavior=".OverScrollBehavior"
+                app:layout_behavior="com.programmersbox.helpfulutils.views.OverScrollBehavior"
                 android:orientation="vertical"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 app:layout_constraintBottom_toTopOf="@id/moreInfo"

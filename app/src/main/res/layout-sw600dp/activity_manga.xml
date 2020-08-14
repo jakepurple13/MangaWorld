@@ -243,7 +243,7 @@
                 android:id="@+id/mangaInfoChapterList"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                app:layout_behavior=".OverScrollBehavior"
+                app:layout_behavior="com.programmersbox.helpfulutils.views.OverScrollBehavior"
                 android:orientation="vertical"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 tools:listitem="@layout/chapter_list_item" />
