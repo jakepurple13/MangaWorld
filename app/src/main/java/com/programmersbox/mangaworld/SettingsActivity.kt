@@ -25,6 +25,7 @@ import com.programmersbox.manga_db.MangaDatabase
 import com.programmersbox.manga_sources.mangasources.MangaContext
 import com.programmersbox.mangaworld.utils.*
 import com.programmersbox.rxutils.invoke
+import com.programmersbox.thirdpartyutils.openInCustomChromeBrowser
 import de.Maxr1998.modernpreferences.Preference
 import de.Maxr1998.modernpreferences.PreferencesAdapter
 import de.Maxr1998.modernpreferences.helpers.*
@@ -85,6 +86,12 @@ class SettingsActivity : AppCompatActivity() {
                                 .setNeutralButton("View Libraries Used") { d, _ ->
                                     d.dismiss()
                                     LibsBuilder().start(this@SettingsActivity)
+                                }
+                                .setNegativeButton(R.string.gotoBrowser) { d, _ ->
+                                    openInCustomChromeBrowser("https://github.com/jakepurple13/MangaWorld/releases/latest") {
+                                        setStartAnimations(this@SettingsActivity, R.anim.slide_in_right, R.anim.slide_out_left)
+                                    }
+                                    d.dismiss()
                                 }
                                 .show()
                         }
