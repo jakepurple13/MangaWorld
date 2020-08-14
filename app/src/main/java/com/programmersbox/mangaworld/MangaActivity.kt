@@ -17,6 +17,7 @@ import androidx.constraintlayout.widget.ConstraintSet
 import androidx.databinding.BindingAdapter
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.lifecycleScope
 import androidx.palette.graphics.Palette
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
@@ -76,7 +77,7 @@ class MangaActivity : AppCompatActivity() {
 
         mangaModel = intent.getObjectExtra<MangaModel>("manga", null)
 
-        isFavorite.collectOnUi {
+        isFavorite.collectOnUi(lifecycleScope) {
             favoriteManga.check(it)
             favoriteInfo.text = getText(if (it) R.string.removeFromFavorites else R.string.addToFavorites)
         }

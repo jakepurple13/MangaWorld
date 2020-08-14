@@ -9,8 +9,7 @@ import com.programmersbox.manga_sources.mangasources.MangaSource
 import com.programmersbox.manga_sources.mangasources.Sources
 import com.programmersbox.manga_sources.mangasources.manga.MangaEden
 import com.programmersbox.manga_sources.mangasources.manga.Manganelo
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withTimeoutOrNull
+import kotlinx.coroutines.*
 import org.junit.After
 import org.junit.Test
 import java.text.DateFormat
@@ -19,6 +18,7 @@ import java.time.Duration
 import java.time.ZonedDateTime
 import java.time.temporal.ChronoUnit
 import java.util.*
+import java.util.concurrent.atomic.AtomicReference
 import kotlin.random.Random
 import kotlin.system.measureTimeMillis
 
@@ -365,6 +365,34 @@ class ExampleUnitTest {
         return if (durationHour <= durationMinute) durationHour else durationMinute*/
 
         return 0
+    }
+
+    @Test
+    fun jobTesting() = runBlocking {
+        val loadMarkersJob: AtomicReference<Job?> = AtomicReference(null)
+        loadMarkersJob.getAndSet(methodReturningJob())?.cancel()
+
+        for (i in 0..10) {
+            println("Before Get/Set")
+            try {
+                loadMarkersJob.getAndSet(methodReturningJob())?.cancel()
+            } catch (e: Exception) {
+                continue
+            }
+            println("Start Loop Delay")
+            val f = Random.nextInt(1, 10) * 1000L
+            println("Delay: $f")
+            delay(f)
+            println("End Loop Delay")
+        }
+
+    }
+
+    private fun methodReturningJob() = GlobalScope.launch {
+        println("Before Delay")
+        delay(5000)
+        println("After Delay")
+        throw Exception("Finished")
     }
 
 }

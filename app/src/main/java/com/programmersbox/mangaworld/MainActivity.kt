@@ -5,9 +5,11 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.work.*
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ktx.analytics
@@ -128,8 +130,21 @@ class MainActivity : AppCompatActivity() {
                         .show()
                 }
                 R.id.checkForUpdates -> {
-                    val showCheck = Intent(this, UpdateCheckService::class.java)
-                    startService(showCheck)
+                    WorkManager.getInstance(this).enqueueUniqueWork(
+                        "manualUpdateCheck",
+                        ExistingWorkPolicy.REPLACE,
+                        OneTimeWorkRequestBuilder<UpdateWorker>()
+                            .setConstraints(
+                                Constraints.Builder()
+                                    .setRequiredNetworkType(NetworkType.CONNECTED)
+                                    .setRequiresBatteryNotLow(false)
+                                    .setRequiresCharging(false)
+                                    .setRequiresDeviceIdle(false)
+                                    .setRequiresStorageNotLow(false)
+                                    .build()
+                            )
+                            .build()
+                    )
                 }
             }
             //menuOptions.close() // To close the Speed Dial with animation
@@ -141,7 +156,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun loadNewManga() {
         refresh.isRefreshing = true
-        GlobalScope.launch {
+        lifecycleScope.launch {
             try {
                 val list = currentSource.getManga(pageNumber++).toList()
                 mangaList.addAll(list)

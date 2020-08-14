@@ -30,12 +30,11 @@ import com.programmersbox.manga_sources.mangasources.Sources
 import com.programmersbox.mangaworld.utils.*
 import com.programmersbox.rxutils.invoke
 import io.reactivex.Single
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withTimeoutOrNull
+import kotlinx.coroutines.*
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
+import java.util.concurrent.atomic.AtomicReference
 
 class UpdateCheckService : IntentService(UpdateCheckService::class.java.name) {
 
@@ -150,15 +149,28 @@ class UpdateWorker(context: Context, workerParams: WorkerParameters) : RxWorker(
         }
             .map { list ->
                 Loged.f("Map1")
+                val loadMarkersJob: AtomicReference<Job?> = AtomicReference(null)
+                fun methodReturningJob() = GlobalScope.launch {
+                    println("Before Delay")
+                    delay(30000)
+                    println("After Delay")
+                    throw Exception("Finished")
+                }
                 list.mapIndexedNotNull { index, model ->
                     update.sendRunningNotification(list.size, index, model.title)
                     try {
+                        loadMarkersJob.getAndSet(methodReturningJob())?.cancel()
                         val newData = model.toMangaModel().toInfoModel()
                         if (model.numChapters >= newData.chapters.size) null
                         else Pair(newData, model)
                     } catch (e: Exception) {
                         e.crashlyticsLog(model.title, "manga_load_error")
                         null
+                    }
+                }.also {
+                    try {
+                        loadMarkersJob.get()?.cancel()
+                    } catch (ignored: Exception) {
                     }
                 }
             }
