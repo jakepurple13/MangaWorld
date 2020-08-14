@@ -283,7 +283,7 @@ class ReadActivity : AppCompatActivity() {
             direct.mkdir()
         }
 
-        val request = DownloadDslManager(this) {
+        downloadManager.enqueue(this) {
             downloadUri = Uri.parse(downloadUrlOfImage)
             allowOverRoaming = true
             networkType = DownloadDslManager.NetworkType.WIFI_MOBILE
@@ -292,8 +292,6 @@ class ReadActivity : AppCompatActivity() {
             visibility = DownloadDslManager.NotificationVisibility.COMPLETED
             destinationInExternalPublicDir(Environment.DIRECTORY_PICTURES, File.separator + "MangaWorld" + File.separator + filename)
         }
-
-        downloadManager.enqueue(request)
     }
 
     private fun hideSystemUI() {

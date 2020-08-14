@@ -30,7 +30,7 @@
             android:layout_height="0dp"
             android:layout_marginBottom="5dp"
             app:layout_constraintBottom_toTopOf="@id/optionsBar"
-            app:layout_constraintEnd_toStartOf="@id/mangaInfoChapterList"
+            app:layout_constraintEnd_toStartOf="@id/mangaChapterListLayout"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:background="@sample/sample_colors">
@@ -227,8 +227,9 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/mangaInfoChapterList"
+
+        <androidx.coordinatorlayout.widget.CoordinatorLayout
+            android:id="@+id/mangaChapterListLayout"
             android:layout_width="wrap_content"
             android:layout_height="0dp"
             android:orientation="vertical"
@@ -236,8 +237,18 @@
             app:layout_constraintBottom_toTopOf="@id/optionsBar"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/mangaInfoLayout"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:listitem="@layout/chapter_list_item" />
+            app:layout_constraintTop_toTopOf="parent">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/mangaInfoChapterList"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:layout_behavior=".OverScrollBehavior"
+                android:orientation="vertical"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:listitem="@layout/chapter_list_item" />
+
+        </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/moreInfo"

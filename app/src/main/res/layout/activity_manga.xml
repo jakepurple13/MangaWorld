@@ -160,7 +160,7 @@
             android:layout_below="@id/mangaInfoLayout"
             android:layout_marginHorizontal="5dp"
             android:orientation="horizontal"
-            app:layout_constraintBottom_toTopOf="@id/mangaInfoChapterList"
+            app:layout_constraintBottom_toTopOf="@id/mangaChapterListLayout"
             app:layout_constraintTop_toBottomOf="@id/mangaInfoLayout">
 
             <com.airbnb.lottie.LottieAnimationView
@@ -225,7 +225,33 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <androidx.recyclerview.widget.RecyclerView
+        <androidx.coordinatorlayout.widget.CoordinatorLayout
+            android:id="@+id/mangaChapterListLayout"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_above="@id/moreInfo"
+            android:layout_below="@id/optionsBar"
+            android:orientation="vertical"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            app:layout_constraintBottom_toTopOf="@id/moreInfo"
+            app:layout_constraintTop_toBottomOf="@id/optionsBar">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/mangaInfoChapterList"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_above="@id/moreInfo"
+                android:layout_below="@id/optionsBar"
+                app:layout_behavior=".OverScrollBehavior"
+                android:orientation="vertical"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                app:layout_constraintBottom_toTopOf="@id/moreInfo"
+                app:layout_constraintTop_toBottomOf="@id/optionsBar"
+                tools:listitem="@layout/chapter_list_item" />
+
+        </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+        <!--<androidx.recyclerview.widget.RecyclerView
             android:id="@+id/mangaInfoChapterList"
             android:layout_width="match_parent"
             android:layout_height="0dp"
@@ -235,7 +261,7 @@
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
             app:layout_constraintBottom_toTopOf="@id/moreInfo"
             app:layout_constraintTop_toBottomOf="@id/optionsBar"
-            tools:listitem="@layout/chapter_list_item" />
+            tools:listitem="@layout/chapter_list_item" />-->
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/moreInfo"
