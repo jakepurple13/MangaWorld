@@ -5,7 +5,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -156,7 +155,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun loadNewManga() {
         refresh.isRefreshing = true
-        lifecycleScope.launch {
+        GlobalScope.launch {
             try {
                 val list = currentSource.getManga(pageNumber++).toList()
                 mangaList.addAll(list)

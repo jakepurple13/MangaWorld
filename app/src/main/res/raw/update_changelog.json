@@ -1,11 +1,11 @@
 {
-  "version": "3.4",
+  "version": "3.5",
   "url": "https://github.com/jakepurple13/MangaWorld/releases/latest/download/app-release.apk",
   "releaseNotes": [
     "- Small optimizations",
     "- Manganelo, Mangakakalot is not working. Working on it",
     "- Still looking into some pages not loading",
-    "- Added custom chrome view so you stay in app when you click on links",
-    "- Added colors when deep linking"
+    "- Added MangaPark back into update checks",
+    "- Added a good timeout to update checking"
   ]
 }
