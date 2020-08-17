@@ -7,7 +7,6 @@ import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
-import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.net.toUri
@@ -126,7 +125,7 @@ class ReadActivity : AppCompatActivity() {
         /*MobileAds.initialize(this) {}
         MobileAds.setRequestConfiguration(RequestConfiguration.Builder().setTestDeviceIds(listOf("BCF3E346AED658CDCCB1DDAEE8D84845")).build())*/
 
-        hideSystemUI()
+        enableImmersiveMode()
 
         //adViewing.loadAd(AdRequest.Builder().build())
 
@@ -292,18 +291,6 @@ class ReadActivity : AppCompatActivity() {
             visibility = DownloadDslManager.NotificationVisibility.COMPLETED
             destinationInExternalPublicDir(Environment.DIRECTORY_PICTURES, File.separator + "MangaWorld" + File.separator + filename)
         }
-    }
-
-    private fun hideSystemUI() {
-        // Set the IMMERSIVE flag.
-        // Set the content to appear under the system bars so that the content
-        // doesn't resize when the system bars hide and show.
-        val decorView = window.decorView
-        decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                or View.SYSTEM_UI_FLAG_LOW_PROFILE
-                or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION // hide nav bar
-                or View.SYSTEM_UI_FLAG_FULLSCREEN // hide status bar
-                or View.SYSTEM_UI_FLAG_IMMERSIVE)
     }
 
     override fun onPause() {
