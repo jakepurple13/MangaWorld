@@ -95,7 +95,7 @@ dependencies {
     implementation 'com.mikepenz:google-material-typeface:3.0.1.4.original-kotlin@aar'
     implementation "com.github.perfomer:blitz:1.0.4"
     implementation 'me.everything:overscroll-decor-android:1.1.0'
-    implementation 'com.google.androidbrowserhelper:androidbrowserhelper:1.4.0'
+    implementation 'com.google.androidbrowserhelper:androidbrowserhelper:2.0.0'
 
     //Firebase
     implementation 'com.google.firebase:firebase-analytics-ktx:17.5.0'
