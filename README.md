@@ -1,5 +1,6 @@
 # MangaWorld
 A Manga Reader App
+
 Lets you read, favorite, and download manga from multiple different sources.
 
 # [Latest Release](https://github.com/jakepurple13/MangaWorld/releases/latest)
