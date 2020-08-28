@@ -104,7 +104,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-auth:19.3.2'
     implementation 'com.google.android.gms:play-services-auth:18.1.0'
     implementation 'com.firebaseui:firebase-ui-auth:6.3.0'
-    implementation 'com.google.firebase:firebase-firestore-ktx:21.5.0'
+    implementation 'com.google.firebase:firebase-firestore-ktx:21.6.0'
     implementation 'com.google.android.gms:play-services-ads:19.3.0'
 
     //Debug
