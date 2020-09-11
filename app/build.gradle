@@ -105,7 +105,7 @@ dependencies {
     implementation 'com.google.android.gms:play-services-auth:18.1.0'
     implementation 'com.firebaseui:firebase-ui-auth:6.3.0'
     implementation 'com.google.firebase:firebase-firestore-ktx:21.6.0'
-    implementation 'com.google.android.gms:play-services-ads:19.3.0'
+    implementation 'com.google.android.gms:play-services-ads:19.4.0'
 
     //Debug
     implementation 'com.github.pwittchen:reactivenetwork-rx2:3.0.8'
