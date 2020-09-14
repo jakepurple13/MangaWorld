@@ -101,7 +101,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-analytics-ktx:17.5.0'
     // Add the Firebase Crashlytics SDK.
     implementation 'com.google.firebase:firebase-crashlytics:17.2.1'
-    implementation 'com.google.firebase:firebase-auth:19.3.2'
+    implementation 'com.google.firebase:firebase-auth:19.4.0'
     implementation 'com.google.android.gms:play-services-auth:18.1.0'
     implementation 'com.firebaseui:firebase-ui-auth:6.3.0'
     implementation 'com.google.firebase:firebase-firestore-ktx:21.6.0'
