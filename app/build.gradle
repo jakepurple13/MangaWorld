@@ -132,7 +132,7 @@ dependencies {
     implementation project(':manga_sources')
 
     //About
-    implementation "com.mikepenz:aboutlibraries-core:8.3.0"
+    implementation "com.mikepenz:aboutlibraries-core:8.4.2"
     implementation "com.mikepenz:aboutlibraries:8.3.0"
 
     //Custom Libraries
