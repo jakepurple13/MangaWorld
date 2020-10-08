@@ -5,11 +5,12 @@ import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.Icon
 import android.os.Bundle
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.work.WorkManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.snackbar.Snackbar
 import com.mikepenz.aboutlibraries.LibsBuilder
 import com.mikepenz.iconics.IconicsDrawable
 import com.mikepenz.iconics.typeface.library.googlematerial.GoogleMaterial
@@ -39,6 +40,8 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.net.URL
+import java.text.SimpleDateFormat
+import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.math.roundToInt
 
@@ -150,6 +153,9 @@ class SettingsActivity : AppCompatActivity() {
             title = "Allow Update Checking"
             iconRes = R.drawable.ic_baseline_update_24
             defaultValue = useUpdate
+            lastUpdateCheck
+                ?.let { SimpleDateFormat("MM/dd/yyyy hh:mm a", Locale.getDefault()).format(it) }
+                ?.let { summary = it }
             checkedChangeListener = object : TwoStatePreference.OnCheckedChangeListener {
                 override fun onCheckedChanged(preference: TwoStatePreference, holder: PreferencesAdapter.ViewHolder?, checked: Boolean): Boolean {
                     useUpdate = checked
@@ -201,12 +207,28 @@ class SettingsActivity : AppCompatActivity() {
             }
         }
 
+        pref("clearOthers") {
+            title = "Stop Update Checker"
+            iconRes = R.drawable.ic_baseline_cached_24
+            onClicked {
+                WorkManager.getInstance(this@SettingsActivity).cancelAllWork()
+                Snackbar
+                    .make(preferenceView, "Stopped", Snackbar.LENGTH_SHORT)
+                    .setAnimationMode(Snackbar.ANIMATION_MODE_SLIDE)
+                    .show()
+                true
+            }
+        }
+
         pref("clearCookies") {
             title = "Clear Cookies"
             iconRes = R.drawable.ic_baseline_cached_24
             onClicked {
                 MangaContext.getInstance(this@SettingsActivity).cookieManager.removeAll()
-                Toast.makeText(this@SettingsActivity, "Cleared", Toast.LENGTH_SHORT).show()
+                Snackbar
+                    .make(preferenceView, "Cleared", Snackbar.LENGTH_SHORT)
+                    .setAnimationMode(Snackbar.ANIMATION_MODE_SLIDE)
+                    .show()
                 true
             }
         }

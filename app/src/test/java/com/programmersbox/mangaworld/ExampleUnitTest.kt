@@ -61,6 +61,7 @@ class ExampleUnitTest {
     @Test
     fun quickTimeTest() {
         val format = SimpleDateFormat("MM/dd/yyyy hh:mm:ss a")
+        println(format.format(1916396312247))
         val f = nextTime(30.minutes.inMilliseconds.toLong())
         println(format.format(f))
         println(format(f))

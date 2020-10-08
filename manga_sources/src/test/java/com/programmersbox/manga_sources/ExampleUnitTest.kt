@@ -326,4 +326,30 @@ class ExampleUnitTest {
 
     }
 
+    @Test
+    fun plus() {
+        //val f = getApi("https://mangaplus.shueisha.co.jp/updates")
+        val f = getApi("https://jumpg-webapi.tokyo-cdn.com/api/web/web_home?lang=eng") { }
+        println(f)
+    }
+
+    /*
+    fetch("https://jumpg-webapi.tokyo-cdn.com/api/web/web_home?lang=eng", {
+  "headers": {
+    "accept": "application/json, text/plain, *",
+    "accept-language": "en-US,en;q=0.9",
+    "sec-fetch-dest": "empty",
+    "sec-fetch-mode": "cors",
+    "sec-fetch-site": "cross-site",
+    "session-token": "453383bd-e73d-4038-ac74-be3e02ec8d0a"
+},
+"referrer": "https://mangaplus.shueisha.co.jp/updates",
+"referrerPolicy": "no-referrer-when-downgrade",
+"body": null,
+"method": "GET",
+"mode": "cors",
+"credentials": "omit"
+});
+     */
+
 }

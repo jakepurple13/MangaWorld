@@ -41,6 +41,7 @@ class UpdateCheckService : IntentService(UpdateCheckService::class.java.name) {
     private val update by lazy { UpdateNotification(this) }
 
     override fun onHandleIntent(intent: Intent?) {
+        applicationContext.lastUpdateCheck = System.currentTimeMillis()
         //FirebaseAnalytics.getInstance(this).logEvent("Start_update_check_UpdateCheckService", null)
         startForeground(13, NotificationDslBuilder.builder(this, "updateCheckChannel", R.drawable.manga_world_round_logo) {
             onlyAlertOnce = true
@@ -125,6 +126,7 @@ class UpdateWorker(context: Context, workerParams: WorkerParameters) : RxWorker(
     }
 
     override fun createWork(): Single<Result> {
+        applicationContext.lastUpdateCheck = System.currentTimeMillis()
         Loged.f("Starting check here")
         return Single.create<List<MangaDbModel>> { emitter ->
             Loged.f("Start")
@@ -132,7 +134,7 @@ class UpdateWorker(context: Context, workerParams: WorkerParameters) : RxWorker(
             /*val sourceList = Sources.getUpdateSearches()
                 .filter { s -> list.any { m -> m.source == s } }
                 .flatMap { m -> m.getManga() }*/
-            val newList = list.intersect(
+            val newList = /*emptyList<MangaDbModel>()*/list.intersect(
                 Sources.getUpdateSearches()
                     .filter { s -> list.any { m -> m.source == s } }
                     .mapNotNull { m ->
@@ -184,6 +186,7 @@ class UpdateWorker(context: Context, workerParams: WorkerParameters) : RxWorker(
                 Result.success()
             }
             .onErrorReturn {
+                it.printStackTrace()
                 update.sendFinishedNotification()
                 Result.failure()
             }
@@ -298,7 +301,7 @@ class UpdateNotification(private val context: Context) {
         connection.connect()
         BitmapFactory.decodeStream(connection.inputStream)
     } catch (e: IOException) {
-        e.printStackTrace()
+        //e.printStackTrace()
         null
     }
 

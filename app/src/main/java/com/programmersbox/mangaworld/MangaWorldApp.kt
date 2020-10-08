@@ -2,8 +2,8 @@ package com.programmersbox.mangaworld
 
 import android.app.Application
 import android.content.Context
-import android.content.Intent
 import android.os.Build
+import android.util.Log
 import androidx.work.*
 import com.facebook.stetho.Stetho
 import com.github.piasy.biv.BigImageViewer
@@ -11,9 +11,11 @@ import com.github.piasy.biv.loader.glide.GlideImageLoader
 import com.google.android.gms.ads.MobileAds
 import com.google.android.gms.ads.RequestConfiguration
 import com.google.firebase.crashlytics.FirebaseCrashlytics
-import com.programmersbox.helpfulutils.*
+import com.programmersbox.helpfulutils.NotificationChannelImportance
+import com.programmersbox.helpfulutils.createNotificationChannel
+import com.programmersbox.helpfulutils.createNotificationGroup
+import com.programmersbox.helpfulutils.defaultSharedPrefName
 import com.programmersbox.loggingutils.Loged
-import com.programmersbox.loggingutils.f
 import com.programmersbox.manga_sources.mangasources.MangaContext
 import com.programmersbox.manga_sources.mangasources.utilities.WebViewUtil
 import com.programmersbox.mangaworld.utils.MangaInfoCache
@@ -26,7 +28,11 @@ import io.reactivex.plugins.RxJavaPlugins
 import okhttp3.OkHttpClient
 import java.util.concurrent.TimeUnit
 
-class MangaWorldApp : Application() {
+class MangaWorldApp : Application(), Configuration.Provider {
+
+    override fun getWorkManagerConfiguration(): Configuration = Configuration.Builder()
+        .setMinimumLoggingLevel(Log.DEBUG)
+        .build()
 
     override fun onCreate() {
         super.onCreate()
@@ -73,25 +79,35 @@ class MangaWorldApp : Application() {
         }
         setAlarmUp()
 
-        MobileAds.initialize(this) { s -> Loged.f(s.adapterStatusMap.entries.joinToString { "${it.key}=(${it.value.initializationState}, ${it.value.description})" }) }
-        MobileAds.setRequestConfiguration(RequestConfiguration.Builder().setTestDeviceIds(listOf("BCF3E346AED658CDCCB1DDAEE8D84845")).build())
+        try {
+            //MobileAds.initialize(this) { s -> Loged.f(s.adapterStatusMap.entries.joinToString { "${it.key}=(${it.value.initializationState}, ${it.value.description})" }) }
+        } catch (e: Exception) {
+
+        }
+        MobileAds.setRequestConfiguration(
+            RequestConfiguration.Builder()
+                .setTestDeviceIds(
+                    listOf("BCF3E346AED658CDCCB1DDAEE8D84845")
+                )
+                .build()
+        )
     }
 
     private fun setAlarmUp() {
-        val updateCheckIntent = Intent(this, UpdateReceiver::class.java)
+        /*val updateCheckIntent = Intent(this, UpdateReceiver::class.java)
         val code = 3
-        AlarmUtils.cancelAlarm(this, updateCheckIntent, code)
-        /*if (!AlarmUtils.hasAlarm(this, updateCheckIntent, code)) {
+        //AlarmUtils.cancelAlarm(this, updateCheckIntent, code)
+        if (!AlarmUtils.hasAlarm(this, updateCheckIntent, code)) {
             val pendingIntent = PendingIntent.getBroadcast(this, code, updateCheckIntent, 0)
-            val timeToSet = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) timeToNextHourOrHalf() else timeToNext(1_800_000)
+            val timeToSet = 1.hours.inMilliseconds.toLong()//if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) timeToNextHourOrHalf() else timeToNext(1_800_000)
             val firstMillis = System.currentTimeMillis() + timeToSet
-            //alarmManager.cancel(pendingIntent)
-            alarmManager.setRepeating(
+            alarmManager.cancel(pendingIntent)
+            *//*alarmManager.setRepeating(
                 AlarmManager.RTC_WAKEUP,
                 firstMillis,
                 AlarmManager.INTERVAL_HOUR,
                 pendingIntent
-            )
+            )*//*
         }*/
 
         //val work = WorkManager.getInstance(this)
@@ -104,18 +120,17 @@ class MangaWorldApp : Application() {
 
     companion object {
         fun setupUpdate(context: Context, shouldCheck: Boolean) {
+            Loged.wtf("Setting update checker $shouldCheck")
+            val work = WorkManager.getInstance(context)
+
             try {
-
-                val work = WorkManager.getInstance(context)
-
                 //work.cancelAllWork()
-
                 if (shouldCheck) {
                     work.enqueueUniquePeriodicWork(
                         "updateChecks",
                         ExistingPeriodicWorkPolicy.KEEP,
-                        PeriodicWorkRequest.Builder(UpdateWorker::class.java, 1, TimeUnit.HOURS)
-                            //PeriodicWorkRequest.Builder(UpdateWorker::class.java, 15, TimeUnit.MINUTES)
+                        PeriodicWorkRequest.Builder(UpdateWorker::class.java, 1, TimeUnit.HOURS, 15, TimeUnit.MINUTES)
+                            .setInitialDelay(10, TimeUnit.SECONDS)
                             .setConstraints(
                                 Constraints.Builder()
                                     .setRequiredNetworkType(NetworkType.CONNECTED)
@@ -125,12 +140,16 @@ class MangaWorldApp : Application() {
                                     .setRequiresStorageNotLow(false)
                                     .build()
                             )
-                            .setInitialDelay(10, TimeUnit.SECONDS)
+                            .addTag("Update Checking")
                             .build()
                     ).state.observeForever { println(it) }
                 } else work.cancelAllWork()
             } catch (e: Exception) {
+                Loged.e("Something went wrong")
                 e.printStackTrace()
+                work.cancelAllWork()
+            } finally {
+                Loged.v(work.getWorkInfosForUniqueWork("updateChecks").get())
             }
         }
     }
