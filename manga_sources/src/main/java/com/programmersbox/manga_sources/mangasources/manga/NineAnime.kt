@@ -41,13 +41,14 @@ object NineAnime : MangaSource {
                 MangaModel(
                     title = it.select("p.title a").text(),
                     description = "",
-                    mangaUrl = it.select("p.title a").attr("href"),
+                    mangaUrl = it.select("p.title a").attr("abs:href"),
                     imageUrl = it.select("img").attr("abs:src"),
                     source = Sources.NINE_ANIME
                 )
             }
 
     override fun toInfoModel(model: MangaModel): MangaInfoModel {
+        println(model)
         val doc = Jsoup.connect("${model.mangaUrl}?waring=1").followRedirects(true).get()
         val genreAndDescription = doc.select("div.manga-detailmiddle")
         return MangaInfoModel(
