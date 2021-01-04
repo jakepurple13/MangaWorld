@@ -26,7 +26,7 @@ object NineAnime : MangaSource {
                 MangaModel(
                     title = it.select("p.title a").text(),
                     description = "",
-                    mangaUrl = it.select("p.title a").attr("href"),
+                    mangaUrl = it.select("p.title a").attr("abs:href"),
                     imageUrl = it.select("img").attr("abs:src"),
                     source = Sources.NINE_ANIME
                 )
